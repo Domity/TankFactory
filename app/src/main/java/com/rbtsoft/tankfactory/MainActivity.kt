@@ -79,12 +79,13 @@ fun MainMenuScreen(navController: NavController) {
             Button(onClick = { navController.navigate("make_Mtank") }) {
                 Text("制作幻影坦克")
             }
-            Button(onClick = { navController.navigate("make_LSBtank") }) {
-                Text("制作无影坦克")
-            }
             Button(onClick = { navController.navigate("view_LSBTank")} ) {
                 Text("查看无影坦克")
             }
+            Button(onClick = { navController.navigate("make_LSBtank") }) {
+                Text("制作无影坦克")
+            }
+
         }
         Button(onClick = { showAboutDialog=true },
             modifier = Modifier

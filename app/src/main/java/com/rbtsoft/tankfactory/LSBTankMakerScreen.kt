@@ -168,7 +168,7 @@ fun LSBTankMakerScreen(
         ) {
             Text("制作无影坦克")
         }
-        Text("提示\n1.更低的压缩度意味着更好的质量和更长的时间\n" +
+        Text("提示\n1.更低的压缩度意味着更好的表图质量和更长的制作时间\n" +
                 "2.图片默认保存到download目录", color = MaterialTheme.colorScheme.onBackground)
     }
 }

@@ -49,6 +49,7 @@ fun AppNavigator() {
         composable("view_Mtank") { MirageTankViewerScreen() }
         composable("make_Mtank") { MirageTankMakerScreen() }
         composable("make_LSBtank") { LSBTankMakerScreen() }
+        composable("view_LSBTank") {LSBTankViewerScreen()}
     }
 }
 
@@ -80,6 +81,9 @@ fun MainMenuScreen(navController: NavController) {
             }
             Button(onClick = { navController.navigate("make_LSBtank") }) {
                 Text("制作无影坦克")
+            }
+            Button(onClick = { navController.navigate("view_LSBTank")} ) {
+                Text("查看无影坦克")
             }
         }
         Button(onClick = { showAboutDialog=true },

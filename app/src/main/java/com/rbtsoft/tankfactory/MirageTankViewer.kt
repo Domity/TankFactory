@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import coil.compose.AsyncImage
 import com.rbtsoft.tankfactory.ui.theme.MirageTankImageTheme
 import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
@@ -85,36 +86,74 @@ fun MirageTankViewerScreen() {
             }
         }
 
-        FloatingActionButton(
-            onClick = {
-                photoPickerLauncher.launch("image/*")
-            },
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(16.dp),
-            shape = CircleShape,
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ) {
-            Icon(
-                imageVector = Icons.Filled.AddPhotoAlternate,
-                contentDescription = "Select Image"
-            )
-        }
+        //Text("提示\n没有任何效果？幻影坦克可能已被破坏", color = MaterialTheme.colorScheme.onBackground)
 
-        FloatingActionButton(
-            onClick = {
-                isDarkMode = !isDarkMode
-            },
+//        FloatingActionButton(
+//            onClick = {
+//                photoPickerLauncher.launch("image/*")
+//            },
+//            modifier = Modifier
+//                .align(Alignment.BottomStart)
+//                .padding(16.dp),
+//            shape = CircleShape,
+//            containerColor = MaterialTheme.colorScheme.primaryContainer
+//        ) {
+//            Icon(
+//                imageVector = Icons.Filled.AddPhotoAlternate,
+//                contentDescription = "Select Image"
+//            )
+//        }
+//
+//        FloatingActionButton(
+//            onClick = {
+//                isDarkMode = !isDarkMode
+//            },
+//            modifier = Modifier
+//                .align(Alignment.BottomEnd)
+//                .padding(16.dp),
+//            shape = CircleShape,
+//            containerColor = MaterialTheme.colorScheme.secondaryContainer
+//        ) {
+//            Icon(
+//                imageVector = if (isDarkMode) Icons.Filled.LightMode else Icons.Filled.DarkMode,
+//                contentDescription = "Toggle Theme"
+//            )
+//        }
+        Row(
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            shape = CircleShape,
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter) // 整个 Row 居中对齐到底部
+                .padding(bottom = 32.dp, start = 64.dp, end = 64.dp),
+            horizontalArrangement = Arrangement.SpaceBetween, // 按钮之间留出空间
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = if (isDarkMode) Icons.Filled.LightMode else Icons.Filled.DarkMode,
-                contentDescription = "Toggle Theme"
-            )
+            // 1. 选择图片按钮 (FloatingActionButton)
+            FloatingActionButton(
+                onClick = {
+                    photoPickerLauncher.launch("image/*")
+                },
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.AddPhotoAlternate,
+                    contentDescription = "Select Image"
+                )
+            }
+
+            // 2. 切换主题按钮 (FloatingActionButton)
+            FloatingActionButton(
+                onClick = {
+                    isDarkMode = !isDarkMode
+                },
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                Icon(
+                    imageVector = if (isDarkMode) Icons.Filled.LightMode else Icons.Filled.DarkMode,
+                    contentDescription = "Toggle Theme"
+                )
+            }
         }
     }
 }

@@ -2,45 +2,84 @@ package com.rbtsoft.tankfactory
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import kotlinx.coroutines.*
+import kotlin.math.max
+import androidx.core.graphics.scale
+import androidx.core.graphics.createBitmap
 
 object MirageTankEncoder {
 
-    fun encode(photo1: Bitmap, photo2: Bitmap, photo1K: Float, photo2K: Float, threshold: Int): Bitmap {
-        //调整图像大小
-        val width = maxOf(photo1.width, photo2.width)
-        val height = maxOf(photo1.height, photo2.height)
+    suspend fun encode(photo1: Bitmap, photo2: Bitmap, photo1K: Float, photo2K: Float, threshold: Int): Bitmap = withContext(Dispatchers.Default) {
+
+        val width = max(photo1.width, photo2.width)
+        val height = max(photo1.height, photo2.height)
 
         val scaledPhoto1 = scaleBitmap(photo1, width, height)
         val scaledPhoto2 = scaleBitmap(photo2, width, height)
 
-        //将图片转换为灰度图
         val grayPhoto1 = toGrayscale(scaledPhoto1)
         val grayPhoto2 = toGrayscale(scaledPhoto2)
 
-        val outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                val pixel1 = grayPhoto1.getPixel(x, y)
-                val pixel2 = grayPhoto2.getPixel(x, y)
-
-                val grayValue1 = (Color.red(pixel1) * photo1K).toInt().coerceIn(threshold + 1, 254)
-                val grayValue2 = (Color.red(pixel2) * photo2K).toInt().coerceIn(1, threshold)
-
-                val alpha = 255 - (grayValue1 - grayValue2)
-                val gray = (255f * grayValue2 / alpha).toInt().coerceIn(0, 255)
-
-                outputBitmap.setPixel(x, y, Color.argb(alpha, gray, gray, gray))
-            }
+        val size = width * height
+        val pixels1 = IntArray(size).apply {
+            grayPhoto1.getPixels(this, 0, width, 0, 0, width, height)
         }
-        return outputBitmap
+        val pixels2 = IntArray(size).apply {
+            grayPhoto2.getPixels(this, 0, width, 0, 0, width, height)
+        }
+        val outputPixels = IntArray(size)
+
+        val numCores = Runtime.getRuntime().availableProcessors()
+        val totalPixels = width * height
+
+        coroutineScope {
+            val jobs = mutableListOf<Deferred<Unit>>()
+
+            // 手动计算每个核心的起始和结束索引
+            val chunkSize = totalPixels / numCores
+
+            for (i in 0 until numCores) {
+                val start = i * chunkSize
+                // 最后一个块处理剩余的所有像素
+                val end = if (i == numCores - 1) totalPixels else (i + 1) * chunkSize
+
+                // 启动一个异步任务
+                val job = async {
+                    // 遍历此块中的所有像素索引
+                    for (index in start until end) {
+
+                        // --- 您的原始像素计算逻辑 (保留) ---
+                        val pixel1 = pixels1[index]
+                        val pixel2 = pixels2[index]
+
+                        val grayValue1 = (Color.red(pixel1) * photo1K).toInt().coerceIn(threshold + 1, 254)
+                        val grayValue2 = (Color.red(pixel2) * photo2K).toInt().coerceIn(1, threshold)
+
+                        val alpha = 255 - (grayValue1 - grayValue2)
+                        val safeAlpha = if (alpha == 0) 1 else alpha
+                        val gray = (255f * grayValue2 / safeAlpha).toInt().coerceIn(0, 255)
+
+                        outputPixels[index] = Color.argb(alpha, gray, gray, gray)
+
+                    }
+                }
+                jobs.add(job) // 添加到列表中
+            }
+
+            // 确保所有并行计算完成后再继续
+            jobs.awaitAll()
+        }
+
+        val outputBitmap = createBitmap(width, height)
+        outputBitmap.setPixels(outputPixels, 0, width, 0, 0, width, height)
+
+        return@withContext outputBitmap
     }
 
-    // 将 Bitmap 转换为灰度图
     private fun toGrayscale(bitmap: Bitmap): Bitmap {
         val width = bitmap.width
         val height = bitmap.height
-        val grayBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val grayBitmap = createBitmap(width, height)
 
         val pixels = IntArray(width * height)
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
@@ -57,8 +96,7 @@ object MirageTankEncoder {
         return grayBitmap
     }
 
-    // 调整 Bitmap 大小
     private fun scaleBitmap(bitmap: Bitmap, newWidth: Int, newHeight: Int): Bitmap {
-        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+        return bitmap.scale(newWidth, newHeight)
     }
 }

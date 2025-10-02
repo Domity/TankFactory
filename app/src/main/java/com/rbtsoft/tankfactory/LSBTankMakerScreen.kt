@@ -150,7 +150,8 @@ fun LSBTankMakerScreen(
                     },
                     enabled = encodedBitmap != null && !isSaving
                 ) {
-                    Text("保存")
+                    // Text("保存")
+                    Text(if (isSaving) "保存中" else "保存")
                 }
             }
         }
@@ -166,7 +167,7 @@ fun LSBTankMakerScreen(
             enabled = selectedImage1Uri != null && selectedImage2Uri != null && !isGenerating,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("制作无影坦克")
+            Text(if (isGenerating) "制作中" else "制作")
         }
         Text("提示\n1.更低的压缩度意味着更好的表图质量和更长的制作时间\n" +
                 "2.图片默认保存到download目录", color = MaterialTheme.colorScheme.onBackground)

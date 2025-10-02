@@ -17,6 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import coil.compose.AsyncImage
 
 @Composable
@@ -29,7 +30,10 @@ fun MirageTankMakerScreen(
 
     val selectedImage1Uri by viewModel.selectedImage1Uri.collectAsState()
     val selectedImage2Uri by viewModel.selectedImage2Uri.collectAsState()
-    val encodedBitmap by viewModel.encodedImage.collectAsState()
+    val displayBitmap by viewModel.displayBitmap.collectAsState()
+    val isTooLarge by viewModel.isResultTooLarge.collectAsState()
+
+
     val isSaving by viewModel.isSaving.collectAsState()
     val isGenerating by viewModel.isGenerating.collectAsState()
 
@@ -139,15 +143,25 @@ fun MirageTankMakerScreen(
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (encodedBitmap == null) {
-                        Text("生成图", color = MaterialTheme.colorScheme.onBackground)
-                    } else {
-                        Image(
-                            bitmap = encodedBitmap!!.asImageBitmap(),
-                            contentDescription = "Encoded Mirage Tank",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                    when {
+                        isTooLarge -> {
+                            Text(
+                                "图片尺寸过大，无法预览\n正在自动保存原图\n请勿退出",
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        displayBitmap != null -> {
+                            Image(
+                                bitmap = displayBitmap!!.asImageBitmap(),
+                                contentDescription = "Encoded Mirage Tank",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        else -> {
+                            Text("生成图", color = MaterialTheme.colorScheme.onBackground)
+                        }
                     }
                 }
             }
@@ -164,14 +178,13 @@ fun MirageTankMakerScreen(
                 }
                 Button(
                     onClick = {
-                        encodedBitmap?.let {
-                            viewModel.saveImageToDownloads(it)
-                        }
+                        viewModel.saveImageToDownloads()
                     },
-                    enabled = encodedBitmap != null && !isSaving
+                    enabled = !isGenerating && !isSaving && (isTooLarge || displayBitmap != null)
                 ) {
-                    Text("保存")
+                    Text(if (isSaving) "保存中" else "保存")
                 }
+
             }
         }
         Spacer(Modifier.height(16.dp))
@@ -188,6 +201,7 @@ fun MirageTankMakerScreen(
         }
         Text("提示\n1.亮度系数用于调整灰度图片的亮度，尽量保证表图比里图亮\n" +
                 "2.阈值用于设置表图最暗的程度及里图最亮的程度\n" +
-                "3.图片默认保存到download目录", color = MaterialTheme.colorScheme.onBackground)
+                "3.图片默认保存到download目录"+
+                "4.生成图过大时，将自动保存原图并提示您查看下载目录。", color = MaterialTheme.colorScheme.onBackground)
     }
 }

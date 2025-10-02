@@ -17,11 +17,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:largeHeap="true"
-        android:theme="@style/Theme.TankViewer">
+        android:theme="@style/Theme.TankFactory">
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.TankViewer">
+            android:theme="@style/Theme.TankFactory">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

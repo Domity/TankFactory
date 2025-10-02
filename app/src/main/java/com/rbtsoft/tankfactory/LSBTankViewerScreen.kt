@@ -120,7 +120,7 @@ fun LSBTankViewerScreen(
             enabled = decodedBitmap != null && !isSaving,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (isSaving) "保存中..." else "保存")
+            Text(if (isSaving) "保存中" else "保存")
         }
         Text("提示\n1.如果无法显示解码后的图片，那么它很有可能已经损坏，或不是无影坦克\n2.如果确定图片没有问题，请更换解码软件", color = MaterialTheme.colorScheme.onBackground)
     }

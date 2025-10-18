@@ -13,14 +13,12 @@ import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    background = PurpleGrey80,
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    background = PurpleGrey40,
 )
 
 @Composable
@@ -38,9 +36,16 @@ fun TankFactoryTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-
+    val bgcolorScheme = if (darkTheme) {
+        colorScheme
+    } else {
+        colorScheme.copy(
+            // 亮色模式的白色太亮了，调低一点
+            background = Color(0xFFEEEEEE),
+        )
+    }
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = bgcolorScheme,
         typography = Typography,
         content = content
     )

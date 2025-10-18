@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.background
@@ -65,7 +66,7 @@ fun LSBTankMakerScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (selectedImage1Uri == null) {
-                        Text("表图", color = Color.Black)
+                        Text(stringResource(id = R.string.lsb_tank_maker_cover_image), color = Color.Black)
                     } else {
                         AsyncImage(
                             model = selectedImage1Uri,
@@ -88,7 +89,7 @@ fun LSBTankMakerScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (selectedImage2Uri == null) {
-                        Text("里图", color = Color.Black)
+                        Text(stringResource(id = R.string.lsb_tank_maker_hidden_image), color = Color.Black)
                     } else {
                         AsyncImage(
                             model = selectedImage2Uri,
@@ -110,7 +111,7 @@ fun LSBTankMakerScreen(
                 valueRange = 1f..7f,
 
             )
-            Text("压缩度: $compress", color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(id = R.string.lsb_tank_maker_compress_level, compress), color = MaterialTheme.colorScheme.onBackground)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -129,7 +130,7 @@ fun LSBTankMakerScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (encodedBitmap == null) {
-                        Text("生成图", color = Color.Black)
+                        Text(stringResource(id = R.string.lsb_tank_maker_generated_image), color = Color.Black)
                     } else {
                         Image(
                             bitmap = encodedBitmap!!.asImageBitmap(),
@@ -151,7 +152,7 @@ fun LSBTankMakerScreen(
                     enabled = encodedBitmap != null && !isSaving
                 ) {
                     // Text("保存")
-                    Text(if (isSaving) "保存中" else "保存")
+                    Text(if (isSaving) stringResource(id = R.string.lsb_tank_maker_saving) else stringResource(id = R.string.lsb_tank_maker_save))
                 }
             }
         }
@@ -167,9 +168,8 @@ fun LSBTankMakerScreen(
             enabled = selectedImage1Uri != null && selectedImage2Uri != null && !isGenerating,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (isGenerating) "制作中" else "制作")
+            Text(if (isGenerating) stringResource(id = R.string.lsb_tank_maker_making) else stringResource(id = R.string.lsb_tank_maker_make))
         }
-        Text("提示\n1.更低的压缩度意味着更好的表图质量和更长的制作时间\n" +
-                "2.图片默认保存到download目录", color = MaterialTheme.colorScheme.onBackground)
+        Text(stringResource(id = R.string.lsb_tank_maker_tips), color = MaterialTheme.colorScheme.onBackground)
     }
 }

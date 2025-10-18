@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -59,7 +60,7 @@ fun LSBTankViewerScreen(
             contentAlignment = Alignment.Center
         ) {
             if (selectedImageUri == null) {
-                Text("选择无影坦克", color = Color.Black)
+                Text(stringResource(id = R.string.lsb_tank_viewer_select_tank), color = Color.Black)
             } else {
                 AsyncImage(
                     model = selectedImageUri,
@@ -80,7 +81,7 @@ fun LSBTankViewerScreen(
             enabled = selectedImageUri != null && !isDecoding,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (isDecoding) "解码中..." else "解码")
+            Text(if (isDecoding) stringResource(id = R.string.lsb_tank_viewer_decoding) else stringResource(id = R.string.lsb_tank_viewer_decode))
         }
 
         Spacer(Modifier.height(16.dp))
@@ -94,7 +95,7 @@ fun LSBTankViewerScreen(
             contentAlignment = Alignment.Center
         ) {
             if (decodedBitmap == null) {
-                Text("解码结果", color = Color.Black)
+                Text(stringResource(id = R.string.lsb_tank_viewer_decoded_result), color = Color.Black)
             } else {
                 Image(
                     bitmap = decodedBitmap!!.asImageBitmap(),
@@ -120,8 +121,8 @@ fun LSBTankViewerScreen(
             enabled = decodedBitmap != null && !isSaving,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (isSaving) "保存中" else "保存")
+            Text(if (isSaving) stringResource(id = R.string.lsb_tank_viewer_saving) else stringResource(id = R.string.lsb_tank_viewer_save))
         }
-        Text("提示\n1.如果无法显示解码后的图片，那么它很有可能已经损坏，或不是无影坦克\n2.如果确定图片没有问题，请更换解码软件", color = MaterialTheme.colorScheme.onBackground)
+        Text(stringResource(id = R.string.lsb_tank_viewer_tips), color = MaterialTheme.colorScheme.onBackground)
     }
 }

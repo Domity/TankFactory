@@ -8,9 +8,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -28,9 +30,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rbtsoft.tankfactory.ui.about.AboutDialog
 import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
@@ -49,7 +53,8 @@ fun AppNavigator() {
         composable("view_Mtank") { MirageTankViewerScreen() }
         composable("make_Mtank") { MirageTankMakerScreen() }
         composable("make_LSBtank") { LSBTankMakerScreen() }
-        composable("view_LSBTank") {LSBTankViewerScreen()}
+        composable("view_LSBTank") { LSBTankViewerScreen() }
+        composable("settings") { Settings() }
     }
 }
 
@@ -74,30 +79,36 @@ fun MainMenuScreen(navController: NavController) {
                 color = MaterialTheme.colorScheme.onBackground
             )
             Button(onClick = { navController.navigate("view_Mtank") }) {
-                Text("查看幻影坦克")
+                Text(stringResource(id = R.string.main_menu_view_mirage_tank))
             }
             Button(onClick = { navController.navigate("make_Mtank") }) {
-                Text("制作幻影坦克")
+                Text(stringResource(id = R.string.main_menu_make_mirage_tank))
             }
             Button(onClick = { navController.navigate("view_LSBTank")} ) {
-                Text("查看无影坦克")
+                Text(stringResource(id = R.string.main_menu_view_lsb_tank))
             }
             Button(onClick = { navController.navigate("make_LSBtank") }) {
-                Text("制作无影坦克")
+                Text(stringResource(id = R.string.main_menu_make_lsb_tank))
             }
 
         }
-        Button(onClick = { showAboutDialog=true },
+        Row(
             modifier = Modifier
-                .wrapContentWidth()
+                .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("关于")
+            Button(onClick = { navController.navigate("settings") }) {
+                Text(stringResource(id = R.string.main_menu_settings))
+            }
+            Button(onClick = { showAboutDialog = true }) {
+                Text(stringResource(id = R.string.main_menu_about))
+            }
         }
     }
     if (showAboutDialog) {
         AboutDialog(onDismiss = { showAboutDialog = false })
     }
 }
-

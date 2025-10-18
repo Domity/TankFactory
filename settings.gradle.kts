@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Tank Factoryr"
+rootProject.name = "Tank Factory"
 include(":app")
  

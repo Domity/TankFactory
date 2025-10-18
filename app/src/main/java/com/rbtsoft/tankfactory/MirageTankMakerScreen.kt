@@ -17,6 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import coil.compose.AsyncImage
 
@@ -77,7 +78,7 @@ fun MirageTankMakerScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (selectedImage1Uri == null) {
-                        Text("表图", color = Color.Black)
+                        Text(stringResource(id = R.string.mirage_tank_maker_cover_image), color = Color.Black)
                     } else {
                         AsyncImage(
                             model = selectedImage1Uri,
@@ -101,7 +102,7 @@ fun MirageTankMakerScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (selectedImage2Uri == null) {
-                        Text("里图", color = Color.Black)
+                        Text(stringResource(id = R.string.mirage_tank_maker_hidden_image), color = Color.Black)
                     } else {
                         AsyncImage(
                             model = selectedImage2Uri,
@@ -118,13 +119,13 @@ fun MirageTankMakerScreen(
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Slider(value = photo1K, onValueChange = { photo1K = it }, valueRange = 0.1f..2.0f)
-            Text("表图亮度: ${"%.2f".format(photo1K)}", color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(id = R.string.mirage_tank_maker_cover_image_brightness, photo1K), color = MaterialTheme.colorScheme.onBackground)
 
             Slider(value = photo2K, onValueChange = { photo2K = it }, valueRange = 0.1f..2.0f)
-            Text("里图亮度: ${"%.2f".format(photo2K)}", color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(id = R.string.mirage_tank_maker_hidden_image_brightness, photo2K), color = MaterialTheme.colorScheme.onBackground)
 
             Slider(value = threshold, onValueChange = { threshold = it }, valueRange = 1f..250f)
-            Text("阈值: ${threshold.toInt()}", color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(id = R.string.mirage_tank_maker_threshold, threshold.toInt()), color = MaterialTheme.colorScheme.onBackground)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -146,7 +147,7 @@ fun MirageTankMakerScreen(
                     when {
                         isTooLarge -> {
                             Text(
-                                "图片尺寸过大，无法预览\n正在自动保存原图\n请勿退出",
+                                stringResource(id = R.string.mirage_tank_maker_image_too_large),
                                 color = MaterialTheme.colorScheme.error,
                                 textAlign = TextAlign.Center
                             )
@@ -160,7 +161,7 @@ fun MirageTankMakerScreen(
                             )
                         }
                         else -> {
-                            Text("生成图", color = MaterialTheme.colorScheme.onBackground)
+                            Text(stringResource(id = R.string.mirage_tank_maker_generated_image), color = MaterialTheme.colorScheme.onBackground)
                         }
                     }
                 }
@@ -182,7 +183,7 @@ fun MirageTankMakerScreen(
                     },
                     enabled = !isGenerating && !isSaving && (isTooLarge || displayBitmap != null)
                 ) {
-                    Text(if (isSaving) "保存中" else "保存")
+                    Text(if (isSaving) stringResource(id = R.string.mirage_tank_maker_saving) else stringResource(id = R.string.mirage_tank_maker_save))
                 }
 
             }
@@ -197,11 +198,8 @@ fun MirageTankMakerScreen(
             enabled = selectedImage1Uri != null && selectedImage2Uri != null && !isGenerating,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("生成")
+            Text(stringResource(id = R.string.mirage_tank_maker_generate))
         }
-        Text("提示\n1.亮度系数用于调整灰度图片的亮度，尽量保证表图比里图亮\n" +
-                "2.阈值用于设置表图最暗的程度及里图最亮的程度\n" +
-                "3.图片默认保存到download目录\n"+
-                "4.生成图过大时，将自动保存原图并提示您查看下载目录。", color = MaterialTheme.colorScheme.onBackground)
+        Text(stringResource(id = R.string.mirage_tank_maker_tips), color = MaterialTheme.colorScheme.onBackground)
     }
 }

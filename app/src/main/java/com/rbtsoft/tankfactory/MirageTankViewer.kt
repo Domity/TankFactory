@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,7 +42,6 @@ class MirageTankViewMainActivity : ComponentActivity() {
 
 @Composable
 fun MirageTankViewerScreen() {
-    // --- 状态管理 ---
     var isDarkMode by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -70,7 +70,7 @@ fun MirageTankViewerScreen() {
             ) {
                 if (selectedImageUri == null) {
                     Text(
-                        text = "请点击左下角按钮选择图片",
+                        text = stringResource(id = R.string.mirage_tank_viewer_select_image_prompt),
                         color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center
                     )

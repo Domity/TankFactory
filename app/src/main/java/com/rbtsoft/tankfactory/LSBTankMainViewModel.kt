@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -23,29 +24,20 @@ import java.io.OutputStream
 class LSBTankMainViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedImage1Uri = MutableStateFlow<Uri?>(null)
     val selectedImage1Uri: StateFlow<Uri?> = _selectedImage1Uri
-
     private val _selectedImage2Uri = MutableStateFlow<Uri?>(null)
     val selectedImage2Uri: StateFlow<Uri?> = _selectedImage2Uri
-
     private val _encodedImage = MutableStateFlow<Bitmap?>(null)
     val encodedImage: StateFlow<Bitmap?> = _encodedImage
-
-    //在生成吗
     private val _isGenerating = MutableStateFlow(false)
     val isGenerating: StateFlow<Boolean> = _isGenerating
-
-    //在保存吗
     private val _isSaving = MutableStateFlow(false)
     val isSaving: StateFlow<Boolean> = _isSaving
-
     fun setImage1Uri(uri: Uri) {
         _selectedImage1Uri.value = uri
     }
-
     fun setImage2Uri(uri: Uri) {
         _selectedImage2Uri.value = uri
     }
-
     fun onMakerScreenEntered() {
         _selectedImage1Uri.value = null
         _selectedImage2Uri.value = null
@@ -74,11 +66,13 @@ class LSBTankMainViewModel(application: Application) : AndroidViewModel(applicat
                 FileOutputStream(image)
             }
 
-            fos?.use {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+            fos?.use { os ->
+                val bufferedStream = BufferedOutputStream(os, 8192)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, bufferedStream)
+                bufferedStream.flush()
                 withContext(Dispatchers.Main) {
                     _isSaving.value=false
-                    Toast.makeText(app, "图片已保存到Downloads", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(app, app.getString(R.string.lsb_tank_main_view_model_image_saved), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -93,13 +87,10 @@ class LSBTankMainViewModel(application: Application) : AndroidViewModel(applicat
                 val photo1 = getApplication<Application>().contentResolver.openInputStream(uri1)?.use {
                     BitmapFactory.decodeStream(it)
                 } ?: return@withContext null
-
                 val photo2 = getApplication<Application>().contentResolver.openInputStream(uri2)?.use {
                     BitmapFactory.decodeStream(it)
                 } ?: return@withContext null
-
                 val lsbTank = LsbTankEncoder.encode(photo1, photo2, "", compress)
-
                 photo1.recycle()
                 photo2.recycle()
                 lsbTank

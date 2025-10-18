@@ -21,6 +21,7 @@ import java.io.FileOutputStream
 import java.io.OutputStream
 import kotlin.math.max
 import androidx.core.graphics.scale
+import java.io.BufferedOutputStream
 
 class MirageTankMainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -68,7 +69,6 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
         val uri1 = _selectedImage1Uri.value ?: return
         val uri2 = _selectedImage2Uri.value ?: return
 
-        // 预设状态
         originalResultBitmap = null
         _displayBitmap.value = null
         _isResultTooLarge.value = false
@@ -77,7 +77,7 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
         viewModelScope.launch {
             val app = getApplication<Application>()
 
-            val largeBitmap: Bitmap? = withContext(Dispatchers.IO) {
+            val largeBitmap: Bitmap? = withContext(Dispatchers.Default) {
                 val photo1 = app.contentResolver.openInputStream(uri1)?.use {
                     BitmapFactory.decodeStream(it)
                 } ?: return@withContext null
@@ -127,7 +127,7 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
         }
 
         _isSaving.value = true
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             val app = getApplication<Application>()
             val filename = "MirageTank_${System.currentTimeMillis()}.png"
             var outputStream: OutputStream? = null
@@ -151,19 +151,21 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
                 }
 
                 outputStream?.use { os ->
+                    val bufferedStream = BufferedOutputStream(os,8192)
                     bitmapToSave.compress(Bitmap.CompressFormat.PNG, 100, os)
+                    bufferedStream.flush()
                     success = true
                 }
 
                 withContext(Dispatchers.Main) {
                     if (success) {
-                        Toast.makeText(app, "图片已保存到Downloads目录。", Toast.LENGTH_LONG).show()
+                        Toast.makeText(app, app.getString(R.string.mirage_tank_main_view_model_image_saved), Toast.LENGTH_LONG).show()
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(app, "保存失败: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(app, app.getString(R.string.mirage_tank_main_view_model_save_failed, e.message), Toast.LENGTH_LONG).show()
                 }
             } finally {
                 withContext(Dispatchers.Main) {

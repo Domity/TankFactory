@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -13,13 +14,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import com.rbtsoft.tankfactory.BuildConfig
 
 @Composable
 fun AboutDialog(onDismiss: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Tank Factory") },
+        title = { Text(text = "Tank Factory", color = colorScheme.onSurface) },
         text = {
             Column(horizontalAlignment = Alignment.Start) {
                 Text(
@@ -33,7 +35,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "版本号：1.0.5",
+                    text = "版本号："+ BuildConfig.VERSION_NAME,
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))

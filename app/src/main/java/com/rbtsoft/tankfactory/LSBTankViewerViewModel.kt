@@ -50,7 +50,7 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
         _isDecoding.value = true
         _decodedImage.value = null
         viewModelScope.launch {
-            _decodedImage.value = withContext(Dispatchers.IO) {
+            _decodedImage.value = withContext(Dispatchers.Default) {
                 val tankBitmap = try {
                     getApplication<Application>().contentResolver.openInputStream(uri)?.use { inputStream ->
                         BitmapFactory.decodeStream(inputStream)
@@ -70,7 +70,7 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
 
     fun saveImageToDownloads(bitmap: Bitmap) {
         _isSaving.value = true
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             val app = getApplication<Application>()
             val filename = "LSB_Decoded_${System.currentTimeMillis()}.png"
             val fos: OutputStream? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -95,11 +95,11 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
                 withContext(Dispatchers.Main) {
                     _isSaving.value = false
-                    Toast.makeText(app, "图片已保存到Downloads", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(app, app.getString(R.string.lsb_tank_viewer_view_model_image_saved), Toast.LENGTH_SHORT).show()
                 }
             } ?: withContext(Dispatchers.Main) {
                 _isSaving.value = false
-                Toast.makeText(app, "图片保存失败", Toast.LENGTH_SHORT).show()
+                Toast.makeText(app, app.getString(R.string.lsb_tank_viewer_view_model_save_failed), Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -34,17 +34,13 @@ object MirageTankEncoder {
 
         coroutineScope {
             val jobs = mutableListOf<Deferred<Unit>>()
-
             val chunkSize = totalPixels / numCores
 
             for (i in 0 until numCores) {
                 val start = i * chunkSize
-                // 最后一个块处理剩余的所有像素
                 val end = if (i == numCores - 1) totalPixels else (i + 1) * chunkSize
 
-                // 启动一个异步任务
                 val job = async {
-                    // 遍历此块中的所有像素索引
                     for (index in start until end) {
 
                         val pixel1 = pixels1[index]

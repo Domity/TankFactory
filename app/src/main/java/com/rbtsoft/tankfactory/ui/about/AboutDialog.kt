@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rbtsoft.tankfactory.BuildConfig
+import com.rbtsoft.tankfactory.R
 
 @Composable
 fun AboutDialog(onDismiss: () -> Unit) {
@@ -25,17 +27,17 @@ fun AboutDialog(onDismiss: () -> Unit) {
         text = {
             Column(horizontalAlignment = Alignment.Start) {
                 Text(
-                    text = "一个图片处理应用",
+                    text = stringResource(id = R.string.about_dialog_description),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "开发者：Domity",
+                    text = stringResource(id = R.string.about_dialog_developer),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "版本号："+ BuildConfig.VERSION_NAME,
+                    text = stringResource(id = R.string.about_dialog_version, BuildConfig.VERSION_NAME),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -43,14 +45,14 @@ fun AboutDialog(onDismiss: () -> Unit) {
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("确定")
+                Text(stringResource(id = R.string.about_dialog_confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = {
                 uriHandler.openUri("https://github.com/Domity/TankFactory")
             }) {
-                Text("项目主页")
+                Text(stringResource(id = R.string.about_dialog_project_home))
             }
         },
         modifier = Modifier.padding(16.dp)

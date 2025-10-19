@@ -89,7 +89,7 @@ fun LSBTankViewerScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f) // 占据所有剩余垂直空间
+                .weight(1f)
                 .background(Color(0xFFA0A0A0))
                 .padding(8.dp),
             contentAlignment = Alignment.Center

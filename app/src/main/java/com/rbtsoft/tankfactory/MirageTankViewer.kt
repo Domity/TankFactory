@@ -8,12 +8,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddPhotoAlternate
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -51,12 +47,13 @@ fun MirageTankViewerScreen() {
         }
     )
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
-            .navigationBarsPadding()
+            .navigationBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         MirageTankImageTheme(isDarkMode = isDarkMode) {
@@ -65,7 +62,8 @@ fun MirageTankViewerScreen() {
                     .fillMaxWidth()
                     .fillMaxHeight(0.6f)
                     .padding(24.dp)
-                    .background(MaterialTheme.colorScheme.background),
+                    .background(MaterialTheme.colorScheme.background)
+                    .clickable { photoPickerLauncher.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
                 if (selectedImageUri == null) {
@@ -85,40 +83,16 @@ fun MirageTankViewerScreen() {
             }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp, start = 64.dp, end = 64.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            FloatingActionButton(
-                onClick = {
-                    photoPickerLauncher.launch("image/*")
-                },
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.AddPhotoAlternate,
-                    contentDescription = "Select Image"
-                )
-            }
+        Switch(
+            checked = isDarkMode,
+            onCheckedChange = { isDarkMode = it },
+        )
 
-            FloatingActionButton(
-                onClick = {
-                    isDarkMode = !isDarkMode
-                },
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            ) {
-                Icon(
-                    imageVector = if (isDarkMode) Icons.Filled.LightMode else Icons.Filled.DarkMode,
-                    contentDescription = "Toggle Theme"
-                )
-            }
-        }
+        Text(
+            text = stringResource(id = R.string.mirage_tank_viewer_tip),
+            modifier = Modifier.padding(16.dp),
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }
 @Preview(showBackground = true)

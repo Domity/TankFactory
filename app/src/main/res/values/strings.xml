@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">Tank Factory</string>
-    <string name="mirage_tank_viewer_select_image_prompt">请点击左下角按钮选择图片</string>
+    <string name="mirage_tank_viewer_select_image_prompt">请点击图片区域选择图片</string>
     <string name="mirage_tank_maker_cover_image">表图</string>
     <string name="mirage_tank_maker_hidden_image">里图</string>
     <string name="mirage_tank_maker_cover_image_brightness">表图亮度: %.2f</string>
@@ -39,4 +39,10 @@
     <string name="lsb_tank_maker_make">制作</string>
     <string name="lsb_tank_maker_tips">提示\n1.更低的压缩度意味着更好的表图质量和更长的制作时间\n2.图片默认保存到download目录</string>
     <string name="lsb_tank_main_view_model_image_saved">图片已保存到Downloads</string>
+    <string name="about_dialog_description">一个图片处理应用</string>
+    <string name="about_dialog_developer">开发者：Domity</string>
+    <string name="about_dialog_version">版本号：%s</string>
+    <string name="about_dialog_confirm">确定</string>
+    <string name="about_dialog_project_home">项目主页</string>
+    <string name="mirage_tank_viewer_tip">提示\n没有效果？图片可能已被损坏，或不是幻影坦克</string>
 </resources>

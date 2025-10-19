@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory
+package com.rbtsoft.tankfactory.MirageTank
 
 import android.app.Application
 import android.content.ContentValues
@@ -9,19 +9,20 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.core.graphics.scale
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.rbtsoft.tankfactory.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import kotlin.math.max
-import androidx.core.graphics.scale
-import java.io.BufferedOutputStream
 
 class MirageTankMainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -151,7 +152,7 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
                 }
 
                 outputStream?.use { os ->
-                    val bufferedStream = BufferedOutputStream(os,8192)
+                    val bufferedStream = BufferedOutputStream(os, 8192)
                     bitmapToSave.compress(Bitmap.CompressFormat.PNG, 100, os)
                     bufferedStream.flush()
                     success = true
@@ -159,13 +160,21 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
 
                 withContext(Dispatchers.Main) {
                     if (success) {
-                        Toast.makeText(app, app.getString(R.string.mirage_tank_main_view_model_image_saved), Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            app,
+                            app.getString(R.string.mirage_tank_main_view_model_image_saved),
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(app, app.getString(R.string.mirage_tank_main_view_model_save_failed, e.message), Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        app,
+                        app.getString(R.string.mirage_tank_main_view_model_save_failed, e.message),
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             } finally {
                 withContext(Dispatchers.Main) {

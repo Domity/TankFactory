@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory
+package com.rbtsoft.tankfactory.LSBTank
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import androidx.compose.material3.CircularProgressIndicator
+import com.rbtsoft.tankfactory.LSBTank.LSBTankViewerViewModel
+import com.rbtsoft.tankfactory.R
 
 @Composable
 fun LSBTankViewerScreen(

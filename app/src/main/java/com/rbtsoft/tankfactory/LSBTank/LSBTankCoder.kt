@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory
+package com.rbtsoft.tankfactory.LSBTank
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap

@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory
+package com.rbtsoft.tankfactory.LSBTank
 
 import android.app.Application
 import android.content.ContentValues
@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.rbtsoft.tankfactory.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,8 +72,12 @@ class LSBTankMainViewModel(application: Application) : AndroidViewModel(applicat
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, bufferedStream)
                 bufferedStream.flush()
                 withContext(Dispatchers.Main) {
-                    _isSaving.value=false
-                    Toast.makeText(app, app.getString(R.string.lsb_tank_main_view_model_image_saved), Toast.LENGTH_SHORT).show()
+                    _isSaving.value = false
+                    Toast.makeText(
+                        app,
+                        app.getString(R.string.lsb_tank_main_view_model_image_saved),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -84,12 +89,14 @@ class LSBTankMainViewModel(application: Application) : AndroidViewModel(applicat
         _isGenerating.value=true
         viewModelScope.launch {
             _encodedImage.value = withContext(Dispatchers.IO) {
-                val photo1 = getApplication<Application>().contentResolver.openInputStream(uri1)?.use {
-                    BitmapFactory.decodeStream(it)
-                } ?: return@withContext null
-                val photo2 = getApplication<Application>().contentResolver.openInputStream(uri2)?.use {
-                    BitmapFactory.decodeStream(it)
-                } ?: return@withContext null
+                val photo1 =
+                    getApplication<Application>().contentResolver.openInputStream(uri1)?.use {
+                        BitmapFactory.decodeStream(it)
+                    } ?: return@withContext null
+                val photo2 =
+                    getApplication<Application>().contentResolver.openInputStream(uri2)?.use {
+                        BitmapFactory.decodeStream(it)
+                    } ?: return@withContext null
                 val lsbTank = LsbTankEncoder.encode(photo1, photo2, "", compress)
                 photo1.recycle()
                 photo2.recycle()

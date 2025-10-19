@@ -1,25 +1,27 @@
-package com.rbtsoft.tankfactory
+package com.rbtsoft.tankfactory.LSBTank
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.ContentValues
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.rbtsoft.tankfactory.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.content.ContentValues
-import android.graphics.BitmapFactory
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
-import android.widget.Toast
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+
 class LSBTankViewerViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     val selectedImageUri: StateFlow<Uri?> = _selectedImageUri
@@ -52,9 +54,10 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
         viewModelScope.launch {
             _decodedImage.value = withContext(Dispatchers.Default) {
                 val tankBitmap = try {
-                    getApplication<Application>().contentResolver.openInputStream(uri)?.use { inputStream ->
-                        BitmapFactory.decodeStream(inputStream)
-                    }
+                    getApplication<Application>().contentResolver.openInputStream(uri)
+                        ?.use { inputStream ->
+                            BitmapFactory.decodeStream(inputStream)
+                        }
                 } catch (_: Exception) {
                     null
                 }
@@ -95,11 +98,19 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
                 withContext(Dispatchers.Main) {
                     _isSaving.value = false
-                    Toast.makeText(app, app.getString(R.string.lsb_tank_viewer_view_model_image_saved), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        app,
+                        app.getString(R.string.lsb_tank_viewer_view_model_image_saved),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             } ?: withContext(Dispatchers.Main) {
                 _isSaving.value = false
-                Toast.makeText(app, app.getString(R.string.lsb_tank_viewer_view_model_save_failed), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    app,
+                    app.getString(R.string.lsb_tank_viewer_view_model_save_failed),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }

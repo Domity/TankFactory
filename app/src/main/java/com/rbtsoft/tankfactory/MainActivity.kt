@@ -31,6 +31,11 @@ import androidx.navigation.compose.rememberNavController
 import com.rbtsoft.tankfactory.ui.about.AboutDialog
 import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.rbtsoft.tankfactory.LSBTank.LSBTankMakerScreen
+import com.rbtsoft.tankfactory.LSBTank.LSBTankViewerScreen
+import com.rbtsoft.tankfactory.MirageTank.MirageTankMakerScreen
+import com.rbtsoft.tankfactory.MirageTank.MirageTankViewerScreen
+import com.rbtsoft.tankfactory.settings.Settings
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory
+package com.rbtsoft.tankfactory.MirageTank
 
 import android.net.Uri
 import android.os.Bundle
@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.rbtsoft.tankfactory.R
 import com.rbtsoft.tankfactory.ui.theme.MirageTankImageTheme
 import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
 

@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">Tank Factory</string>
-    <string name="mirage_tank_viewer_select_image_prompt">请点击图片区域选择图片</string>
+    <string name="mirage_tank_viewer_select_image_prompt">请选择图片</string>
     <string name="mirage_tank_maker_cover_image">表图</string>
     <string name="mirage_tank_maker_hidden_image">里图</string>
     <string name="mirage_tank_maker_cover_image_brightness">表图亮度: %.2f</string>

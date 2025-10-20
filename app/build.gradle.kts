@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.rbtsoft.tankfactory"
-        minSdk = 26
+        minSdk = 31
         targetSdk = 36
         versionCode = 107
         versionName = "1.0.7"
@@ -63,7 +63,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.runtime)
-    implementation(libs.androidx.compose.material3)
+    implementation(libs.google.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,7 +74,6 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.compose.material.icons.extended.android)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.coil.compose)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.lifecycle.livedata.ktx)
 }

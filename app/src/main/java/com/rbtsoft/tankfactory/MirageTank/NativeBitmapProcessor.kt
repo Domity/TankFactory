@@ -14,8 +14,6 @@ object NativeBitmapProcessor {
         outputBitmap: Bitmap,
         photo1K: Float,
         photo2K: Float,
-        threshold: Int,
-        startY: Int,
-        endY: Int
+        threshold: Int
     )
 }

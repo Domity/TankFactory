@@ -2,6 +2,7 @@
 #include <android/bitmap.h>
 #include <algorithm>
 #include <vector>
+#include <omp.h>
 
 int toGray(int r, int g, int b) {
     return static_cast<int>(r * 0.299f + g * 0.587f + b * 0.114f);
@@ -11,8 +12,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_rbtsoft_tankfactory_MirageTank_NativeBitmapProcessor_encodeBitmaps(
         JNIEnv *env, jobject,
         jobject bitmap1, jobject bitmap2, jobject outputBitmap,
-        jfloat photo1K, jfloat photo2K, jint threshold,
-        jint startY, jint endY) {
+        jfloat photo1K, jfloat photo2K, jint threshold) {
 
     AndroidBitmapInfo info1, info2, outInfo;
     if (AndroidBitmap_getInfo(env, bitmap1, &info1) < 0 ||
@@ -33,8 +33,10 @@ Java_com_rbtsoft_tankfactory_MirageTank_NativeBitmapProcessor_encodeBitmaps(
     }
 
     uint32_t width = info1.width;
+    uint32_t height = info1.height;
 
-    for (uint32_t y = startY; y < endY; ++y) {
+    #pragma omp parallel for
+    for (uint32_t y = 0; y < height; ++y) {
         auto* row1 = (uint32_t*)((char*)pixels1 + y * info1.stride);
         auto* row2 = (uint32_t*)((char*)pixels2 + y * info2.stride);
         auto* outRow = (uint32_t*)((char*)outputPixels + y * outInfo.stride);
@@ -58,8 +60,9 @@ Java_com_rbtsoft_tankfactory_MirageTank_NativeBitmapProcessor_encodeBitmaps(
             int alpha = 255 - (v1 - v2);
             int safeAlpha = (alpha == 0) ? 1 : alpha;
             int gray = std::min(std::max((int)(255.0f * v2 / safeAlpha), 0), 255);
-            int pGray = (gray * alpha) / 255;
-            outRow[x] = (alpha << 24) | (pGray << 16) | (pGray << 8) | pGray;
+            
+            //  不进行Alpha预乘，视觉上会更好
+            outRow[x] = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
         }
     }
 

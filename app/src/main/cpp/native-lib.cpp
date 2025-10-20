@@ -60,9 +60,9 @@ Java_com_rbtsoft_tankfactory_MirageTank_NativeBitmapProcessor_encodeBitmaps(
             int alpha = 255 - (v1 - v2);
             int safeAlpha = (alpha == 0) ? 1 : alpha;
             int gray = std::min(std::max((int)(255.0f * v2 / safeAlpha), 0), 255);
-            
-            //  不进行Alpha预乘，视觉上会更好
-            outRow[x] = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
+
+            int pGray = (gray * alpha) / 255;
+            outRow[x] = (alpha << 24) | (pGray << 16) | (pGray << 8) | pGray;
         }
     }
 

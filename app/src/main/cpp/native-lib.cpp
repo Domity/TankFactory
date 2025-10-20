@@ -55,14 +55,13 @@ Java_com_rbtsoft_tankfactory_MirageTank_NativeBitmapProcessor_encodeBitmaps(
             int b2 = (pixel2 >> 16) & 0xFF;
             uint8_t gray2 = toGray(r2, g2, b2);
 
-            int v1 = std::min(std::max((int)(gray1 * photo1K), threshold + 1), 254);
-            int v2 = std::min(std::max((int)(gray2 * photo2K), 1), threshold);
+            int v1 = std::min(std::max((int)(gray1 * photo1K), threshold), 255);
+            int v2 = std::min(std::max((int)(gray2 * photo2K), 0), threshold);
             int alpha = 255 - (v1 - v2);
             int safeAlpha = (alpha == 0) ? 1 : alpha;
             int gray = std::min(std::max((int)(255.0f * v2 / safeAlpha), 0), 255);
 
-            int pGray = (gray * alpha) / 255;
-            outRow[x] = (alpha << 24) | (pGray << 16) | (pGray << 8) | pGray;
+            outRow[x] = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
         }
     }
 

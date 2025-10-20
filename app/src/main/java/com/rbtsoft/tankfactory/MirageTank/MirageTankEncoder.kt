@@ -12,7 +12,7 @@ import kotlin.math.min
 
 object MirageTankEncoder {
     //  具体的大小还需研究
-    private const val PIXEL_THRESHOLD = 1000 * 1000
+    private const val PIXEL_THRESHOLD = 10000 * 10000
 
     suspend fun encode(photo1: Bitmap, photo2: Bitmap, photo1K: Float, photo2K: Float, threshold: Int): Bitmap =
         withContext(Dispatchers.Default) {
@@ -111,8 +111,8 @@ object MirageTankEncoder {
             val gray1 = toGray(pixels1[i])
             val gray2 = toGray(pixels2[i])
 
-            val v1 = min(max((gray1 * photo1K).toInt(), threshold + 1), 254)
-            val v2 = min(max((gray2 * photo2K).toInt(), 1), threshold)
+            val v1 = min(max((gray1 * photo1K).toInt(), threshold), 255)
+            val v2 = min(max((gray2 * photo2K).toInt(), 0), threshold)
             val alpha = 255 - (v1 - v2)
             val safeAlpha = if (alpha == 0) 1 else alpha
             val gray = min(max((255.0f * v2 / safeAlpha).toInt(), 0), 255)

@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -21,20 +22,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.rbtsoft.tankfactory.R
+import com.rbtsoft.tankfactory.ui.theme.AppTheme
 import com.rbtsoft.tankfactory.ui.theme.MirageTankImageTheme
 import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
+import com.rbtsoft.tankfactory.ui.theme.ThemeDataStore
+import com.rbtsoft.tankfactory.ui.theme.ThemeSettings
 
 class MirageTankViewMainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val themeDataStore = ThemeDataStore(this)
         setContent {
-            TankFactoryTheme{
+            val themeSettings by themeDataStore.themeSettingsFlow.collectAsState(
+                initial = ThemeSettings(useDynamicColor = true, selectedTheme = AppTheme.BLACK_AND_WHITE)
+            )
+            TankFactoryTheme(
+                useDynamicColor = themeSettings.useDynamicColor,
+                selectedTheme = themeSettings.selectedTheme
+            ) {
                 MirageTankViewerScreen()
             }
         }
     }
-
 }
 
 @Composable
@@ -99,7 +109,8 @@ fun MirageTankViewerScreen() {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    TankFactoryTheme {
+    // For previews, we provide static values for the theme.
+    TankFactoryTheme(useDynamicColor = false, selectedTheme = AppTheme.ORANGE) {
         MirageTankViewerScreen()
     }
 }

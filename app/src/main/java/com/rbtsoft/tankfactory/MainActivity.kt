@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,15 +37,27 @@ import com.rbtsoft.tankfactory.LSBTank.LSBTankViewerScreen
 import com.rbtsoft.tankfactory.MirageTank.MirageTankMakerScreen
 import com.rbtsoft.tankfactory.MirageTank.MirageTankViewerScreen
 import com.rbtsoft.tankfactory.settings.Settings
+import com.rbtsoft.tankfactory.ui.theme.ThemeDataStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val themeDataStore = ThemeDataStore(this)
+
         setContent {
-            TankFactoryTheme {
-                AppNavigator()
+            val themeSettings by themeDataStore.themeSettingsFlow.collectAsState(
+                initial = null
+            )
+            if (themeSettings != null) {
+                TankFactoryTheme(
+                    useDynamicColor = themeSettings!!.useDynamicColor,
+                    selectedTheme = themeSettings!!.selectedTheme
+                ) {
+                    AppNavigator()
+                }
             }
         }
     }

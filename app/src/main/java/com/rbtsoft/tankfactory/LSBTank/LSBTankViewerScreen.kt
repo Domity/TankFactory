@@ -113,7 +113,6 @@ fun LSBTankViewerScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        //  保存按钮
         Button(
             onClick = {
                 decodedBitmap?.let {

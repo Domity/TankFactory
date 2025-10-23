@@ -11,27 +11,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.rbtsoft.tankfactory.ui.theme.apptheme.BlackAndWhiteDarkColorScheme
 import com.rbtsoft.tankfactory.ui.theme.apptheme.BlackAndWhiteLightColorScheme
+import com.rbtsoft.tankfactory.ui.theme.apptheme.OrangeDarkColorScheme
+import com.rbtsoft.tankfactory.ui.theme.apptheme.OrangeLightColorScheme
 
 @Composable
-//  默认动态取色
 fun TankFactoryTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    useDynamicColor: Boolean,
+    selectedTheme: AppTheme,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (dynamicColor) {
-        val context = LocalContext.current
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-    } else {
-        if (darkTheme) BlackAndWhiteDarkColorScheme else BlackAndWhiteLightColorScheme
+    val colorScheme = when {
+        useDynamicColor -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        else -> {
+            when (selectedTheme) {
+                AppTheme.BLACK_AND_WHITE -> {
+                    if (darkTheme) BlackAndWhiteDarkColorScheme else BlackAndWhiteLightColorScheme
+                }
+                AppTheme.ORANGE -> {
+                    if (darkTheme) OrangeDarkColorScheme else OrangeLightColorScheme
+                }
+            }
+        }
     }
 
     val bgcolorScheme = if (darkTheme) {
         colorScheme
     } else {
         colorScheme.copy(
-            // 亮色模式的白色太亮了，调低一点
-            background = Color(0xFFEEEEEE),
+            background = if (useDynamicColor) colorScheme.background else Color(0xFFEEEEEE),
         )
     }
     MaterialTheme(

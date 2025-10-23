@@ -16,6 +16,7 @@ materialIconsExtendedAndroid = "1.7.8"
 navigationCompose = "2.9.5"
 runtime = "1.9.1"
 material = "1.13.0"
+datastore = "1.1.1"
 
 [libraries]
 androidx-compose-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
@@ -40,6 +41,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

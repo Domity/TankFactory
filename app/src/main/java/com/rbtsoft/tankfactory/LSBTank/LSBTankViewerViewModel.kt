@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.LSBTank
+package com.rbtsoft.tankfactory.lsbtank
 
 import android.annotation.SuppressLint
 import android.app.Application
@@ -6,7 +6,6 @@ import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
@@ -18,8 +17,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 import java.io.OutputStream
 
 class LSBTankViewerViewModel(application: Application) : AndroidViewModel(application) {
@@ -76,23 +73,13 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
         viewModelScope.launch(Dispatchers.Default) {
             val app = getApplication<Application>()
             val filename = "LSB_Decoded_${System.currentTimeMillis()}.png"
-            val fos: OutputStream? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                }
-                app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let {
-                    app.contentResolver.openOutputStream(it)
-                }
-            } else {
-                @Suppress("DEPRECATION")
-                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                val image = File(imagesDir, filename)
-                if (!imagesDir.exists()) {
-                    imagesDir.mkdirs()
-                }
-                FileOutputStream(image)
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            }
+            val fos: OutputStream? = app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let {
+                app.contentResolver.openOutputStream(it)
             }
             fos?.use {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)

@@ -16,7 +16,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,12 +31,11 @@ import androidx.navigation.compose.rememberNavController
 import com.rbtsoft.tankfactory.ui.about.AboutDialog
 import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.rbtsoft.tankfactory.LSBTank.LSBTankMakerScreen
-import com.rbtsoft.tankfactory.LSBTank.LSBTankViewerScreen
-import com.rbtsoft.tankfactory.MirageTank.MirageTankMakerScreen
-import com.rbtsoft.tankfactory.MirageTank.MirageTankViewerScreen
+import com.rbtsoft.tankfactory.lsbtank.LSBTankMakerScreen
+import com.rbtsoft.tankfactory.lsbtank.LSBTankViewerScreen
+import com.rbtsoft.tankfactory.miragetank.MirageTankMakerScreen
+import com.rbtsoft.tankfactory.miragetank.MirageTankViewerScreen
 import com.rbtsoft.tankfactory.settings.Settings
-import com.rbtsoft.tankfactory.ui.theme.ThemeDataStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,19 +43,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val themeDataStore = ThemeDataStore(this)
-
         setContent {
-            val themeSettings by themeDataStore.themeSettingsFlow.collectAsState(
-                initial = null
-            )
-            if (themeSettings != null) {
-                TankFactoryTheme(
-                    useDynamicColor = themeSettings!!.useDynamicColor,
-                    selectedTheme = themeSettings!!.selectedTheme
-                ) {
-                    AppNavigator()
-                }
+            TankFactoryTheme {
+                AppNavigator()
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.LSBTank
+package com.rbtsoft.tankfactory.lsbtank
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image

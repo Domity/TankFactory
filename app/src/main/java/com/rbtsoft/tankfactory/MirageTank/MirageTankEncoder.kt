@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.MirageTank
+package com.rbtsoft.tankfactory.miragetank
 
 import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap

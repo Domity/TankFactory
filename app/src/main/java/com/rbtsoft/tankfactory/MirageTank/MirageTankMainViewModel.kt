@@ -1,11 +1,10 @@
-package com.rbtsoft.tankfactory.MirageTank
+package com.rbtsoft.tankfactory.miragetank
 
 import android.app.Application
 import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
@@ -19,9 +18,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
 import kotlin.math.max
 
 class MirageTankMainViewModel(application: Application) : AndroidViewModel(application) {
@@ -46,9 +42,9 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
     private val _isSaving = MutableStateFlow(false)
     val isSaving: StateFlow<Boolean> = _isSaving
 
-    private val MAX_SAFE_PIXELS = 30000000
+    private val maxSafePixels = 30000000
 
-    private val MAX_DISPLAY_DIMENSION = 2500
+    private val maxDisplayDimension = 2500
 
     fun setImage1Uri(uri: Uri) { _selectedImage1Uri.value = uri }
     fun setImage2Uri(uri: Uri) { _selectedImage2Uri.value = uri }
@@ -95,7 +91,7 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
             if (largeBitmap == null) return@launch
             originalResultBitmap = largeBitmap
             val pixelCount = largeBitmap.width * largeBitmap.height
-            if (pixelCount > MAX_SAFE_PIXELS) {
+            if (pixelCount > maxSafePixels) {
                 _isResultTooLarge.value = true
                 saveImageToDownloads()
             } else {
@@ -110,11 +106,11 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
         val currentHeight = bitmap.height
         val maxDimension = max(currentWidth, currentHeight)
 
-        if (maxDimension <= MAX_DISPLAY_DIMENSION) {
+        if (maxDimension <= maxDisplayDimension) {
             return bitmap.scale(currentWidth, currentHeight)
         }
 
-        val scaleFactor = MAX_DISPLAY_DIMENSION.toFloat() / maxDimension
+        val scaleFactor = maxDisplayDimension.toFloat() / maxDimension
         val newWidth = (currentWidth * scaleFactor).toInt()
         val newHeight = (currentHeight * scaleFactor).toInt()
 
@@ -122,40 +118,27 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun saveImageToDownloads() {
-        val bitmapToSave = originalResultBitmap
-        if (bitmapToSave == null) {
-            return
-        }
+        val bitmapToSave = originalResultBitmap ?: return
 
         _isSaving.value = true
         viewModelScope.launch(Dispatchers.Default) {
             val app = getApplication<Application>()
             val filename = "MirageTank_${System.currentTimeMillis()}.png"
-            var outputStream: OutputStream? = null
             var success = false
 
             try {
-                outputStream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                        put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                    }
-                    app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let {
-                        app.contentResolver.openOutputStream(it)
-                    }
-                } else {
-                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    downloadsDir.mkdirs()
-                    val imageFile = File(downloadsDir, filename)
-                    FileOutputStream(imageFile)
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
                 }
-
-                outputStream?.use { os ->
-                    val bufferedStream = BufferedOutputStream(os, 8192)
-                    bitmapToSave.compress(Bitmap.CompressFormat.PNG, 100, os)
-                    bufferedStream.flush()
-                    success = true
+                app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
+                    app.contentResolver.openOutputStream(uri)?.use { os ->
+                        BufferedOutputStream(os).use { bufferedStream ->
+                            bitmapToSave.compress(Bitmap.CompressFormat.PNG, 100, bufferedStream)
+                            success = true
+                        }
+                    }
                 }
 
                 withContext(Dispatchers.Main) {

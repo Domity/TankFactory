@@ -9,44 +9,21 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import com.rbtsoft.tankfactory.ui.theme.apptheme.BlackAndWhiteDarkColorScheme
-import com.rbtsoft.tankfactory.ui.theme.apptheme.BlackAndWhiteLightColorScheme
-import com.rbtsoft.tankfactory.ui.theme.apptheme.OrangeDarkColorScheme
-import com.rbtsoft.tankfactory.ui.theme.apptheme.OrangeLightColorScheme
 
 @Composable
 fun TankFactoryTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    useDynamicColor: Boolean,
-    selectedTheme: AppTheme,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        useDynamicColor -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        else -> {
-            when (selectedTheme) {
-                AppTheme.BLACK_AND_WHITE -> {
-                    if (darkTheme) BlackAndWhiteDarkColorScheme else BlackAndWhiteLightColorScheme
-                }
-                AppTheme.ORANGE -> {
-                    if (darkTheme) OrangeDarkColorScheme else OrangeLightColorScheme
-                }
-            }
-        }
+    val context = LocalContext.current
+    val colorScheme = if (darkTheme) {
+        dynamicDarkColorScheme(context)
+    } else {
+        dynamicLightColorScheme(context)
     }
 
-    val bgcolorScheme = if (darkTheme) {
-        colorScheme
-    } else {
-        colorScheme.copy(
-            background = if (useDynamicColor) colorScheme.background else Color(0xFFEEEEEE),
-        )
-    }
     MaterialTheme(
-        colorScheme = bgcolorScheme,
+        colorScheme = colorScheme,
         typography = Typography,
         content = content
     )

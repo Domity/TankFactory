@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.MirageTank
+package com.rbtsoft.tankfactory.miragetank
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts

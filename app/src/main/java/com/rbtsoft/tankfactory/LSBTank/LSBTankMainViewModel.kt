@@ -1,17 +1,15 @@
-package com.rbtsoft.tankfactory.LSBTank
+package com.rbtsoft.tankfactory.lsbtank
 
 import android.app.Application
 import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.rbtsoft.tankfactory.LSBTank.LsbTankEncoder
 import com.rbtsoft.tankfactory.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedOutputStream
-import java.io.File
-import java.io.FileOutputStream
 import java.io.OutputStream
 
 class LSBTankMainViewModel(application: Application) : AndroidViewModel(application) {
@@ -53,19 +49,13 @@ class LSBTankMainViewModel(application: Application) : AndroidViewModel(applicat
         viewModelScope.launch(Dispatchers.IO) {
             val app = getApplication<Application>()
             val filename = "LSBTank_${System.currentTimeMillis()}.png"
-            val fos: OutputStream? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                }
-                app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let {
-                    app.contentResolver.openOutputStream(it)
-                }
-            } else {
-                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                val image = File(imagesDir, filename)
-                FileOutputStream(image)
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            }
+            val fos = app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let {
+                app.contentResolver.openOutputStream(it)
             }
 
             fos?.use { os ->
@@ -98,7 +88,7 @@ class LSBTankMainViewModel(application: Application) : AndroidViewModel(applicat
                     getApplication<Application>().contentResolver.openInputStream(uri2)?.use {
                         BitmapFactory.decodeStream(it)
                     } ?: return@withContext null
-                val lsbTank = LsbTankEncoder.encode(photo1, photo2, "", compress)
+                val lsbTank = LsbTankEncoder.encode(photo1, photo2, compress)
                 photo1.recycle()
                 photo2.recycle()
                 lsbTank

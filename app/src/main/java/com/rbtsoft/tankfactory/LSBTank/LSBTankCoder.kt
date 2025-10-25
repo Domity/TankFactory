@@ -7,7 +7,7 @@ import android.graphics.Color
 import java.io.ByteArrayOutputStream
 import kotlin.math.sqrt
 
-object LsbTankEncoder {
+object LsbTankCoder {
 
     @SuppressLint("UseKtx")
     fun encode(surPic: Bitmap, insPic: Bitmap, compress: Int): Bitmap? {

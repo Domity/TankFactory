@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -38,7 +39,8 @@ fun LSBTankViewerScreen(
 ) {
 
     val selectedImageUri by viewModel.selectedImageUri.collectAsState()
-    val decodedBitmap by viewModel.decodedImage.collectAsState()
+    val displayBitmap by viewModel.displayBitmap.collectAsState()
+    val isTooLarge by viewModel.isResultTooLarge.collectAsState()
     val isSaving by viewModel.isSaving.collectAsState()
     val isDecoding by viewModel.isDecoding.collectAsState()
 
@@ -105,15 +107,25 @@ fun LSBTankViewerScreen(
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            if (decodedBitmap == null) {
-                Text(stringResource(id = R.string.lsb_tank_viewer_decoded_result), color = Color.Black)
-            } else {
-                Image(
-                    bitmap = decodedBitmap!!.asImageBitmap(),
-                    contentDescription = "Decoded Hidden Image",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
-                )
+            when {
+                isTooLarge -> {
+                    Text(
+                        stringResource(id = R.string.lsb_tank_maker_image_too_large),
+                        color=MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                displayBitmap != null -> {
+                    Image(
+                        bitmap = displayBitmap!!.asImageBitmap(),
+                        contentDescription = "Decoded Hidden Image",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                else -> {
+                    Text(stringResource(id = R.string.lsb_tank_viewer_decoded_result), color = Color.Black)
+                }
             }
             if (isDecoding) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -124,11 +136,9 @@ fun LSBTankViewerScreen(
 
         Button(
             onClick = {
-                decodedBitmap?.let {
-                    viewModel.saveImageToDownloads(it)
-                }
+                viewModel.saveImageToDownloads()
             },
-            enabled = decodedBitmap != null && !isSaving,
+            enabled = (displayBitmap != null || isTooLarge) && !isSaving,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(if (isSaving) stringResource(id = R.string.lsb_tank_viewer_saving) else stringResource(id = R.string.lsb_tank_viewer_save))

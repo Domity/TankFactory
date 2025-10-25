@@ -35,7 +35,7 @@ import com.rbtsoft.tankfactory.lsbtank.LSBTankMakerScreen
 import com.rbtsoft.tankfactory.lsbtank.LSBTankViewerScreen
 import com.rbtsoft.tankfactory.miragetank.MirageTankMakerScreen
 import com.rbtsoft.tankfactory.miragetank.MirageTankViewerScreen
-import com.rbtsoft.tankfactory.settings.Settings
+//import com.rbtsoft.tankfactory.settings.Settings
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +60,7 @@ fun AppNavigator() {
         composable("make_Mtank") { MirageTankMakerScreen() }
         composable("make_LSBtank") { LSBTankMakerScreen() }
         composable("view_LSBTank") { LSBTankViewerScreen() }
-        composable("settings") { Settings() }
+        //composable("settings") { Settings() }
     }
 }
 
@@ -106,9 +106,9 @@ fun MainMenuScreen(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(onClick = { navController.navigate("settings") }) {
-                Text(stringResource(id = R.string.main_menu_settings))
-            }
+//            Button(onClick = { navController.navigate("settings") }) {
+//                Text(stringResource(id = R.string.main_menu_settings))
+//            }
             Button(onClick = { showAboutDialog = true }) {
                 Text(stringResource(id = R.string.main_menu_about))
             }

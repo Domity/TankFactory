@@ -6,12 +6,18 @@
     <string name="mirage_tank_maker_cover_image_brightness">表图亮度: %.2f</string>
     <string name="mirage_tank_maker_hidden_image_brightness">里图亮度: %.2f</string>
     <string name="mirage_tank_maker_threshold">阈值: %d</string>
-    <string name="mirage_tank_maker_image_too_large">图片尺寸过大，无法预览\n正在自动保存原图\n请勿退出</string>
+    <string name="mirage_tank_maker_image_too_large">图片尺寸过大，无法预览
+正在自动保存原图
+请勿退出</string>
     <string name="mirage_tank_maker_generated_image">生成图</string>
     <string name="mirage_tank_maker_saving">保存中</string>
     <string name="mirage_tank_maker_save">保存</string>
     <string name="mirage_tank_maker_generate">生成</string>
-    <string name="mirage_tank_maker_tips">提示\n1.亮度系数用于调整灰度图片的亮度，尽量保证表图比里图亮\n2.阈值用于设置表图最暗的程度及里图最亮的程度\n3.图片默认保存到download目录\n4.生成图过大时，将自动保存原图并提示您查看下载目录。</string>
+    <string name="mirage_tank_maker_tips">提示
+1.亮度系数用于调整灰度图片的亮度，尽量保证表图比里图亮
+2.阈值用于设置表图最暗的程度及里图最亮的程度
+3.图片默认保存到download目录
+4.生成图过大时，将自动保存原图并提示您查看下载目录。</string>
     <string name="mirage_tank_main_view_model_image_saved">图片已保存到Downloads目录。</string>
     <string name="mirage_tank_main_view_model_save_failed">保存失败: %s</string>
     <string name="main_menu_view_mirage_tank">查看幻影坦克</string>
@@ -28,7 +34,9 @@
     <string name="lsb_tank_viewer_decoded_result">解码结果</string>
     <string name="lsb_tank_viewer_saving">保存中</string>
     <string name="lsb_tank_viewer_save">保存</string>
-    <string name="lsb_tank_viewer_tips">提示\n1.如果无法显示解码后的图片，那么它很有可能已经损坏，或不是无影坦克\n2.如果确定图片没有问题，请更换解码软件</string>
+    <string name="lsb_tank_viewer_tips">提示
+1.如果无法显示解码后的图片，那么它很有可能已经损坏，或不是无影坦克
+2.如果确定图片没有问题，请更换解码软件</string>
     <string name="lsb_tank_maker_cover_image">表图</string>
     <string name="lsb_tank_maker_hidden_image">里图</string>
     <string name="lsb_tank_maker_compress_level">压缩度: %d</string>
@@ -37,12 +45,18 @@
     <string name="lsb_tank_maker_save">保存</string>
     <string name="lsb_tank_maker_making">制作中</string>
     <string name="lsb_tank_maker_make">制作</string>
-    <string name="lsb_tank_maker_tips">提示\n1.更低的压缩度意味着更好的表图质量和更长的制作时间\n2.图片默认保存到download目录</string>
+    <string name="lsb_tank_maker_tips">提示
+1.更低的压缩度意味着更好的表图质量和更长的制作时间
+2.图片默认保存到download目录</string>
     <string name="lsb_tank_main_view_model_image_saved">图片已保存到Downloads</string>
+    <string name="lsb_tank_maker_image_too_large">图片尺寸过大，无法预览
+正在自动保存原图
+请勿退出</string>
     <string name="about_dialog_description">一个图片处理应用</string>
     <string name="about_dialog_developer">开发者：Domity</string>
     <string name="about_dialog_version">版本号：%s</string>
     <string name="about_dialog_confirm">确定</string>
     <string name="about_dialog_project_home">项目主页</string>
-    <string name="mirage_tank_viewer_tip">提示\n没有效果？图片可能已被损坏，或不是幻影坦克</string>
+    <string name="mirage_tank_viewer_tip">提示
+没有效果？图片可能已被损坏，或不是幻影坦克</string>
 </resources>

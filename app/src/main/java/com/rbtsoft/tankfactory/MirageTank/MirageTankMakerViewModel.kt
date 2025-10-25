@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 import java.io.BufferedOutputStream
 import kotlin.math.max
 
-class MirageTankMainViewModel(application: Application) : AndroidViewModel(application) {
+class MirageTankMakerViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _selectedImage1Uri = MutableStateFlow<Uri?>(null)
     val selectedImage1Uri: StateFlow<Uri?> = _selectedImage1Uri
@@ -45,11 +45,11 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
     //  大于此值则不进行预览直接保存
     private val maxSafePixels = 50000000
 
-    //  大于此值则加载较小的位图副本到预览界面
+    //  大于此值则加载较小的副本到预览界面
     private val maxDisplayDimension = 2500
 
     //  在位图生成完毕后，应用先检查总像素数决定是否显示预览图，再决定预览图质量
-
+    //  跟幻影坦克差不多，注释都是直接复制的()
     fun setImage1Uri(uri: Uri) { _selectedImage1Uri.value = uri }
     fun setImage2Uri(uri: Uri) { _selectedImage2Uri.value = uri }
 

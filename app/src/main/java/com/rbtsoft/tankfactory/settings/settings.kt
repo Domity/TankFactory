@@ -50,7 +50,7 @@ fun Settings() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("另一个测试开关")
+                Text("这是另一个测试开关")
                 Switch(
                     checked = isChecked2,
                     onCheckedChange = { isChecked2 = it }

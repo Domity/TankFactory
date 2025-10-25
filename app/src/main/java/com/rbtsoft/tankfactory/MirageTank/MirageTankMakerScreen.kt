@@ -24,7 +24,7 @@ import com.rbtsoft.tankfactory.R
 
 @Composable
 fun MirageTankMakerScreen(
-    viewModel: MirageTankMainViewModel = viewModel()
+    viewModel: MirageTankMakerViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) {
         viewModel.onMakerScreenEntered()
@@ -149,7 +149,7 @@ fun MirageTankMakerScreen(
                         isTooLarge -> {
                             Text(
                                 stringResource(id = R.string.mirage_tank_maker_image_too_large),
-                                color = MaterialTheme.colorScheme.error,
+                                color = Color.Red,
                                 textAlign = TextAlign.Center
                             )
                         }

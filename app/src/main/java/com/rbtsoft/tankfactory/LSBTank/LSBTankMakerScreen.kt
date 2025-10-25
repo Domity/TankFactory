@@ -15,13 +15,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import coil.compose.AsyncImage
 import com.rbtsoft.tankfactory.R
 import kotlin.math.roundToInt
 
 @Composable
 fun LSBTankMakerScreen(
-    viewModel: LSBTankMainViewModel = viewModel()
+    viewModel: LSBTankMakerViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) {
         viewModel.onMakerScreenEntered()
@@ -29,7 +30,8 @@ fun LSBTankMakerScreen(
 
     val selectedImage1Uri by viewModel.selectedImage1Uri.collectAsState()
     val selectedImage2Uri by viewModel.selectedImage2Uri.collectAsState()
-    val encodedBitmap by viewModel.encodedImage.collectAsState()
+    val displayBitmap by viewModel.displayBitmap.collectAsState()
+    val isTooLarge by viewModel.isResultTooLarge.collectAsState()
     val isSaving by viewModel.isSaving.collectAsState()
     val isGenerating by viewModel.isGenerating.collectAsState()
     var compress by remember { mutableIntStateOf(4) }
@@ -130,15 +132,25 @@ fun LSBTankMakerScreen(
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (encodedBitmap == null) {
-                        Text(stringResource(id = R.string.lsb_tank_maker_generated_image), color = Color.Black)
-                    } else {
-                        Image(
-                            bitmap = encodedBitmap!!.asImageBitmap(),
-                            contentDescription = "Encoded LSB Tank",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                     when {
+                        isTooLarge -> {
+                            Text(
+                                stringResource(id = R.string.mirage_tank_maker_image_too_large),
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        displayBitmap != null -> {
+                            Image(
+                                bitmap = displayBitmap!!.asImageBitmap(),
+                                contentDescription = "Encoded LSB Tank",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        else -> {
+                            Text(stringResource(id = R.string.lsb_tank_maker_generated_image), color = Color.Black)
+                        }
                     }
                 }
 
@@ -146,13 +158,10 @@ fun LSBTankMakerScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(
                     onClick = {
-                        encodedBitmap?.let {
-                            viewModel.saveImageToDownloads(it)
-                        }
+                        viewModel.saveImageToDownloads()
                     },
-                    enabled = encodedBitmap != null && !isSaving
+                    enabled = (displayBitmap != null || isTooLarge) && !isSaving
                 ) {
-                    // Text("保存")
                     Text(if (isSaving) stringResource(id = R.string.lsb_tank_maker_saving) else stringResource(id = R.string.lsb_tank_maker_save))
                 }
             }

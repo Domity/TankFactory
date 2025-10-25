@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.Packaging
 
 plugins {
     alias(libs.plugins.android.application)
@@ -52,7 +51,7 @@ android {
             version = "3.22.1"
         }
     }
-    fun Packaging.() {
+    packaging {
         jniLibs {
             useLegacyPackaging = true
         }

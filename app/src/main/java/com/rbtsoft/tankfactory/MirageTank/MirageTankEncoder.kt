@@ -14,7 +14,7 @@ object MirageTankEncoder {
     //  具体的大小还需研究
     //  未来会交给用户决定
 
-    private const val PIXEL_THRESHOLD = 10000 * 10000
+    private const val PIXEL_THRESHOLD = 5000 * 5000
 
     suspend fun encode(photo1: Bitmap, photo2: Bitmap, photo1K: Float, photo2K: Float, threshold: Int): Bitmap =
         withContext(Dispatchers.Default) {
@@ -36,7 +36,7 @@ object MirageTankEncoder {
 
             if (width * height > PIXEL_THRESHOLD) {
 
-                //  大图片使用C++加速计算
+                //  大图片使用C++加速计算(也许)
 
                 NativeBitmapProcessor.encodeBitmaps(
                     scaledPhoto1,

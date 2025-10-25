@@ -42,9 +42,13 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
     private val _isSaving = MutableStateFlow(false)
     val isSaving: StateFlow<Boolean> = _isSaving
 
-    private val maxSafePixels = 30000000
+    //  大于此值则不进行预览直接保存
+    private val maxSafePixels = 50000000
 
+    //  大于此值则加载较小的位图副本到预览界面
     private val maxDisplayDimension = 2500
+
+    //  在位图生成完毕后，应用先检查总像素数决定是否显示预览图，再决定预览图质量
 
     fun setImage1Uri(uri: Uri) { _selectedImage1Uri.value = uri }
     fun setImage2Uri(uri: Uri) { _selectedImage2Uri.value = uri }
@@ -90,11 +94,15 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
 
             if (largeBitmap == null) return@launch
             originalResultBitmap = largeBitmap
+
             val pixelCount = largeBitmap.width * largeBitmap.height
+
             if (pixelCount > maxSafePixels) {
                 _isResultTooLarge.value = true
+                _displayBitmap.value = null
                 saveImageToDownloads()
             } else {
+                _isResultTooLarge.value = false
                 val scaledBitmap = scaleForDisplay(largeBitmap)
                 _displayBitmap.value = scaledBitmap
             }
@@ -107,7 +115,7 @@ class MirageTankMainViewModel(application: Application) : AndroidViewModel(appli
         val maxDimension = max(currentWidth, currentHeight)
 
         if (maxDimension <= maxDisplayDimension) {
-            return bitmap.scale(currentWidth, currentHeight)
+            return bitmap
         }
 
         val scaleFactor = maxDisplayDimension.toFloat() / maxDimension

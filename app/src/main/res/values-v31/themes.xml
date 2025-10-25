@@ -4,7 +4,7 @@
 
     <style name="Theme.SplashScreen.Background" parent="Theme.SplashScreen">
         <item name="android:windowSplashScreenBackground">?android:attr/colorBackground</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_start</item>
         <item name="postSplashScreenTheme">@style/Theme.TankFactory</item>
     </style>
 </resources>

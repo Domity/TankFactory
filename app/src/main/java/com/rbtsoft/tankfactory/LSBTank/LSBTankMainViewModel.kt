@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedOutputStream
-import java.io.OutputStream
+
 
 class LSBTankMainViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedImage1Uri = MutableStateFlow<Uri?>(null)

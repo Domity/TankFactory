@@ -9,7 +9,7 @@ int toGray(int r, int g, int b) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_rbtsoft_tankfactory_MirageTank_NativeBitmapProcessor_encodeBitmaps(
+Java_com_rbtsoft_tankfactory_miragetank_NativeBitmapProcessor_encodeBitmaps(
         JNIEnv *env, jobject,
         jobject bitmap1, jobject bitmap2, jobject outputBitmap,
         jfloat photo1K, jfloat photo2K, jint threshold) {
@@ -58,8 +58,7 @@ Java_com_rbtsoft_tankfactory_MirageTank_NativeBitmapProcessor_encodeBitmaps(
             int v1 = std::min(std::max((int)(gray1 * photo1K), threshold), 255);
             int v2 = std::min(std::max((int)(gray2 * photo2K), 0), threshold);
             int alpha = 255 - (v1 - v2);
-            int safeAlpha = (alpha == 0) ? 1 : alpha;
-            int gray = std::min(std::max((int)(255.0f * v2 / safeAlpha), 0), 255);
+            int gray = v2;
 
             outRow[x] = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
         }

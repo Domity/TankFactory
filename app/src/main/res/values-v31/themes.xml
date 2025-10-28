@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.TankFactory" parent="android:Theme.Material.Light.NoActionBar"/>
-
-    <style name="Theme.SplashScreen.Background" parent="Theme.SplashScreen">
-        <item name="android:windowSplashScreenBackground">?android:attr/colorBackground</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_start</item>
-        <item name="postSplashScreenTheme">@style/Theme.TankFactory</item>
-    </style>
+    <style name="Theme.TankFactory" parent="Theme.Material3.DayNight.NoActionBar"/>
 </resources>

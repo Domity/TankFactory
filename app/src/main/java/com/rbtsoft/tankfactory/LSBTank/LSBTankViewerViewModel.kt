@@ -119,6 +119,7 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
         return bitmap.scale(newWidth, newHeight)
     }
 
+    @SuppressLint("StringFormatInvalid")
     fun saveImageToDownloads() {
         val bitmapToSave = originalResultBitmap ?: return
         _isSaving.value = true

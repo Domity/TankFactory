@@ -111,7 +111,7 @@ fun LSBTankViewerScreen(
                 isTooLarge -> {
                     Text(
                         stringResource(id = R.string.lsb_tank_maker_image_too_large),
-                        color=MaterialTheme.colorScheme.error,
+                        color=Color.Red,
                         textAlign = TextAlign.Center
                     )
                 }

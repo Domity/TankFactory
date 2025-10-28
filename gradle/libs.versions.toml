@@ -11,6 +11,7 @@ junitVersion = "1.1.5"
 kotlin = "2.0.21"
 kotlinxCoroutinesAndroid = "1.8.1"
 lifecycleRuntimeKtx = "2.6.1"
+material = "1.13.0"
 navigationCompose = "2.9.5"
 runtime = "1.9.1"
 
@@ -34,6 +35,7 @@ androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

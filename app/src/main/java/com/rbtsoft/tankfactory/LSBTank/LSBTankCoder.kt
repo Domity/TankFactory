@@ -9,8 +9,35 @@ import kotlin.math.sqrt
 
 object LsbTankCoder {
 
+    private const val PIXEL_THRESHOLD = 10_000_000
+    private const val DECODE_PIXEL_THRESHOLD = 5000 * 5000
+
+    init {
+        System.loadLibrary("tankfactory")
+    }
+
+    private external fun encodeNative(surPic: Bitmap, insPic: Bitmap, compress: Int): Bitmap?
+    private external fun decodeNative(tankPic: Bitmap): Bitmap?
+
     @SuppressLint("UseKtx")
     fun encode(surPic: Bitmap, insPic: Bitmap, compress: Int): Bitmap? {
+        val insPicByteArray = bitmapToByteArray(insPic) ?: return null
+        val insPicLength = insPicByteArray.size.toLong()
+        val byteForLSB = (insPicLength * 8 / compress)
+        val currentSurPicByte = (surPic.width * surPic.height * 3).toLong()
+        val zoom = byteForLSB.toDouble() / currentSurPicByte.toDouble() * (if (compress >= 6) 1.05 else 1.01)
+        val squareRootZoom = sqrt(zoom)
+        val scaledWidth = (surPic.width * squareRootZoom).toInt()
+        val scaledHeight = (surPic.height * squareRootZoom).toInt()
+
+        if (scaledWidth * scaledHeight > PIXEL_THRESHOLD) {
+            return encodeNative(surPic, insPic, compress)
+        }
+        return encodeKotlin(surPic, insPic, compress)
+    }
+
+    @SuppressLint("UseKtx")
+    private fun encodeKotlin(surPic: Bitmap, insPic: Bitmap, compress: Int): Bitmap? {
         if (compress == 0 || compress >= 8) return null
         val lsbMask = intArrayOf(0x1, 0x3, 0x7, 0xF, 0x1F, 0x3F, 0x7F)
         val signature = "/By:f_Endman".toByteArray()
@@ -61,7 +88,6 @@ object LsbTankCoder {
                 }
                 val unsignedByteLong = (byteToHide.toInt() and 0xFF).toLong()
                 fifo = fifo or (unsignedByteLong shl (24 - fifoCount))
-
                 fifoCount += 8
             }
             val lsbBits = ((fifo ushr (32 - compress)) and lsbMask[compress - 1].toLong()).toInt()
@@ -95,87 +121,98 @@ object LsbTankCoder {
     }
 
     fun decode(tankPic: Bitmap): Bitmap? {
-            val lsbMask = intArrayOf(0x1, 0x3, 0x7, 0xF, 0x1F, 0x3F, 0x7F)
-            val width = tankPic.width
-            val height = tankPic.height
-            val pixels = IntArray(width * height)
-            tankPic.getPixels(pixels, 0, width, 0, 0, width, height)
-            val tankByteArray = ByteArray(width * height * 3)
-            for (i in pixels.indices) {
-                tankByteArray[i * 3 + 0] = Color.red(pixels[i]).toByte()
-                tankByteArray[i * 3 + 1] = Color.green(pixels[i]).toByte()
-                tankByteArray[i * 3 + 2] = Color.blue(pixels[i]).toByte()
-            }
-            val byte0 = tankByteArray[0].toInt() and 0xFF
-            val byte1 = tankByteArray[1].toInt() and 0xFF
-            val byte2 = tankByteArray[2].toInt() and 0xFF
+        if (tankPic.width * tankPic.height > DECODE_PIXEL_THRESHOLD) {
+            return decodeNative(tankPic)
+        }
+        val lsbMask = intArrayOf(0x1, 0x3, 0x7, 0xF, 0x1F, 0x3F, 0x7F)
+        val width = tankPic.width
+        val height = tankPic.height
+        val pixels = IntArray(width * height)
+        tankPic.getPixels(pixels, 0, width, 0, 0, width, height)
+        val tankByteArray = ByteArray(width * height * 3)
+        for (i in pixels.indices) {
+            tankByteArray[i * 3 + 0] = Color.red(pixels[i]).toByte()
+            tankByteArray[i * 3 + 1] = Color.green(pixels[i]).toByte()
+            tankByteArray[i * 3 + 2] = Color.blue(pixels[i]).toByte()
+        }
 
-            if ((byte0 and 0x7) != 0x0 ||
-                (byte1 and 0x7) != 0x3 ||
-                (byte2 and 0x7) == 0// ||
-               // (byte2 and 0x7) > 7
-            ) {
+        val byte0 = tankByteArray[0].toInt() and 0xFF
+        val byte1 = tankByteArray[1].toInt() and 0xFF
+        val byte2 = tankByteArray[2].toInt() and 0xFF
+
+        if ((byte0 and 0x7) != 0x0 ||
+            (byte1 and 0x7) != 0x3 ||
+            (byte2 and 0x7) == 0// ||
+           // (byte2 and 0x7) > 7
+        ) {
+            return null
+        }
+        val lsbCompress = byte2 and 0x7
+        var fifo =0L.toLong()
+        var fifoCount = 0
+        val lsbByteList = ByteArrayOutputStream()
+        val currentLsbMask = lsbMask[lsbCompress - 1]
+
+        for (i in 2 until tankByteArray.size) {
+            val currentByte = tankByteArray[i].toInt() and 0xFF
+            val newLsb = currentByte and currentLsbMask
+            fifo = fifo or (newLsb.toLong())
+            if (fifoCount >= 8) {
+                val shiftAmount = fifoCount - 8
+                val decodedByteInt = ((fifo ushr shiftAmount) and 0xFF).toInt()
+                lsbByteList.write(decodedByteInt)
+                fifoCount -= 8
+            }
+
+            fifo = fifo shl lsbCompress
+            fifoCount += lsbCompress
+        }
+
+
+        val lsbByteArrayFull = lsbByteList.toByteArray()
+
+        if (lsbByteArrayFull.size < 256) {
+            return null
+        }
+
+        var offset = 0
+        val sLsbCountBuilder = StringBuilder()
+        val lsbFileNameList = ByteArrayOutputStream()
+        val lsbFileMimeBuilder = StringBuilder()
+
+        while (offset < lsbByteArrayFull.size && offset < 0xFF && lsbByteArrayFull[offset].toInt() != 0x01) {
+            val currentByte = lsbByteArrayFull[offset].toInt() and 0xFF
+            if (currentByte in 48..57) {
+                sLsbCountBuilder.append(currentByte.toChar())
+            } else {
                 return null
             }
-            val lsbCompress = byte2 and 0x7
-            var fifo =0L
-            var fifoCount = 0
-            val lsbByteList = ByteArrayOutputStream()
-            val currentLsbMask = lsbMask[lsbCompress - 1]
-            //val lsbCompressLong = lsbCompress.toLong()
-            for (i in 2 until tankByteArray.size) {
-                val currentByte = tankByteArray[i].toInt() and 0xFF
-                val newLsb = currentByte and currentLsbMask
-                fifo = fifo or (newLsb.toLong())
-                if (fifoCount >= 8) {
-                    val shiftAmount = fifoCount - 8
-                    val decodedByteInt = ((fifo ushr shiftAmount) and 0xFF).toInt()
-                    lsbByteList.write(decodedByteInt)
-                    fifoCount -= 8
-                }
-                fifo = (fifo.toInt().toLong()) shl lsbCompress
-                fifoCount += lsbCompress
-            }
-            val lsbByteArrayFull = lsbByteList.toByteArray()
-            if (lsbByteArrayFull.size < 256) {
-                return null
-            }
-            var offset = 0
-            val sLsbCountBuilder = StringBuilder()
-            val lsbFileNameList = ByteArrayOutputStream()
-            val lsbFileMimeBuilder = StringBuilder()
-            while (offset < lsbByteArrayFull.size && offset < 0xFF && lsbByteArrayFull[offset].toInt() != 0x01) {
-                val currentByte = lsbByteArrayFull[offset].toInt() and 0xFF
-                if (currentByte in 48..57) {
-                    sLsbCountBuilder.append(currentByte.toChar())
-                } else {
-                    return null
-                }
-                offset++
-            }
-            if (offset == lsbByteArrayFull.size || offset == 0xFF) return null
-            offset++ // 跳过 0x01
-            while (offset < lsbByteArrayFull.size && offset < 0xFF && lsbByteArrayFull[offset].toInt() != 0x01) {
-                lsbFileNameList.write(lsbByteArrayFull[offset].toInt())
-                offset++
-            }
-            if (offset == lsbByteArrayFull.size || offset == 0xFF) return null
             offset++
-            while (offset < lsbByteArrayFull.size && offset < 0xFF && lsbByteArrayFull[offset].toInt() != 0x00) {
-                lsbFileMimeBuilder.append(lsbByteArrayFull[offset].toInt().toChar())
-                offset++
-            }
-            if (offset == lsbByteArrayFull.size || offset == 0xFF) return null
+        }
+
+        if (offset == lsbByteArrayFull.size || offset == 0xFF) return null
+        offset++ // 跳过 0x01
+        while (offset < lsbByteArrayFull.size && offset < 0xFF && lsbByteArrayFull[offset].toInt() != 0x01) {
+            lsbFileNameList.write(lsbByteArrayFull[offset].toInt())
             offset++
-            val sLsbCount = sLsbCountBuilder.toString()
-            val LsbCount = sLsbCount.toIntOrNull() ?: run {
-                return null
-            }
-            if (lsbByteArrayFull.size < offset + LsbCount) {
-                return null
-            }
-            val lsbData = lsbByteArrayFull.sliceArray(offset until offset + LsbCount)
-            return BitmapFactory.decodeByteArray(lsbData, 0, lsbData.size)
+        }
+        if (offset == lsbByteArrayFull.size || offset == 0xFF) return null
+        offset++
+        while (offset < lsbByteArrayFull.size && offset < 0xFF && lsbByteArrayFull[offset].toInt() != 0x00) {
+            lsbFileMimeBuilder.append(lsbByteArrayFull[offset].toInt().toChar())
+            offset++
+        }
+        if (offset == lsbByteArrayFull.size || offset == 0xFF) return null
+        offset++
+        val sLsbCount = sLsbCountBuilder.toString()
+        val LsbCount = sLsbCount.toIntOrNull() ?: run {
+            return null
+        }
+        if (lsbByteArrayFull.size < offset + LsbCount) {
+            return null
+        }
+        val lsbData = lsbByteArrayFull.sliceArray(offset until offset + LsbCount)
+        return BitmapFactory.decodeByteArray(lsbData, 0, lsbData.size)
 
     }
 }

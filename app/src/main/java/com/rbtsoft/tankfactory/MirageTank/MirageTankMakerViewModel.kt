@@ -49,7 +49,6 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
     private val maxDisplayDimension = 2500
 
     //  在位图生成完毕后，应用先检查总像素数决定是否显示预览图，再决定预览图质量
-    //  跟幻影坦克差不多，注释都是直接复制的()
     fun setImage1Uri(uri: Uri) { _selectedImage1Uri.value = uri }
     fun setImage2Uri(uri: Uri) { _selectedImage2Uri.value = uri }
 

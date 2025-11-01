@@ -125,19 +125,19 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
         _isSaving.value = true
         viewModelScope.launch(Dispatchers.Default) {
             val app = getApplication<Application>()
-            val filename = "LSB_Decoded_${System.currentTimeMillis()}.png"
+            val filename = "LSB_Decoded_${System.currentTimeMillis()}.webp"
             var success = false
 
             try {
                 val contentValues = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/webp")
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
                 }
                 app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
                     app.contentResolver.openOutputStream(uri)?.use { os ->
                         BufferedOutputStream(os).use { bufferedStream ->
-                            bitmapToSave.compress(Bitmap.CompressFormat.PNG, 100, bufferedStream)
+                            bitmapToSave.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, bufferedStream)
                             success = true
                         }
                     }

@@ -69,10 +69,10 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
         _isSaving.value = true
         viewModelScope.launch(Dispatchers.IO) {
             val app = getApplication<Application>()
-            val filename = "LSBTank_${System.currentTimeMillis()}.png"
+            val filename = "LSBTank_${System.currentTimeMillis()}.webp"
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/webp")
                 put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
             }
             val fos = app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let {
@@ -80,8 +80,8 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
             }
 
             fos?.use { os ->
-                val bufferedStream = BufferedOutputStream(os, 8192)
-                bitmapToSave.compress(Bitmap.CompressFormat.PNG, 100, bufferedStream)
+                val bufferedStream = BufferedOutputStream(os, 32768)
+                bitmapToSave.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, bufferedStream)
                 bufferedStream.flush()
                 withContext(Dispatchers.Main) {
                     _isSaving.value = false

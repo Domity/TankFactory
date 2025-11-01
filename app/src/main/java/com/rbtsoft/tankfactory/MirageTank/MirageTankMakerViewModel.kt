@@ -128,7 +128,7 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
         val bitmapToSave = originalResultBitmap ?: return
 
         _isSaving.value = true
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             val app = getApplication<Application>()
             val filename = "MirageTank_${System.currentTimeMillis()}.webp"
             var success = false
@@ -139,9 +139,10 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
                     put(MediaStore.MediaColumns.MIME_TYPE, "image/webp")
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
                 }
+                val bufferSize = 32768
                 app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
                     app.contentResolver.openOutputStream(uri)?.use { os ->
-                        BufferedOutputStream(os).use { bufferedStream ->
+                        BufferedOutputStream(os,bufferSize).use { bufferedStream ->
                             bitmapToSave.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, bufferedStream)
                             success = true
                         }

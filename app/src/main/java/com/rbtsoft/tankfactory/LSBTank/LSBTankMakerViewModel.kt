@@ -1,5 +1,6 @@
 package com.rbtsoft.tankfactory.lsbtank
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ContentValues
 import android.graphics.Bitmap
@@ -64,32 +65,51 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
         originalResultBitmap = null
         _isResultTooLarge.value = false
     }
+    @SuppressLint("StringFormatInvalid")
     fun saveImageToDownloads() {
         val bitmapToSave = originalResultBitmap ?: return
         _isSaving.value = true
         viewModelScope.launch(Dispatchers.IO) {
             val app = getApplication<Application>()
             val filename = "LSBTank_${System.currentTimeMillis()}.webp"
-            val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                put(MediaStore.MediaColumns.MIME_TYPE, "image/webp")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-            }
-            val fos = app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let {
-                app.contentResolver.openOutputStream(it)
-            }
+            var success = false
+            try {
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/webp")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                }
+                val bufferSize = 32768
+                app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
+                    app.contentResolver.openOutputStream(uri)?.use { os ->
+                        BufferedOutputStream(os,bufferSize).use { bufferedStream ->
+                            bitmapToSave.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, bufferedStream)
+                            success = true
+                        }
+                    }
+                }
 
-            fos?.use { os ->
-                val bufferedStream = BufferedOutputStream(os, 32768)
-                bitmapToSave.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, bufferedStream)
-                bufferedStream.flush()
                 withContext(Dispatchers.Main) {
-                    _isSaving.value = false
+                    if (success) {
+                        Toast.makeText(
+                            app,
+                            app.getString(R.string.lsb_tank_maker_view_model_image_saved),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
                     Toast.makeText(
                         app,
-                        app.getString(R.string.lsb_tank_main_view_model_image_saved),
-                        Toast.LENGTH_SHORT
+                        app.getString(R.string.lsb_tank_maker_view_model_save_failed, e.message),
+                        Toast.LENGTH_LONG
                     ).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    _isSaving.value = false
                 }
             }
         }

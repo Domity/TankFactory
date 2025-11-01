@@ -423,4 +423,3 @@ Java_com_rbtsoft_tankfactory_lsbtank_LsbTankCoder_decodeNative(JNIEnv *env, jobj
 
     return result_bitmap;
 }
-

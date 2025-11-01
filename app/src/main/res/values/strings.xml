@@ -39,6 +39,8 @@
     <string name="lsb_tank_maker_make">制作</string>
     <string name="lsb_tank_maker_tips">提示\n1.更低的压缩度意味着更好的表图质量和更长的制作时间\n2.图片默认保存到download目录\n3.图片过大时制作和保存速度会变慢，请耐心等待</string>
     <string name="lsb_tank_main_view_model_image_saved">图片已保存到Download</string>
+    <string name="lsb_tank_maker_view_model_image_saved">图片已保存到Download"></string>
+    <string name="lsb_tank_maker_view_model_save_failed">图片保存失败</string>
     <string name="lsb_tank_maker_image_too_large">图片尺寸过大，无法预览\n正在自动保存原图\n请勿退出</string>
     <string name="about_dialog_description">一个图片处理应用</string>
     <string name="about_dialog_developer">开发者：Domity</string>

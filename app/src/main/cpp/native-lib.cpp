@@ -10,7 +10,8 @@
 #include <sstream>
 
 int toGray(int r, int g, int b) {
-    return static_cast<int>(r * 0.299f + g * 0.587f + b * 0.114f);
+    int gray = (r * 19595 + g * 38469 + b * 7472) >> 16;
+    return static_cast<uint8_t>(std::min(255, gray));
 }
 
 extern "C" JNIEXPORT void JNICALL

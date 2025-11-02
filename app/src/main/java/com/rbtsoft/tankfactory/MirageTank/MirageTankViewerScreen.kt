@@ -52,7 +52,7 @@ fun MirageTankViewerScreen() {
             ) {
                 if (selectedImageUri == null) {
                     Text(
-                        text = stringResource(id = R.string.mirage_tank_viewer_select_image_prompt),
+                        text = stringResource(id = R.string.select_image),
                         color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center
                     )
@@ -73,7 +73,7 @@ fun MirageTankViewerScreen() {
         )
 
         Text(
-            text = stringResource(id = R.string.mirage_tank_viewer_tip),
+            text = stringResource(id = R.string.mirage_tank_viewer_tips),
             modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.onBackground
         )

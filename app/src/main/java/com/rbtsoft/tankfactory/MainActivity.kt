@@ -85,16 +85,16 @@ fun MainMenuScreen(navController: NavController) {
                 color = MaterialTheme.colorScheme.onBackground
             )
             Button(onClick = { navController.navigate("view_Mtank") }) {
-                Text(stringResource(id = R.string.main_menu_view_mirage_tank))
+                Text(stringResource(id = R.string.view_mirage_tank))
             }
             Button(onClick = { navController.navigate("make_Mtank") }) {
-                Text(stringResource(id = R.string.main_menu_make_mirage_tank))
+                Text(stringResource(id = R.string.make_mirage_tank))
             }
             Button(onClick = { navController.navigate("view_LSBTank")} ) {
-                Text(stringResource(id = R.string.main_menu_view_lsb_tank))
+                Text(stringResource(id = R.string.view_lsb_tank))
             }
             Button(onClick = { navController.navigate("make_LSBtank") }) {
-                Text(stringResource(id = R.string.main_menu_make_lsb_tank))
+                Text(stringResource(id = R.string.make_lsb_tank))
             }
 
         }
@@ -107,10 +107,10 @@ fun MainMenuScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
 //            Button(onClick = { navController.navigate("settings") }) {
-//                Text(stringResource(id = R.string.main_menu_settings))
+//                Text(stringResource(id = R.string.settings))
 //            }
             Button(onClick = { showAboutDialog = true }) {
-                Text(stringResource(id = R.string.main_menu_about))
+                Text(stringResource(id = R.string.about))
             }
         }
     }

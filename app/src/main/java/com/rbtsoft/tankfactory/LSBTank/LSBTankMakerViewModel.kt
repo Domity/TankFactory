@@ -93,7 +93,7 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
                     if (success) {
                         Toast.makeText(
                             app,
-                            app.getString(R.string.lsb_tank_maker_view_model_image_saved),
+                            app.getString(R.string.save_success),
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -103,7 +103,7 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         app,
-                        app.getString(R.string.lsb_tank_maker_view_model_save_failed, e.message),
+                        app.getString(R.string.save_failed, e.message),
                         Toast.LENGTH_LONG
                     ).show()
                 }

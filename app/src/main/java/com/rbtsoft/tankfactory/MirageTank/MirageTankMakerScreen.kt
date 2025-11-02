@@ -79,7 +79,7 @@ fun MirageTankMakerScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (selectedImage1Uri == null) {
-                        Text(stringResource(id = R.string.mirage_tank_maker_cover_image), color = Color.Black)
+                        Text(stringResource(id = R.string.cover_image), color = Color.Black)
                     } else {
                         AsyncImage(
                             model = selectedImage1Uri,
@@ -103,7 +103,7 @@ fun MirageTankMakerScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (selectedImage2Uri == null) {
-                        Text(stringResource(id = R.string.mirage_tank_maker_hidden_image), color = Color.Black)
+                        Text(stringResource(id = R.string.hidden_image), color = Color.Black)
                     } else {
                         AsyncImage(
                             model = selectedImage2Uri,
@@ -148,7 +148,7 @@ fun MirageTankMakerScreen(
                     when {
                         isTooLarge -> {
                             Text(
-                                stringResource(id = R.string.mirage_tank_maker_image_too_large),
+                                stringResource(id = R.string.image_too_large),
                                 color = Color.Red,
                                 textAlign = TextAlign.Center
                             )
@@ -162,7 +162,7 @@ fun MirageTankMakerScreen(
                             )
                         }
                         else -> {
-                            Text(stringResource(id = R.string.mirage_tank_maker_generated_image), color = MaterialTheme.colorScheme.onBackground)
+                            Text(stringResource(id = R.string.generated_image), color = MaterialTheme.colorScheme.onBackground)
                         }
                     }
                 }
@@ -184,7 +184,7 @@ fun MirageTankMakerScreen(
                     },
                     enabled = !isGenerating && !isSaving && (isTooLarge || displayBitmap != null)
                 ) {
-                    Text(if (isSaving) stringResource(id = R.string.mirage_tank_maker_saving) else stringResource(id = R.string.mirage_tank_maker_save))
+                    Text(if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save))
                 }
 
             }
@@ -199,7 +199,7 @@ fun MirageTankMakerScreen(
             enabled = selectedImage1Uri != null && selectedImage2Uri != null && !isGenerating,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(stringResource(id = R.string.mirage_tank_maker_generate))
+            Text(if (isGenerating) stringResource(id = R.string.making)else stringResource(id = R.string.make))
         }
         Text(stringResource(id = R.string.mirage_tank_maker_tips), color = MaterialTheme.colorScheme.onBackground)
     }

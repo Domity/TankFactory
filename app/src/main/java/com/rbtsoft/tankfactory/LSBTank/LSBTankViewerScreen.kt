@@ -73,7 +73,7 @@ fun LSBTankViewerScreen(
             contentAlignment = Alignment.Center
         ) {
             if (selectedImageUri == null) {
-                Text(stringResource(id = R.string.lsb_tank_viewer_select_tank), color = Color.Black)
+                Text(stringResource(id = R.string.select_image), color = Color.Black)
             } else {
                 AsyncImage(
                     model = selectedImageUri,
@@ -110,7 +110,7 @@ fun LSBTankViewerScreen(
             when {
                 isTooLarge -> {
                     Text(
-                        stringResource(id = R.string.lsb_tank_maker_image_too_large),
+                        stringResource(id = R.string.image_too_large),
                         color=Color.Red,
                         textAlign = TextAlign.Center
                     )
@@ -141,7 +141,7 @@ fun LSBTankViewerScreen(
             enabled = (displayBitmap != null || isTooLarge) && !isSaving,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (isSaving) stringResource(id = R.string.lsb_tank_viewer_saving) else stringResource(id = R.string.lsb_tank_viewer_save))
+            Text(if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save))
         }
         Text(stringResource(id = R.string.lsb_tank_viewer_tips), color = MaterialTheme.colorScheme.onBackground)
     }

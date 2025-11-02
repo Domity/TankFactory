@@ -153,7 +153,7 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
                     if (success) {
                         Toast.makeText(
                             app,
-                            app.getString(R.string.mirage_tank_main_view_model_image_saved),
+                            app.getString(R.string.save_success),
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -163,7 +163,7 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         app,
-                        app.getString(R.string.mirage_tank_main_view_model_save_failed, e.message),
+                        app.getString(R.string.save_failed, e.message),
                         Toast.LENGTH_LONG
                     ).show()
                 }

@@ -13,8 +13,8 @@ android {
         applicationId = "com.rbtsoft.tankfactory"
         minSdk = 31
         targetSdk = 36
-        versionCode = 1096
-        versionName = "1.0.9 alpha6"
+        versionCode = 1097
+        versionName = "1.0.9 alpha7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         externalNativeBuild {

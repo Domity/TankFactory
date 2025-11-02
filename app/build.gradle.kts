@@ -13,8 +13,8 @@ android {
         applicationId = "com.rbtsoft.tankfactory"
         minSdk = 31
         targetSdk = 36
-        versionCode = 1094
-        versionName = "1.0.9 alpha4"
+        versionCode = 1096
+        versionName = "1.0.9 alpha6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         externalNativeBuild {
@@ -69,7 +69,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.material)
     implementation(libs.androidx.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

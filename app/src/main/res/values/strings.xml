@@ -9,6 +9,8 @@
     <string name="saving">保存中</string>
     <string name="make">生成</string>
     <string name="making">生成中</string>
+    <string name="decode">解码</string>
+    <string name="decoding">解码中</string>
     <string name="save_success">图片已保存到Download</string>
     <string name="save_failed">保存失败: %s</string>
 
@@ -19,10 +21,8 @@
     <string name="mirage_tank_viewer_tips">提示\n没有效果？图片可能已被损坏，或不是幻影坦克</string>
 
     <string name="lsb_tank_maker_compress_level">压缩度: %d</string>
-    <string name="lsb_tank_viewer_decoding">解码中</string>
-    <string name="lsb_tank_viewer_decode">解码</string>
     <string name="lsb_tank_viewer_decoded_result">解码结果</string>
-    <string name="lsb_tank_maker_tips">提示\n1.更低的压缩度意味着更好的表图质量和更长的制作时间\n2.图片默认保存到Download目录\n3.图片过大时制作和保存速度会变慢，请耐心等待</string>
+    <string name="lsb_tank_maker_tips">提示\n1.更低的压缩度意味着更好的表图质量和更长的制作时间\n2.图片过大时制作和保存速度会变慢，请耐心等待\n3.图片默认保存到Download目录</string>
     <string name="lsb_tank_viewer_tips">提示\n1.如果无法显示解码后的图片，那么它很有可能已经损坏，或不是无影坦克\n2.如果确定图片没有问题，请更换解码软件</string>
 
     <string name="view_mirage_tank">查看幻影坦克</string>

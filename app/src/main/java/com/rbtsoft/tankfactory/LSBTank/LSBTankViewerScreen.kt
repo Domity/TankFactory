@@ -94,7 +94,7 @@ fun LSBTankViewerScreen(
             enabled = selectedImageUri != null && !isDecoding,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (isDecoding) stringResource(id = R.string.lsb_tank_viewer_decoding) else stringResource(id = R.string.lsb_tank_viewer_decode))
+            Text(if (isDecoding) stringResource(id = R.string.decoding) else stringResource(id = R.string.decode))
         }
 
         Spacer(Modifier.height(16.dp))

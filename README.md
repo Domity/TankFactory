@@ -9,8 +9,8 @@
 - [ ] 更多图片功能
 - [ ] 跑路
 ## 下载
-  最新稳定版本可在[这里](https://github.com/Domity/TankFactory/releases/latest)找到 
-  也可在[release页面](https://github.com/Domity/TankFactory/releases)下载测试版本第一时间尝试新功能 
+  最新稳定版本可在[这里](https://github.com/Domity/TankFactory/releases/latest)找到  
+  也可在[release页面](https://github.com/Domity/TankFactory/releases)下载测试版本第一时间尝试新功能  
   请仅从github release下载本应用。对于从其他渠道下载的应用，开发者不保证它们的安全性
 ### 题外话
   Tank Factory最开始只是作为幻影坦克查看器开发的，并且叫Tank Viewer  

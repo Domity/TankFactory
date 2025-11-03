@@ -136,7 +136,7 @@ fun LSBTankViewerScreen(
 
         Button(
             onClick = {
-                viewModel.saveImageToDownloads()
+                viewModel.saveImageToDownload()
             },
             enabled = (displayBitmap != null || isTooLarge) && !isSaving,
             modifier = Modifier.fillMaxWidth()

@@ -158,7 +158,7 @@ fun LSBTankMakerScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(
                     onClick = {
-                        viewModel.saveImageToDownloads()
+                        viewModel.saveImageToDownload()
                     },
                     enabled = (displayBitmap != null || isTooLarge) && !isSaving
                 ) {

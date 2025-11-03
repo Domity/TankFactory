@@ -1,23 +1,18 @@
 package com.rbtsoft.tankfactory.miragetank
 
 import android.app.Application
-import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Environment
-import android.provider.MediaStore
-import android.widget.Toast
 import androidx.core.graphics.scale
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.rbtsoft.tankfactory.R
+import com.rbtsoft.tankfactory.general.saveImageToDownload
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.BufferedOutputStream
 import kotlin.math.max
 
 class MirageTankMakerViewModel(application: Application) : AndroidViewModel(application) {
@@ -99,7 +94,7 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
             if (pixelCount > maxSafePixels) {
                 _isResultTooLarge.value = true
                 _displayBitmap.value = null
-                saveImageToDownloads()
+                saveImageToDownload()
             } else {
                 _isResultTooLarge.value = false
                 val scaledBitmap = scaleForDisplay(largeBitmap)
@@ -124,54 +119,17 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
         return bitmap.scale(newWidth, newHeight)
     }
 
-    fun saveImageToDownloads() {
+    fun saveImageToDownload() {
         val bitmapToSave = originalResultBitmap ?: return
 
         _isSaving.value = true
-        viewModelScope.launch(Dispatchers.IO) {
-            val app = getApplication<Application>()
-            val filename = "MirageTank_${System.currentTimeMillis()}.webp"
-            var success = false
-
-            try {
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/webp")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                }
-                val bufferSize = 32768
-                app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
-                    app.contentResolver.openOutputStream(uri)?.use { os ->
-                        BufferedOutputStream(os,bufferSize).use { bufferedStream ->
-                            bitmapToSave.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, bufferedStream)
-                            success = true
-                        }
-                    }
-                }
-
-                withContext(Dispatchers.Main) {
-                    if (success) {
-                        Toast.makeText(
-                            app,
-                            app.getString(R.string.save_success),
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        app,
-                        app.getString(R.string.save_failed, e.message),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            } finally {
-                withContext(Dispatchers.Main) {
-                    _isSaving.value = false
-                }
-            }
+        viewModelScope.launch {
+            saveImageToDownload(
+                context = getApplication(),
+                bitmap = bitmapToSave,
+                filename = "MirageTank_${System.currentTimeMillis()}.webp"
+            )
+            _isSaving.value = false
         }
     }
 }

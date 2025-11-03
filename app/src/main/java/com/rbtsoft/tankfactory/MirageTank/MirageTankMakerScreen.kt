@@ -180,7 +180,7 @@ fun MirageTankMakerScreen(
                 }
                 Button(
                     onClick = {
-                        viewModel.saveImageToDownloads()
+                        viewModel.saveImageToDownload()
                     },
                     enabled = !isGenerating && !isSaving && (isTooLarge || displayBitmap != null)
                 ) {

@@ -4,7 +4,7 @@
     <string name="cover_image">表图</string>
     <string name="hidden_image">里图</string>
     <string name="generated_image">生成图</string>
-    <string name="image_too_large">图片尺寸过大，无法预览\n正在自动保存原图\m请勿退出</string>
+    <string name="image_too_large">图片尺寸过大，无法预览\n正在自动保存原图\n请勿退出</string>
     <string name="save">保存</string>
     <string name="saving">保存中</string>
     <string name="make">生成</string>

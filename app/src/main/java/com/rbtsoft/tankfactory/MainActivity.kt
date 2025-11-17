@@ -79,20 +79,32 @@ fun MainMenuScreen(navController: NavController) {
         ) {
             Text(
                 "Tank Factory",
+                //标题微粗
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Button(onClick = { navController.navigate("view_Mtank") }) {
-                Text(stringResource(id = R.string.view_mirage_tank))
+
+            Row(
+                modifier = Modifier.padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(onClick = { navController.navigate("view_Mtank") }) {
+                    Text(stringResource(id = R.string.view_mirage_tank))
+                }
+                Button(onClick = { navController.navigate("make_Mtank") }) {
+                    Text(stringResource(id = R.string.make_mirage_tank))
+                }
             }
-            Button(onClick = { navController.navigate("make_Mtank") }) {
-                Text(stringResource(id = R.string.make_mirage_tank))
-            }
-            Button(onClick = { navController.navigate("view_LSBTank")} ) {
-                Text(stringResource(id = R.string.view_lsb_tank))
-            }
-            Button(onClick = { navController.navigate("make_LSBtank") }) {
-                Text(stringResource(id = R.string.make_lsb_tank))
+            Row(
+                modifier = Modifier.padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(onClick = { navController.navigate("view_LSBTank") }) {
+                    Text(stringResource(id = R.string.view_lsb_tank))
+                }
+                Button(onClick = { navController.navigate("make_LSBtank") }) {
+                    Text(stringResource(id = R.string.make_lsb_tank))
+                }
             }
 
         }

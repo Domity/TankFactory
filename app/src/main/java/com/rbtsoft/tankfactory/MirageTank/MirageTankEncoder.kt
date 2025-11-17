@@ -36,7 +36,7 @@ object MirageTankEncoder {
 
                 //  大图片使用C++加速计算(也许)
 
-                NativeBitmapProcessor.encodeBitmaps(
+                MiragetankCoder.encodeNative(
                     scaledPhoto1,
                     scaledPhoto2,
                     outputBitmap,

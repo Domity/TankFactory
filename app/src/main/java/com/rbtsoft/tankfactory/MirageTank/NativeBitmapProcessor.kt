@@ -2,13 +2,13 @@ package com.rbtsoft.tankfactory.miragetank
 
 import android.graphics.Bitmap
 
-object NativeBitmapProcessor {
+object MiragetankCoder {
 
     init {
         System.loadLibrary("tankfactory")
     }
 
-    external fun encodeBitmaps(
+    external fun encodeNative(
         bitmap1: Bitmap,
         bitmap2: Bitmap,
         outputBitmap: Bitmap,

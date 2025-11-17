@@ -1,8 +1,8 @@
 #include <jni.h>
 #include <android/bitmap.h>
+#include <arm_neon.h>
 #include <algorithm>
 #include <vector>
-#include <omp.h>
 #include <string>
 #include <cmath>
 #include <cstring>
@@ -15,7 +15,7 @@ int toGray(int r, int g, int b) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_rbtsoft_tankfactory_miragetank_NativeBitmapProcessor_encodeBitmaps(
+Java_com_rbtsoft_tankfactory_miragetank_MiragetankCoder_encodeNative(
         JNIEnv *env, jobject,
         jobject bitmap1, jobject bitmap2, jobject outputBitmap,
         jfloat photo1K, jfloat photo2K, jint threshold) {

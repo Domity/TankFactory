@@ -13,8 +13,8 @@ android {
         applicationId = "com.rbtsoft.tankfactory"
         minSdk = 31
         targetSdk = 36
-        versionCode = 1097
-        versionName = "1.0.9 alpha7"
+        versionCode = 1098
+        versionName = "1.0.9 alpha8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         externalNativeBuild {
@@ -22,12 +22,17 @@ android {
                 cppFlags.add("-std=c++17")
             }
         }
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a"))
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isJniDebuggable = false
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -55,6 +60,9 @@ android {
         jniLibs {
             useLegacyPackaging = true
         }
+        dex {                        //压缩classes.dex
+            useLegacyPackaging = true//减小安装包体积，减慢安装速度
+        }                            //降低运行性能
     }
 }
 

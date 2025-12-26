@@ -5,7 +5,9 @@ project("tankfactory")
 add_library(
         tankfactory
         SHARED
-        native-lib.cpp)
+        mirage_tank_coder.cpp
+        lsb_tank_encoder.cpp
+        lsb_tank_decoder.cpp)
 
 find_library(
         jnigraphics-lib

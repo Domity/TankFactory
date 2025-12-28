@@ -25,5 +25,5 @@ target_link_libraries(
         ${jnigraphics-lib}
         OpenMP::OpenMP_CXX)
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -fvisibility=hidden -ffunction-sections -fdata-sections")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto -ffast-math -fvisibility=hidden -ffunction-sections -fdata-sections")
 set_target_properties(tankfactory PROPERTIES LINK_FLAGS "-Wl,--gc-sections")

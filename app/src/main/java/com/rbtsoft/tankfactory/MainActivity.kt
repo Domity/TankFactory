@@ -10,7 +10,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavController
@@ -20,6 +23,7 @@ import com.rbtsoft.tankfactory.lsbtank.LSBTankViewerScreen
 import com.rbtsoft.tankfactory.miragetank.MirageTankMakerScreen
 import com.rbtsoft.tankfactory.miragetank.MirageTankViewerScreen
 import com.rbtsoft.tankfactory.ui.about.AboutDialog
+import com.rbtsoft.tankfactory.ui.theme.NeonText
 import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
 
 class MainActivity : ComponentActivity() {
@@ -51,6 +55,8 @@ fun AppNavigator() {
 @Composable
 fun MainMenuScreen(navController: NavController) {
     var showAboutDialog by remember { mutableStateOf(false) }
+    val systemNeonColor = MaterialTheme.colorScheme.tertiary
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -59,16 +65,21 @@ fun MainMenuScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .background(Color.Transparent),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                "Tank Factory",
-                //标题微粗
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onBackground
+
+            NeonText(
+                text = "Tank Factory",
+                neonColor = systemNeonColor,
+                style = MaterialTheme.typography.displayMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace
+                )
             )
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             Row(
                 modifier = Modifier.padding(vertical = 8.dp),

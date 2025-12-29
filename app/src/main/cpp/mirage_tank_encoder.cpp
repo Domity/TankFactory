@@ -35,7 +35,7 @@ int toGrayScalar(int r, int g, int b) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_rbtsoft_tankfactory_miragetank_MiragetankCoder_encodeNative(
+Java_com_rbtsoft_tankfactory_miragetank_MirageTankCoder_encodeNative(
         JNIEnv *env, jobject,
         jobject bitmap1, jobject bitmap2, jobject outputBitmap,
         jfloat photo1K, jfloat photo2K, jint threshold) {

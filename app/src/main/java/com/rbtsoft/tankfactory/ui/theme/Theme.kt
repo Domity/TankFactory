@@ -1,30 +1,30 @@
 package com.rbtsoft.tankfactory.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import com.domity.cybertheme.foundation.CyberColors
+import com.domity.cybertheme.foundation.CyberTypography
+import com.domity.cybertheme.foundation.LocalCyberColors
+import com.domity.cybertheme.foundation.LocalCyberTypography
 
 @Composable
 fun TankFactoryTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
-    val colorScheme = if (darkTheme) {
-        dynamicDarkColorScheme(context)
-    } else {
-        dynamicLightColorScheme(context)
-    }
+    val fixedCyberColors = CyberColors(
+        primary = Color(0xFFFFd700),
+        secondary = Color(0xFFFF0000),
+        background = Color(0xFF050505),
+        surface = Color(0xFF121212),
+        border = Color(0xFF333333),
+        text = Color(0xFFE0E0E0),
+        textDim = Color(0xFF606060)
+    )
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
+    CompositionLocalProvider(
+        LocalCyberColors provides fixedCyberColors,
+        LocalCyberTypography provides CyberTypography(),
         content = content
     )
 }
@@ -34,20 +34,30 @@ fun MirageTankImageTheme(
     isDarkMode: Boolean,
     content: @Composable () -> Unit
 ) {
-    val colors = if (isDarkMode) {
-        darkColorScheme(
+    val forcedColors = if (!isDarkMode) {
+        CyberColors(
             background = Color.Black,
-            onBackground = Color.White
+            surface = Color.Black,
+            text = Color.White,
+            primary = Color.White,
+            secondary = Color.Gray,
+            border = Color.DarkGray
         )
     } else {
-        lightColorScheme(
+        CyberColors(
             background = Color.White,
-            onBackground = Color.Black
+            surface = Color.White,
+            text = Color.Black,
+            primary = Color.Black,
+            secondary = Color.Gray,
+            textDim = Color.DarkGray,
+            border = Color.LightGray
         )
     }
 
-    MaterialTheme(
-        colorScheme = colors,
+    CompositionLocalProvider(
+        LocalCyberColors provides forcedColors,
+        LocalCyberTypography provides CyberTypography(),
         content = content
     )
 }

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.max
+import com.rbtsoft.tankfactory.miragetank.MirageTankCoder
 
 class MirageTankMakerViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -81,7 +82,7 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
                     BitmapFactory.decodeStream(it)
                 } ?: return@withContext null
 
-                MirageTankEncoder.encode(photo1, photo2, photo1K, photo2K, threshold)
+                MirageTankCoder.encode(photo1, photo2, photo1K, photo2K, threshold)
             }
 
             _isGenerating.value = false

@@ -4,9 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,12 +13,17 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavController
 import androidx.navigation.compose.*
+import com.domity.cybertheme.molecules.CyberButton
 import com.rbtsoft.tankfactory.lsbtank.LSBTankMakerScreen
 import com.rbtsoft.tankfactory.lsbtank.LSBTankViewerScreen
 import com.rbtsoft.tankfactory.miragetank.MirageTankMakerScreen
 import com.rbtsoft.tankfactory.miragetank.MirageTankViewerScreen
 import com.rbtsoft.tankfactory.ui.about.AboutDialog
+import com.rbtsoft.tankfactory.ui.theme.NeonText
 import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
+import androidx.compose.ui.unit.sp
+import com.domity.cybertheme.foundation.CyberTheme
+import com.domity.cybertheme.templates.CyberScaffold
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,62 +54,72 @@ fun AppNavigator() {
 @Composable
 fun MainMenuScreen(navController: NavController) {
     var showAboutDialog by remember { mutableStateOf(false) }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
+    CyberScaffold(useSafeArea = true) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .align(Alignment.Center)
+                .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                "Tank Factory",
-                //标题微粗
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onBackground
+            NeonText(
+                text = "TANK FACTORY",
+                neonColor = CyberTheme.colors.primary,
+                style = CyberTheme.typography.h1.copy(fontSize = 48.sp),
+
             )
 
+            Spacer(modifier = Modifier.height(48.dp))
+
             Row(
-                modifier = Modifier.padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Button(onClick = { navController.navigate("view_Mtank") }) {
-                    Text(stringResource(id = R.string.view_mirage_tank))
-                }
-                Button(onClick = { navController.navigate("make_Mtank") }) {
-                    Text(stringResource(id = R.string.make_mirage_tank))
-                }
-            }
-            Row(
-                modifier = Modifier.padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Button(onClick = { navController.navigate("view_LSBTank") }) {
-                    Text(stringResource(id = R.string.view_lsb_tank))
-                }
-                Button(onClick = { navController.navigate("make_LSBtank") }) {
-                    Text(stringResource(id = R.string.make_lsb_tank))
-                }
+                CyberButton(
+                    text = stringResource(id = R.string.view_mirage_tank),
+                    onClick = { navController.navigate("view_Mtank") },
+                    modifier = Modifier.weight(1f)
+                )
+                CyberButton(
+                    text = stringResource(id = R.string.make_mirage_tank),
+                    onClick = { navController.navigate("make_Mtank") },
+                    isPrimary = true,
+                    modifier = Modifier.weight(1f)
+                )
             }
 
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(onClick = { showAboutDialog = true }) {
-                Text(stringResource(id = R.string.about))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                CyberButton(
+                    text = stringResource(id = R.string.view_lsb_tank),
+                    onClick = { navController.navigate("view_LSBTank") },
+                    modifier = Modifier.weight(1f)
+                )
+                CyberButton(
+                    text = stringResource(id = R.string.make_lsb_tank),
+                    onClick = { navController.navigate("make_LSBtank") },
+                    isPrimary = true,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 32.dp)
+        ) {
+            CyberButton(
+                text = stringResource(id = R.string.about),
+                onClick = { showAboutDialog = true },
+                isPrimary = false,
+                modifier = Modifier.width(120.dp)
+            )
+        }
     }
+
     if (showAboutDialog) {
         AboutDialog(onDismiss = { showAboutDialog = false })
     }

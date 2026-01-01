@@ -218,7 +218,7 @@ fun MirageTankMakerScreen(
 
             CyberText(
                 text = stringResource(id = R.string.mirage_tank_maker_tips),
-                color = CyberTheme.colors.textDim,
+                color = CyberTheme.colors.text,
                 style = CyberTheme.typography.body.copy(fontSize = 12.sp)
             )
         }

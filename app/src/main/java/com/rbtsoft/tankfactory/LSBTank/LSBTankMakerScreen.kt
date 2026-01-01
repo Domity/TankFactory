@@ -196,7 +196,7 @@ fun LSBTankMakerScreen(
             // 提示文字
             CyberText(
                 text = stringResource(id = R.string.lsb_tank_maker_tips),
-                color = CyberTheme.colors.textDim,
+                color = CyberTheme.colors.text,
                 style = CyberTheme.typography.body.copy(fontSize = 12.sp),
                 modifier = Modifier.padding(bottom = 16.dp)
             )

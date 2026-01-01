@@ -89,7 +89,7 @@ fun MirageTankViewerScreen() {
             CyberText(
                 text = stringResource(id = R.string.mirage_tank_viewer_tips),
                 modifier = Modifier.padding(bottom = 16.dp),
-                color = CyberTheme.colors.textDim,
+                color = CyberTheme.colors.text,
                 style = CyberTheme.typography.body
             )
         }

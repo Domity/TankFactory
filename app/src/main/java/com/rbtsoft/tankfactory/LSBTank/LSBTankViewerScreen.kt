@@ -143,7 +143,7 @@ fun LSBTankViewerScreen(
 
             CyberText(
                 stringResource(id = R.string.lsb_tank_viewer_tips),
-                color = CyberTheme.colors.textDim,
+                color = CyberTheme.colors.text,
                 style = CyberTheme.typography.body.copy(fontSize = 12.sp)
             )
         }

@@ -1,4 +1,5 @@
 ### 文件结构
+
 /foundation
 ├── CyberThemeData.kt
 /atoms
@@ -10,7 +11,9 @@
 └── CyberSwitch.kt
 /templates
 └── CyberScaffold.kt
+
 ### API 用法
+
 **CyberTheme**
 ```kotlin
 @Composable
@@ -24,6 +27,7 @@ fun CyberScaffold(
     topBar: (@Composable () -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 )
+
 **CyberSurface**
 ```kotlin
 @Composable
@@ -35,6 +39,7 @@ fun CyberSurface(
     borderColor: Color = Color.Transparent,
     content: @Composable BoxScope.() -> Unit
 )
+
 **CyberText**
 ```kotlin
 @Composable
@@ -44,6 +49,7 @@ fun CyberText(
     style: TextStyle = CyberTheme.typography.body,
     color: Color = CyberTheme.colors.text
 )
+
 **CyberButton**
 ```kotlin
 @Composable
@@ -54,6 +60,7 @@ fun CyberButton(
     isPrimary: Boolean = true,
     enabled: Boolean = true
 )
+
 **CyberSwitch**
 ```kotlin
 @Composable
@@ -62,6 +69,7 @@ fun CyberSwitch(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 )
+
 **CyberDialog**
 ```kotlin
 @Composable
@@ -71,6 +79,7 @@ fun CyberDialog(
     content: (@Composable ColumnScope.() -> Unit)? = null,
     buttons: (@Composable RowScope.() -> Unit)? = null
 )
+
 **CyberSlider**
 ```kotlin
 @Composable
@@ -81,6 +90,7 @@ fun CyberSlider(
     range: ClosedFloatingPointRange<Float> = 0f..1f,
     steps: Int = 0
 )
+
 **CyberLoading**
 ```kotlin
 @Composable

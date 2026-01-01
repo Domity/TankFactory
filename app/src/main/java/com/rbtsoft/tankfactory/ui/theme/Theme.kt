@@ -13,7 +13,8 @@ fun TankFactoryTheme(
     content: @Composable () -> Unit
 ) {
     val fixedCyberColors = CyberColors(
-        primary = Color(0xFFFFd700),
+        // 这才是改了有用的地方
+        primary = Color(0xFFA5A6FD),
         secondary = Color(0xFFFF0000),
         background = Color(0xFF050505),
         surface = Color(0xFF121212),

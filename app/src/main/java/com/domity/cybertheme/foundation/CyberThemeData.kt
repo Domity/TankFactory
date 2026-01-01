@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.sp
 
 @Immutable
 data class CyberColors(
+    // 这只是定义，改了没用
     val background: Color = Color(0xFF050505),    // 极黑背景
     val surface: Color = Color(0xFF121212),       // 表面颜色
     val primary: Color = Color(0xFFFFD700),       // 主霓虹色

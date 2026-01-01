@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.App.Starting" parent="@android:style/Theme.DeviceDefault.NoActionBar">
-        <item name="android:windowBackground">@drawable/ic_launcher_monochrome</item>
+    <style name="Theme.TankFactory" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
     </style>
 </resources>

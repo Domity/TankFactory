@@ -27,7 +27,6 @@ import com.rbtsoft.tankfactory.R
 fun LSBTankViewerScreen(
     viewModel: LSBTankViewerViewModel = viewModel()
 ) {
-
     val selectedImageUri by viewModel.selectedImageUri.collectAsState()
     val displayBitmap by viewModel.displayBitmap.collectAsState()
     val isTooLarge by viewModel.isResultTooLarge.collectAsState()
@@ -50,28 +49,50 @@ fun LSBTankViewerScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .fillMaxHeight()
+                ) {
+                    ImageSelectionSlot(
+                        modifier = Modifier.fillMaxSize(),
+                        uri = selectedImageUri,
+                        placeholderText = stringResource(id = R.string.select_image).uppercase(),
+                        onClick = { imagePickerLauncher.launch("image/*") }
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
 
-            Box(modifier = Modifier.height(200.dp).fillMaxWidth()) {
-                ImageSelectionSlot(
-                    modifier = Modifier.fillMaxSize(),
-                    uri = selectedImageUri,
-                    placeholderText = stringResource(id = R.string.select_image).uppercase(),
-                    onClick = { imagePickerLauncher.launch("image/*") }
-                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    CyberButton(
+                        text = if (isDecoding) stringResource(id = R.string.decoding) else stringResource(id = R.string.decode),
+                        onClick = {
+                            viewModel.onPressDecoderButton()
+                            viewModel.decodeLSBTank()
+                        },
+                        enabled = selectedImageUri != null && !isDecoding,
+                        modifier = Modifier.fillMaxWidth(),
+                        isPrimary = true
+                    )
+                    CyberButton(
+                        text = if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save),
+                        onClick = { viewModel.saveImageToDownload() },
+                        enabled = (displayBitmap != null || isTooLarge) && !isSaving,
+                        modifier = Modifier.fillMaxWidth(),
+                        isPrimary = false
+                    )
+                }
             }
-
-            Spacer(Modifier.height(16.dp))
-            CyberButton(
-                text = if (isDecoding) stringResource(id = R.string.decoding) else stringResource(id = R.string.decode),
-                onClick = {
-                    viewModel.onPressDecoderButton()
-                    viewModel.decodeLSBTank()
-                },
-                enabled = selectedImageUri != null && !isDecoding,
-                modifier = Modifier.fillMaxWidth(),
-                isPrimary = true
-            )
-
             Spacer(Modifier.height(24.dp))
 
             CyberSurface(
@@ -83,13 +104,15 @@ fun LSBTankViewerScreen(
                 borderColor = if (displayBitmap != null) CyberTheme.colors.primary else CyberTheme.colors.border
             ) {
                 Box(
-                    modifier = Modifier.fillMaxSize().padding(4.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(4.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     when {
                         isTooLarge -> {
                             CyberText(
-                                text=stringResource(id = R.string.image_too_large),
+                                text = stringResource(id = R.string.image_too_large),
                                 color = CyberTheme.colors.secondary,
                                 modifier = Modifier.padding(8.dp)
                             )
@@ -128,23 +151,13 @@ fun LSBTankViewerScreen(
                     }
                 }
             }
-
-            Spacer(Modifier.height(16.dp))
-
-            CyberButton(
-                text = if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save),
-                onClick = { viewModel.saveImageToDownload() },
-                enabled = (displayBitmap != null || isTooLarge) && !isSaving,
-                modifier = Modifier.fillMaxWidth(),
-                isPrimary = false
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             CyberText(
                 stringResource(id = R.string.lsb_tank_viewer_tips),
                 color = CyberTheme.colors.text,
-                style = CyberTheme.typography.body.copy(fontSize = 12.sp)
+                style = CyberTheme.typography.body.copy(fontSize = 12.sp),
+                modifier = Modifier.padding(bottom = 16.dp)
             )
         }
     }
@@ -159,14 +172,15 @@ private fun ImageSelectionSlot(
 ) {
     CyberSurface(
         modifier = modifier
-            .fillMaxHeight()
             .clickable(onClick = onClick),
         color = CyberTheme.colors.surface,
         borderWidth = 1.dp,
         borderColor = if (uri != null) CyberTheme.colors.primary else CyberTheme.colors.border
     ) {
         Box(
-            modifier = Modifier.fillMaxSize().padding(4.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
             if (uri == null) {

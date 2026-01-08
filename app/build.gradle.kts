@@ -56,9 +56,16 @@ android {
         jniLibs {
             useLegacyPackaging = true
         }
-        dex {                        //压缩classes.dex
-            useLegacyPackaging = true//减小安装包体积，减慢安装速度?
-        }                            //降低运行性能?
+        dex {
+            useLegacyPackaging = true
+        }
+    }
+    packaging {
+        resources {
+            excludes += "META-INF/DebugProbesKt.bin"
+            excludes += "META-INF/kotlin-tooling-metadata.json"
+            excludes += "DebugProbesKt.bin"
+        }
     }
 }
 

@@ -4,6 +4,54 @@
 #include <arm_neon.h>
 #include <omp.h>
 
+inline uint32_t get_pixel_at(const AndroidBitmapInfo& info, void* pixels, int x, int y) {
+    x = std::max(0, std::min((int)info.width - 1, x));
+    y = std::max(0, std::min((int)info.height - 1, y));
+    return ((uint32_t*)((char*)pixels + y * info.stride))[x];
+}
+
+void scale_bitmap_bilinear(
+    const AndroidBitmapInfo& srcInfo, void* srcPixels,
+    const AndroidBitmapInfo& dstInfo, void* dstPixels) {
+
+    float x_ratio = dstInfo.width > 1 ? (float)(srcInfo.width - 1) / (dstInfo.width - 1) : 0;
+    float y_ratio = dstInfo.height > 1 ? (float)(srcInfo.height - 1) / (dstInfo.height - 1) : 0;
+
+    for (uint32_t y = 0; y < dstInfo.height; ++y) {
+        auto* dstRow = (uint32_t*)((char*)dstPixels + y * dstInfo.stride);
+        float src_yf = y * y_ratio;
+        int src_y = (int)src_yf;
+        float y_diff = src_yf - src_y;
+
+        for (uint32_t x = 0; x < dstInfo.width; ++x) {
+            float src_xf = x * x_ratio;
+            int src_x = (int)src_xf;
+            float x_diff = src_xf - src_x;
+
+            uint32_t p1 = get_pixel_at(srcInfo, srcPixels, src_x, src_y);
+            uint32_t p2 = get_pixel_at(srcInfo, srcPixels, src_x + 1, src_y);
+            uint32_t p3 = get_pixel_at(srcInfo, srcPixels, src_x, src_y + 1);
+            uint32_t p4 = get_pixel_at(srcInfo, srcPixels, src_x + 1, src_y + 1);
+
+            uint8_t r1 = (p1 >> 0) & 0xff, g1 = (p1 >> 8) & 0xff, b1 = (p1 >> 16) & 0xff, a1 = (p1 >> 24) & 0xff;
+            uint8_t r2 = (p2 >> 0) & 0xff, g2 = (p2 >> 8) & 0xff, b2 = (p2 >> 16) & 0xff, a2 = (p2 >> 24) & 0xff;
+            uint8_t r3 = (p3 >> 0) & 0xff, g3 = (p3 >> 8) & 0xff, b3 = (p3 >> 16) & 0xff, a3 = (p3 >> 24) & 0xff;
+            uint8_t r4 = (p4 >> 0) & 0xff, g4 = (p4 >> 8) & 0xff, b4 = (p4 >> 16) & 0xff, a4 = (p4 >> 24) & 0xff;
+
+            auto lerp = [](float t, uint8_t ca, uint8_t cb) {
+                return (uint8_t)(ca * (1.0f - t) + cb * t);
+            };
+
+            uint8_t r = lerp(y_diff, lerp(x_diff, r1, r2), lerp(x_diff, r3, r4));
+            uint8_t g = lerp(y_diff, lerp(x_diff, g1, g2), lerp(x_diff, g3, g4));
+            uint8_t b = lerp(y_diff, lerp(x_diff, b1, b2), lerp(x_diff, b3, b4));
+            uint8_t a = lerp(y_diff, lerp(x_diff, a1, a2), lerp(x_diff, a3, a4));
+
+            dstRow[x] = (a << 24) | (b << 16) | (g << 8) | r;
+        }
+    }
+}
+
 inline uint8x8_t neon_to_gray(uint8x8_t r, uint8x8_t g, uint8x8_t b) {
 
     const uint16_t W_R = 19595;
@@ -48,8 +96,8 @@ Java_com_rbtsoft_tankfactory_miragetank_MirageTankCoder_encodeNative(
     }
 
     if (info1.format != ANDROID_BITMAP_FORMAT_RGBA_8888 ||
-        info1.width != info2.width || info1.height != info2.height ||
-        info1.width != outInfo.width || info1.height != outInfo.height) {
+        info2.format != ANDROID_BITMAP_FORMAT_RGBA_8888 ||
+        outInfo.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
         return;
     }
 
@@ -60,8 +108,24 @@ Java_com_rbtsoft_tankfactory_miragetank_MirageTankCoder_encodeNative(
         return;
     }
 
-    uint32_t width = info1.width;
-    uint32_t height = info1.height;
+    void* finalPixels1 = pixels1;
+    char* scaled_pixels1_buf = nullptr;
+    if (info1.width != outInfo.width || info1.height != outInfo.height) {
+        scaled_pixels1_buf = new char[outInfo.stride * outInfo.height];
+        scale_bitmap_bilinear(info1, pixels1, outInfo, scaled_pixels1_buf);
+        finalPixels1 = scaled_pixels1_buf;
+    }
+
+    void* finalPixels2 = pixels2;
+    char* scaled_pixels2_buf = nullptr;
+    if (info2.width != outInfo.width || info2.height != outInfo.height) {
+        scaled_pixels2_buf = new char[outInfo.stride * outInfo.height];
+        scale_bitmap_bilinear(info2, pixels2, outInfo, scaled_pixels2_buf);
+        finalPixels2 = scaled_pixels2_buf;
+    }
+
+    uint32_t width = outInfo.width;
+    uint32_t height = outInfo.height;
 
     const int32_t FIXED_SHIFT = 12;
     const int32_t k1_fixed = (int32_t)(photo1K * (1 << FIXED_SHIFT));
@@ -73,8 +137,8 @@ Java_com_rbtsoft_tankfactory_miragetank_MirageTankCoder_encodeNative(
 
 #pragma omp parallel for
     for (uint32_t y = 0; y < height; ++y) {
-        auto* row1 = (uint32_t*)((char*)pixels1 + y * info1.stride);
-        auto* row2 = (uint32_t*)((char*)pixels2 + y * info2.stride);
+        auto* row1 = (uint32_t*)((char*)finalPixels1 + y * outInfo.stride);
+        auto* row2 = (uint32_t*)((char*)finalPixels2 + y * outInfo.stride);
         auto* outRow = (uint32_t*)((char*)outputPixels + y * outInfo.stride);
 
         uint32_t x = 0;
@@ -148,6 +212,9 @@ Java_com_rbtsoft_tankfactory_miragetank_MirageTankCoder_encodeNative(
             outRow[x] = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
         }
     }
+
+    delete[] scaled_pixels1_buf;
+    delete[] scaled_pixels2_buf;
 
     AndroidBitmap_unlockPixels(env, bitmap1);
     AndroidBitmap_unlockPixels(env, bitmap2);

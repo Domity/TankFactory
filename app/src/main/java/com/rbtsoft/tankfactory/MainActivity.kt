@@ -63,7 +63,7 @@ fun MainMenuScreen(navController: NavController) {
             NeonText(
                 text = "TANK FACTORY",
                 neonColor = CyberTheme.colors.primary,
-                style = CyberTheme.typography.h1.copy(fontSize = 48.sp),
+                style = CyberTheme.typography.headline.copy(fontSize = 48.sp),
 
             )
 

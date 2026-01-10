@@ -19,24 +19,17 @@ import kotlin.math.max
 class LSBTankViewerViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     val selectedImageUri: StateFlow<Uri?> = _selectedImageUri
-
     private var originalResultBitmap: Bitmap? = null
-
     private val _displayBitmap = MutableStateFlow<Bitmap?>(null)
     val displayBitmap: StateFlow<Bitmap?> = _displayBitmap
-
     private val _isResultTooLarge = MutableStateFlow(false)
     val isResultTooLarge: StateFlow<Boolean> = _isResultTooLarge
-
     private val _isDecoding = MutableStateFlow(false)
     val isDecoding: StateFlow<Boolean> = _isDecoding
-
     private val _isSaving = MutableStateFlow(false)
     val isSaving: StateFlow<Boolean> = _isSaving
-
     //  大于此值则不进行预览直接保存
     private val maxSafePixels = 50000000
-
     //  大于此值则加载较小的位图副本到预览界面
     private val maxDisplayDimension = 2500
 

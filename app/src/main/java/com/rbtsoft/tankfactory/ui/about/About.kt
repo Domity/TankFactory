@@ -26,7 +26,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
         title = {
             CyberText(
                 text = "Tank Factory",
-                style = CyberTheme.typography.h1,
+                style = CyberTheme.typography.headline,
                 color = CyberTheme.colors.primary
             )
         },

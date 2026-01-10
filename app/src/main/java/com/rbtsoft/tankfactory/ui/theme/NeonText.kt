@@ -1,20 +1,17 @@
 package com.rbtsoft.tankfactory.ui.theme
 
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.Box
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.text.TextStyle
-import com.domity.cybertheme.atoms.CyberText
 import kotlinx.coroutines.delay
 import kotlin.random.Random
-
 
 @Composable
 fun NeonText(
@@ -23,61 +20,80 @@ fun NeonText(
     neonColor: Color,
     style: TextStyle
 ) {
-    val lightAlpha = remember { Animatable(1f) }
+    var alpha by remember { mutableFloatStateOf(1f) }
+
+    // 故障闪烁逻辑
     LaunchedEffect(Unit) {
         while (true) {
-            val stableDuration = Random.nextLong(1000, 5000)
-            delay(stableDuration)
-            val flickerCount = Random.nextInt(3, 8)
-            repeat(flickerCount) {
-                val targetDimness = if (Random.nextBoolean()) 0f else 0.3f
-                lightAlpha.snapTo(targetDimness)
+            // 稳定亮起
+            delay(Random.nextLong(1000, 5000))
+
+            // 快速闪烁
+            repeat(Random.nextInt(3, 8)) {
+                // 随机变暗或全黑
+                alpha = if (Random.nextBoolean()) 0f else 0.3f
                 delay(Random.nextLong(20, 150))
-                lightAlpha.snapTo(1f)
+                alpha = 1f
                 delay(Random.nextLong(20, 100))
             }
 
-            if (Random.nextInt(10) == 0) {
-                lightAlpha.animateTo(0f, animationSpec = tween(50))
+            // 偶尔的长熄灭
+            if (Random.nextFloat() < 0.1f) {
+                alpha = 0f
                 delay(Random.nextLong(300, 800))
-                lightAlpha.animateTo(1f, animationSpec = tween(20))
+                alpha = 1f
             }
         }
     }
 
-    Box(modifier = modifier) {
-        // 底座
-        CyberText(
-            text = text,
-            style = style.copy(
-                color = Color.Gray.copy(alpha = 0.3f),
-                drawStyle = Stroke(width = 3f)
-            )
-        )
-        // 辉光
-        CyberText(
-            text = text,
-            style = style.copy(
-                color = neonColor.copy(alpha = 0.6f * lightAlpha.value),
-                drawStyle = Stroke(width = 5f),
-                shadow = Shadow(
-                    color = neonColor.copy(alpha = lightAlpha.value),
-                    offset = Offset.Zero,
-                    blurRadius = 30f * lightAlpha.value
+    var layoutResult by remember { mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
+
+    BasicText(
+        text = text,
+        style = style.copy(color = Color.Transparent),
+        onTextLayout = { layoutResult = it },
+        modifier = modifier.drawBehind {
+            val layout = layoutResult ?: return@drawBehind
+            val mp = layout.multiParagraph
+
+            drawIntoCanvas { canvas ->
+                // 底座
+                mp.paint(
+                    canvas = canvas,
+                    color = Color.Gray.copy(alpha = 0.3f),
+                    shadow = null,
+                    decoration = null,
+                    drawStyle = Stroke(width = 3f)
                 )
-            )
-        )
-        // 核心
-        CyberText(
-            text = text,
-            style = style.copy(
-                color = Color.White.copy(alpha = 0.9f * lightAlpha.value),
-                shadow = Shadow(
-                    color = neonColor,
-                    offset = Offset.Zero,
-                    blurRadius = 8f * lightAlpha.value
-                )
-            )
-        )
-    }
+
+                // 辉光
+                if (alpha > 0f) {
+                    mp.paint(
+                        canvas = canvas,
+                        color = neonColor.copy(alpha = 0.6f * alpha),
+                        shadow = Shadow(
+                            color = neonColor.copy(alpha = alpha),
+                            offset = Offset.Zero,
+                            blurRadius = 30f * alpha
+                        ),
+                        decoration = null,
+                        drawStyle = Stroke(width = 5f)
+                    )
+
+                    // 核心
+                    mp.paint(
+                        canvas = canvas,
+                        color = Color.White.copy(alpha = 0.9f * alpha),
+                        shadow = Shadow(
+                            color = neonColor,
+                            offset = Offset.Zero,
+                            blurRadius = 8f * alpha
+                        ),
+                        decoration = null,
+                        drawStyle = null // 默认为 Fill
+                    )
+                }
+            }
+        }
+    )
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -94,7 +95,8 @@ fun LSBTankMakerScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     CyberText(
                         text = stringResource(id = R.string.lsb_tank_maker_compress_level, compress),
-                        color = CyberTheme.colors.text
+                        color = CyberTheme.colors.text,
+                        style = CyberTheme.typography.body
                     )
 
                     Spacer(Modifier.height(12.dp))
@@ -129,7 +131,8 @@ fun LSBTankMakerScreen(
                                 CyberText(
                                     text = stringResource(id = R.string.image_too_large),
                                     color = CyberTheme.colors.secondary,
-                                    modifier = Modifier.padding(8.dp)
+                                    modifier = Modifier.padding(8.dp),
+                                    style = CyberTheme.typography.body
                                 )
                             }
                             displayBitmap != null -> {
@@ -144,7 +147,8 @@ fun LSBTankMakerScreen(
                                 if (!isGenerating) {
                                     CyberText(
                                         text = stringResource(id = R.string.generated_image),
-                                        color = CyberTheme.colors.textDim
+                                        color = CyberTheme.colors.textDim,
+                                        style = CyberTheme.typography.body
                                     )
                                 }
                             }
@@ -152,7 +156,9 @@ fun LSBTankMakerScreen(
                         if (isGenerating) {
                             CyberSurface(
                                 modifier = Modifier.fillMaxSize(),
-                                color = CyberTheme.colors.background.copy(alpha = 0.7f)
+                                color = CyberTheme.colors.background.copy(alpha = 0.7f),
+                                borderWidth = 0.dp,
+                                borderColor = Color.Transparent
                             ) {}
 
                             CyberLoading(
@@ -226,7 +232,8 @@ private fun ImageSelectionSlot(
             if (uri == null) {
                 CyberText(
                     text = placeholderText,
-                    color = CyberTheme.colors.textDim
+                    color = CyberTheme.colors.textDim,
+                    style = CyberTheme.typography.body
                 )
             } else {
                 AsyncImage(

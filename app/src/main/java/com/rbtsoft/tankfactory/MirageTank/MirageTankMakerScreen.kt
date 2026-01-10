@@ -141,7 +141,8 @@ fun MirageTankMakerScreen(
                                 isTooLarge -> {
                                     CyberText(
                                         text = stringResource(id = R.string.image_too_large),
-                                        color = Color.Red
+                                        color = Color.Red,
+                                        style = CyberTheme.typography.body
                                     )
                                 }
                                 displayBitmap != null -> {
@@ -156,7 +157,8 @@ fun MirageTankMakerScreen(
                                     if (!isGenerating) {
                                         CyberText(
                                             text = stringResource(id = R.string.generated_image),
-                                            color = CyberTheme.colors.text
+                                            color = CyberTheme.colors.text,
+                                            style = CyberTheme.typography.body
                                         )
                                     }
                                 }
@@ -164,7 +166,9 @@ fun MirageTankMakerScreen(
                             if (isGenerating) {
                                 CyberSurface(
                                     modifier = Modifier.fillMaxSize(),
-                                    color = CyberTheme.colors.background.copy(alpha = 0.7f)
+                                    color = CyberTheme.colors.background.copy(alpha = 0.7f),
+                                    borderWidth = 0.dp,
+                                    borderColor = Color.Transparent
                                 ) {}
                                 CyberTheme{
                                     CyberLoading(
@@ -247,7 +251,8 @@ private fun ImageSelectionSlot(
             if (uri == null) {
                 CyberText(
                     text = placeholderText,
-                    color = CyberTheme.colors.textDim
+                    color = CyberTheme.colors.textDim,
+                    style = CyberTheme.typography.body
                 )
             } else {
                 AsyncImage(

@@ -58,7 +58,8 @@ fun MirageTankViewerScreen() {
                         if (selectedImageUri == null) {
                             CyberText(
                                 text = stringResource(id = R.string.select_image).uppercase(),
-                                color = CyberTheme.colors.text
+                                color = CyberTheme.colors.text,
+                                style = CyberTheme.typography.body
                             )
                         } else {
                             AsyncImage(

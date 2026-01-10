@@ -1,22 +1,21 @@
 package com.domity.cybertheme.molecules
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.domity.cybertheme.foundation.CyberTheme
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
@@ -27,106 +26,125 @@ fun CyberSlider(
     range: ClosedFloatingPointRange<Float> = 0f..1f,
     steps: Int = 0
 ) {
-    // 颜色与尺寸
     val primaryColor = CyberTheme.colors.primary
     val trackColor = CyberTheme.colors.surface
     val borderColor = CyberTheme.colors.border
+    val path = remember { Path() }
 
-    val thumbWidth = 12.dp
-    val thumbHeight = 24.dp
-    val trackHeight = 8.dp
-
-    // 状态计算
-    val fraction = remember(value, range) {
-        ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
+    // 用于绘制辉光
+    val shadowPaint = remember {
+        android.graphics.Paint().apply {
+            color = android.graphics.Color.BLACK // 阴影主体颜色
+            style = android.graphics.Paint.Style.FILL
+        }
     }
 
-    // 布局容器
-    BoxWithConstraints(
+    Spacer(
         modifier = modifier
             .fillMaxWidth()
-            .height(32.dp), // 控件高度
-        contentAlignment = Alignment.CenterStart
-    ) {
-        val widthPx = constraints.maxWidth.toFloat()
-        val thumbWidthPx = with(LocalDensity.current) { thumbWidth.toPx() }
-        val draggableWidth = widthPx - thumbWidthPx
+            .height(32.dp)
+            .pointerInput(range, steps) {
+                val widthPx = size.width.toFloat()
+                val thumbWidthPx = 12.dp.toPx()
 
-        // 处理触摸输入
-        fun updateValue(pxOffset: Float) {
-            val rawFraction = (pxOffset / draggableWidth).coerceIn(0f, 1f)
-            var newValue = range.start + rawFraction * (range.endInclusive - range.start)
+                fun update(xPos: Float) {
+                    val draggableWidth = widthPx - thumbWidthPx
+                    val rawFraction = ((xPos - thumbWidthPx / 2) / draggableWidth).coerceIn(0f, 1f)
+                    var newValue = range.start + rawFraction * (range.endInclusive - range.start)
 
-            if (steps > 0) {
-                val stepSize = (range.endInclusive - range.start) / (steps + 1)
-                val stepIndex = ((newValue - range.start) / stepSize).roundToInt()
-                newValue = range.start + stepIndex * stepSize
-            }
-
-            if (newValue != value) {
-                onValueChange(newValue)
-            }
-        }
-
-        // 绘制轨道
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(trackHeight)
-                .background(trackColor, CutCornerShape(2.dp))
-                .border(1.dp, borderColor, CutCornerShape(2.dp))
-                // 触摸监听
-                .pointerInput(range, steps, widthPx) {
-                    detectTapGestures { offset ->
-                        // 计算中心点相对位置
-                        val adjustedX = offset.x - (thumbWidthPx / 2)
-                        updateValue(adjustedX)
+                    if (steps > 0) {
+                        val stepSize = (range.endInclusive - range.start) / (steps + 1)
+                        val stepIndex = ((newValue - range.start) / stepSize).roundToInt()
+                        newValue = range.start + stepIndex * stepSize
                     }
+                    if (newValue != value) onValueChange(newValue)
                 }
-                .pointerInput(range, steps, widthPx) {
-                    detectHorizontalDragGestures { change, _ ->
-                        change.consume()
-                        val adjustedX = change.position.x - (thumbWidthPx / 2)
-                        updateValue(adjustedX)
+                coroutineScope {
+                    launch { detectTapGestures { offset -> update(offset.x) } }
+                    launch { detectHorizontalDragGestures { change, _ -> change.consume(); update(change.position.x) } }
+                }
+            }
+            .drawBehind {
+                val fraction = ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
+                val thumbW = 12.dp.toPx()
+                val thumbH = 24.dp.toPx()
+                val trackH = 8.dp.toPx()
+                val trackTop = center.y - trackH / 2
+                // 定义切角
+                fun buildCutPath(rectSize: Size, offset: Offset, cut: Float, onlyLeft: Boolean = false) {
+                    path.rewind()
+                    val w = rectSize.width
+                    val h = rectSize.height
+                    val x = offset.x
+                    val y = offset.y
+                    path.moveTo(x + cut, y)
+                    if (onlyLeft) {
+                        path.lineTo(x + w, y)
+                        path.lineTo(x + w, y + h)
+                    } else {
+                        path.lineTo(x + w - cut, y)
+                        path.lineTo(x + w, y + cut)
+                        path.lineTo(x + w, y + h - cut)
+                        path.lineTo(x + w - cut, y + h)
                     }
+                    path.lineTo(x + cut, y + h)
+                    path.lineTo(x, y + h - cut)
+                    path.lineTo(x, y + cut)
+                    path.close()
                 }
-        )
 
-        // 绘制已激活部分
-        Box(
-            modifier = Modifier
-                .width(maxWidth * fraction)
-                .height(trackHeight)
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            primaryColor.copy(alpha = 0.2f),
-                            primaryColor
+                // 绘制轨道背景
+                buildCutPath(Size(size.width, trackH), Offset(0f, trackTop), 2.dp.toPx())
+                drawPath(path, trackColor)
+                drawPath(path, borderColor, style = Stroke(1.dp.toPx()))
+
+                // 绘制激活部分
+                val activeWidth = size.width * fraction
+                if (activeWidth > 0) {
+                    buildCutPath(Size(activeWidth, trackH), Offset(0f, trackTop), 2.dp.toPx(), onlyLeft = true)
+                    drawPath(
+                        path,
+                        brush = Brush.horizontalGradient(
+                            listOf(primaryColor.copy(alpha = 0.2f), primaryColor),
+                            startX = 0f,
+                            endX = activeWidth
                         )
-                    ),
-                    CutCornerShape(topStart = 2.dp, bottomStart = 2.dp)
+                    )
+                }
+
+                // 绘制滑块
+                val draggableWidth = size.width - thumbW
+                val thumbX = draggableWidth * fraction
+                val thumbTop = center.y - thumbH / 2
+                val thumbOffset = Offset(thumbX, thumbTop)
+
+                // 构建滑块路径
+                buildCutPath(Size(thumbW, thumbH), thumbOffset, 2.dp.toPx())
+
+                // 绘制辉光
+                drawIntoCanvas { canvas ->
+                    shadowPaint.setShadowLayer(
+                        8.dp.toPx(), // 半径
+                        0f, 0f,      // 偏移
+                        primaryColor.toArgb()
+                    )
+                    // 绘制阴影
+                    canvas.nativeCanvas.drawPath(path.asAndroidPath(), shadowPaint)
+                }
+
+                // 绘制滑块主体
+                drawPath(path, Color.Black)
+
+                // 绘制滑块边框
+                drawPath(path, primaryColor, style = Stroke(1.dp.toPx()))
+
+                // 绘制中间亮线
+                drawLine(
+                    Color.White,
+                    start = Offset(thumbX + thumbW / 2, center.y - 6.dp.toPx()),
+                    end = Offset(thumbX + thumbW / 2, center.y + 6.dp.toPx()),
+                    strokeWidth = 2.dp.toPx()
                 )
-        )
-
-        // 绘制滑块
-        val thumbOffsetX = (draggableWidth * fraction).roundToInt()
-
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(thumbOffsetX, 0) }
-                .size(width = thumbWidth, height = thumbHeight)
-                .shadow(8.dp, spotColor = primaryColor) // 辉光
-                .background(Color.Black) // 黑色芯
-                .border(1.dp, primaryColor, CutCornerShape(2.dp)) // 边框
-        ) {
-            // 滑块中间加一条亮线 漂亮
-            Box(
-                modifier = Modifier
-                    .width(2.dp)
-                    .height(12.dp)
-                    .background(Color.White)
-                    .align(Alignment.Center)
-            )
-        }
-    }
+            }
+    )
 }

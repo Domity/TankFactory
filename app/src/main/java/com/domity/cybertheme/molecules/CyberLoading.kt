@@ -1,17 +1,18 @@
 package com.domity.cybertheme.molecules
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.domity.cybertheme.foundation.CyberTheme
@@ -22,119 +23,65 @@ fun CyberLoading(
     size: Dp = 48.dp,
     color: Color = CyberTheme.colors.primary
 ) {
-    // 定义动画控制器
-    val infiniteTransition = rememberInfiniteTransition(label = "cyber_loading")
-
-    // 外圈动画
-    val outerRotation by infiniteTransition.animateFloat(
+    // 合并动画状态。
+    val transition = rememberInfiniteTransition(label = "l")
+    val p by transition.animateFloat(
         initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing)
-        ),
-        label = "outer"
-    )
-
-    // 内圈动画
-    val innerRotation by infiniteTransition.animateFloat(
-        initialValue = 360f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing)
-        ),
-        label = "inner"
-    )
-
-    // 呼吸动画
-    val coreAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "core"
+        animationSpec = infiniteRepeatable(tween(8000, easing = LinearEasing)),
+        label = "p"
     )
 
-    Canvas(modifier = modifier.size(size)) {
-        val w = this.size.width
-        val h = this.size.height
-        val center = Offset(w / 2, h / 2)
-        val strokeWidth = 3.dp.toPx()
+    Spacer(
+        modifier = modifier
+            .size(size)
+            .drawBehind {
+                val w = this.size.width
+                val strokeW = 3.dp.toPx()
+                val thinStroke = Stroke(strokeW / 2, cap = StrokeCap.Butt)
 
-        // 绘制外圈
-        withTransform({
-            rotate(outerRotation, center)
-        }) {
-            val outerRadius = w / 2 - strokeWidth
-            val arcSize = Size(outerRadius * 2, outerRadius * 2)
-            val arcTopLeft = Offset(strokeWidth, strokeWidth)
+                // 计算动画值
+                val rotOuter = (p * 4 % 1f) * 360f
+                val rotInner = 360f - (p * 8 % 1f) * 360f
+                val alphaCycle = (p * 5 % 1f)
+                val wave = if (alphaCycle < 0.5f) alphaCycle * 2 else (1 - alphaCycle) * 2
+                val coreAlpha = 0.3f + wave * 0.7f
 
-            drawArc(
-                color = color,
-                startAngle = 0f,
-                sweepAngle = 90f,
-                useCenter = false,
-                topLeft = arcTopLeft,
-                size = arcSize,
-                style = Stroke(width = strokeWidth / 2, cap = StrokeCap.Butt)
-            )
-            drawArc(
-                color = color,
-                startAngle = 120f,
-                sweepAngle = 90f,
-                useCenter = false,
-                topLeft = arcTopLeft,
-                size = arcSize,
-                style = Stroke(width = strokeWidth / 2, cap = StrokeCap.Butt)
-            )
-            drawArc(
-                color = color.copy(alpha = 0.5f),
-                startAngle = 240f,
-                sweepAngle = 60f,
-                useCenter = false,
-                topLeft = arcTopLeft,
-                size = arcSize,
-                style = Stroke(width = strokeWidth / 2, cap = StrokeCap.Butt)
-            )
-        }
+                // 绘制外圈
+                rotate(rotOuter) {
+                    val inset = strokeW
+                    val dSize = Size(w - inset * 2, w - inset * 2)
+                    val dTopLeft = Offset(inset, inset)
+                    drawArc(color, 0f, 90f, false, dTopLeft, dSize, style = thinStroke)
+                    drawArc(color, 120f, 90f, false, dTopLeft, dSize, style = thinStroke)
+                    drawArc(color.copy(0.5f), 240f, 60f, false, dTopLeft, dSize, style = thinStroke)
+                }
 
-        // 绘制内圈
-        withTransform({
-            rotate(innerRotation, center)
-        }) {
-            val innerRadius = w / 3
-            val arcSize = Size(innerRadius * 2, innerRadius * 2)
-            val arcTopLeft = Offset(center.x - innerRadius, center.y - innerRadius)
+                // 绘制内圈
+                rotate(rotInner) {
+                    val innerD = w / 1.5f
+                    val offset = (w - innerD) / 2
 
-            drawArc(
-                color = color,
-                startAngle = 0f,
-                sweepAngle = 270f,
-                useCenter = false,
-                topLeft = arcTopLeft,
-                size = arcSize,
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Square)
-            )
-        }
+                    drawArc(
+                        color = color,
+                        startAngle = 0f,
+                        sweepAngle = 270f,
+                        useCenter = false,
+                        topLeft = Offset(offset, offset),
+                        size = Size(innerD, innerD),
+                        style = Stroke(strokeW, cap = StrokeCap.Square)
+                    )
+                }
 
-        drawCircle(
-            color = color.copy(alpha = coreAlpha),
-            radius = w / 10,
-            center = center
-        )
+                // 核心与十字准星
+                val c = center
+                drawCircle(color.copy(alpha = coreAlpha), radius = w / 10, center = c)
 
-        drawLine(
-            color = color.copy(alpha = 0.3f),
-            start = Offset(center.x - w/4, center.y),
-            end = Offset(center.x + w/4, center.y),
-            strokeWidth = 2f
-        )
-        drawLine(
-            color = color.copy(alpha = 0.3f),
-            start = Offset(center.x, center.y - h/4),
-            end = Offset(center.x, center.y + h/4),
-            strokeWidth = 2f
-        )
-    }
+                // 准星线
+                val lineLen = w / 4
+                val lineAlpha = color.copy(alpha = 0.3f)
+                drawLine(lineAlpha, Offset(c.x - lineLen, c.y), Offset(c.x + lineLen, c.y), strokeWidth = 2f)
+                drawLine(lineAlpha, Offset(c.x, c.y - lineLen), Offset(c.x, c.y + lineLen), strokeWidth = 2f)
+            }
+    )
 }

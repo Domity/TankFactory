@@ -10,14 +10,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.domity.cybertheme.atoms.CyberSurface
 import com.domity.cybertheme.atoms.CyberText
 import com.domity.cybertheme.foundation.CyberTheme
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 
 // 按钮
 @Composable
@@ -31,30 +32,47 @@ fun CyberButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val mainColor = if (isPrimary) CyberTheme.colors.primary else CyberTheme.colors.secondary
-    val scale = if (isPressed && enabled) 0.95f else 1f
-    val shape = CutCornerShape(topStart = 0.dp, topEnd = 12.dp, bottomEnd = 0.dp, bottomStart = 12.dp)
 
-    CyberSurface(
+    Box(
         modifier = modifier
-            .scale(scale)
             .height(48.dp)
-            .graphicsLayer { alpha = if (enabled) 1f else 0.4f } // 禁用时降低透明度
-            .clickable(interactionSource, null, enabled = enabled, onClick = onClick),
-        shape = shape,
-        color = if(isPressed && enabled) mainColor.copy(alpha = 0.2f) else Color.Transparent,
-        borderWidth = 1.dp,
-        borderColor = if(isPressed && enabled) mainColor else mainColor.copy(alpha = 0.6f)
+            .clickable(interactionSource, null, enabled = enabled, onClick = onClick)
+            .drawBehind {
+                val alpha = if (enabled) 1f else 0.4f
+                val pressScale = if (isPressed && enabled) 0.95f else 1f
+
+                scale(pressScale) {
+                    val cutSize = 12.dp.toPx()
+                    val path = Path().apply {
+                        moveTo(0f, 0f)
+                        lineTo(size.width - cutSize, 0f)
+                        lineTo(size.width, cutSize) //右上切角
+                        lineTo(size.width, size.height)
+                        lineTo(cutSize, size.height)
+                        lineTo(0f, size.height - cutSize) //左下切角
+                        close()
+                    }
+                    // 绘制背景
+                    if (isPressed && enabled) {
+                        drawPath(path, mainColor.copy(alpha = 0.2f * alpha))
+                    }
+                    // 绘制边框
+                    val borderC =
+                        if (isPressed && enabled) mainColor else mainColor.copy(alpha = 0.6f)
+                    drawPath(
+                        path,
+                        borderC.copy(alpha = borderC.alpha * alpha),
+                        style = Stroke(1.dp.toPx())
+                    )
+                }
+            },
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CyberText(
-                text = text.uppercase(),
-                style = CyberTheme.typography.button,
-                color = mainColor
-            )
-        }
+        CyberText(
+            text = text.uppercase(),
+            style = CyberTheme.typography.button,
+            color = mainColor.copy(alpha = if (enabled) 1f else 0.4f)
+        )
     }
 }
 

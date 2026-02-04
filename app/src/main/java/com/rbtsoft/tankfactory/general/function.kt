@@ -30,7 +30,7 @@ suspend fun saveImageToDownload(
             context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
                 context.contentResolver.openOutputStream(uri)?.use { os ->
                     BufferedOutputStream(os, bufferSize).use { bufferedStream ->
-                        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, bufferedStream)
+                        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 0, bufferedStream)
                         success = true
                     }
                 }

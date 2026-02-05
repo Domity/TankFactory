@@ -20,11 +20,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.rbtsoft.tankfactory.R
 import com.domity.cybertheme.foundation.CyberTheme
-import com.domity.cybertheme.atoms.CyberSurface
-import com.domity.cybertheme.atoms.CyberText
-import com.domity.cybertheme.molecules.CyberButton
-import com.domity.cybertheme.molecules.CyberLoading
-import com.domity.cybertheme.molecules.CyberSlider
+import com.domity.cybertheme.atoms.*
+import com.domity.cybertheme.molecules.*
 import com.domity.cybertheme.templates.CyberScaffold
 import kotlin.math.roundToInt
 

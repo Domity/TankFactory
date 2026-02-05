@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.domity.cybertheme.atoms.CyberSurface
@@ -20,7 +19,6 @@ import com.domity.cybertheme.molecules.CyberSwitch
 import com.domity.cybertheme.templates.CyberScaffold
 import com.rbtsoft.tankfactory.R
 import com.rbtsoft.tankfactory.ui.theme.MirageTankImageTheme
-import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
 
 @Composable
 fun MirageTankViewerScreen() {
@@ -94,13 +92,5 @@ fun MirageTankViewerScreen() {
                 style = CyberTheme.typography.body
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    TankFactoryTheme {
-        MirageTankViewerScreen()
     }
 }

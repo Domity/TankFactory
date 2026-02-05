@@ -3,22 +3,31 @@ package com.domity.cybertheme.molecules
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.domity.cybertheme.atoms.CyberSurface
 import com.domity.cybertheme.atoms.CyberText
 import com.domity.cybertheme.foundation.CyberTheme
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.scale
 
 // 按钮
 @Composable
@@ -31,39 +40,51 @@ fun CyberButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val mainColor = if (isPrimary) CyberTheme.colors.primary else CyberTheme.colors.secondary
+    val themePrimary = CyberTheme.colors.primary
+    val themeSecondary = CyberTheme.colors.secondary
+    val baseColor = if (isPrimary) themePrimary else themeSecondary
 
     Box(
         modifier = modifier
             .height(48.dp)
             .clickable(interactionSource, null, enabled = enabled, onClick = onClick)
-            .drawBehind {
-                val alpha = if (enabled) 1f else 0.4f
-                val pressScale = if (isPressed && enabled) 0.95f else 1f
+            .drawWithCache {
+                val cutSize = 12.dp.toPx()
+                val path = Path().apply {
+                    moveTo(0f, 0f)
+                    lineTo(size.width - cutSize, 0f)
+                    lineTo(size.width, cutSize)
+                    lineTo(size.width, size.height)
+                    lineTo(cutSize, size.height)
+                    lineTo(0f, size.height - cutSize)
+                    close()
+                }
 
-                scale(pressScale) {
-                    val cutSize = 12.dp.toPx()
-                    val path = Path().apply {
-                        moveTo(0f, 0f)
-                        lineTo(size.width - cutSize, 0f)
-                        lineTo(size.width, cutSize) //右上切角
-                        lineTo(size.width, size.height)
-                        lineTo(cutSize, size.height)
-                        lineTo(0f, size.height - cutSize) //左下切角
-                        close()
+                onDrawBehind {
+                    val alpha = if (enabled) 1f else 0.4f
+                    val activeScale = if (isPressed && enabled) 0.95f else 1f
+                    scale(activeScale) {
+                        // 背景
+                        if (isPressed && enabled) {
+                            drawPath(path, baseColor.copy(alpha = 0.2f * alpha))
+                        }
+                        // 辉光
+                        val strokeColor = if (isPressed && enabled) baseColor else baseColor.copy(alpha = 0.6f)
+                        // 光晕层
+                        if (enabled) {
+                            drawPath(
+                                path,
+                                strokeColor.copy(alpha = 0.3f * alpha),
+                                style = Stroke(width = 3.dp.toPx())
+                            )
+                        }
+                        // 核心层
+                        drawPath(
+                            path,
+                            strokeColor.copy(alpha = strokeColor.alpha * alpha),
+                            style = Stroke(width = 1.dp.toPx())
+                        )
                     }
-                    // 绘制背景
-                    if (isPressed && enabled) {
-                        drawPath(path, mainColor.copy(alpha = 0.2f * alpha))
-                    }
-                    // 绘制边框
-                    val borderC =
-                        if (isPressed && enabled) mainColor else mainColor.copy(alpha = 0.6f)
-                    drawPath(
-                        path,
-                        borderC.copy(alpha = borderC.alpha * alpha),
-                        style = Stroke(1.dp.toPx())
-                    )
                 }
             },
         contentAlignment = Alignment.Center
@@ -71,7 +92,7 @@ fun CyberButton(
         CyberText(
             text = text.uppercase(),
             style = CyberTheme.typography.button,
-            color = mainColor.copy(alpha = if (enabled) 1f else 0.4f)
+            color = baseColor.copy(alpha = if (enabled) 1f else 0.4f)
         )
     }
 }

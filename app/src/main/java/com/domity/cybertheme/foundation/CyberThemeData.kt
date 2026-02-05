@@ -1,6 +1,10 @@
 package com.domity.cybertheme.foundation
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -9,10 +13,10 @@ import androidx.compose.ui.unit.sp
 
 @Immutable
 class CyberColors(
-    // 这只是定义，改了没用
+
     val background: Color = Color(0xFF050505),    // 极黑背景
     val surface: Color = Color(0xFF121212),       // 表面颜色
-    val primary: Color = Color(0xFFFFD700),       // 主霓虹色
+    val primary: Color = Color(0xFFA5A6FD),       // 主霓虹色
     val secondary: Color = Color(0xFFFF0000),     // 副霓虹色
     val text: Color = Color(0xFFE0E0E0),          // 主文本
     val textDim: Color = Color(0xFF666666),       // 暗文本

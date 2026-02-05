@@ -1,21 +1,28 @@
 package com.domity.cybertheme.molecules
 
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.drag
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.domity.cybertheme.foundation.CyberTheme
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
@@ -31,10 +38,9 @@ fun CyberSlider(
     val borderColor = CyberTheme.colors.border
     val path = remember { Path() }
 
-    // 用于绘制辉光
     val shadowPaint = remember {
         android.graphics.Paint().apply {
-            color = android.graphics.Color.BLACK // 阴影主体颜色
+            color = android.graphics.Color.BLACK
             style = android.graphics.Paint.Style.FILL
         }
     }
@@ -59,9 +65,15 @@ fun CyberSlider(
                     }
                     if (newValue != value) onValueChange(newValue)
                 }
-                coroutineScope {
-                    launch { detectTapGestures { offset -> update(offset.x) } }
-                    launch { detectHorizontalDragGestures { change, _ -> change.consume(); update(change.position.x) } }
+
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+                    update(down.position.x)
+
+                    drag(down.id) { change ->
+                        change.consume()
+                        update(change.position.x)
+                    }
                 }
             }
             .drawBehind {
@@ -70,7 +82,6 @@ fun CyberSlider(
                 val thumbH = 24.dp.toPx()
                 val trackH = 8.dp.toPx()
                 val trackTop = center.y - trackH / 2
-                // 定义切角
                 fun buildCutPath(rectSize: Size, offset: Offset, cut: Float, onlyLeft: Boolean = false) {
                     path.rewind()
                     val w = rectSize.width
@@ -93,12 +104,12 @@ fun CyberSlider(
                     path.close()
                 }
 
-                // 绘制轨道背景
+                // 轨道背景
                 buildCutPath(Size(size.width, trackH), Offset(0f, trackTop), 2.dp.toPx())
                 drawPath(path, trackColor)
                 drawPath(path, borderColor, style = Stroke(1.dp.toPx()))
 
-                // 绘制激活部分
+                // 激活部分
                 val activeWidth = size.width * fraction
                 if (activeWidth > 0) {
                     buildCutPath(Size(activeWidth, trackH), Offset(0f, trackTop), 2.dp.toPx(), onlyLeft = true)
@@ -112,33 +123,33 @@ fun CyberSlider(
                     )
                 }
 
-                // 绘制滑块
+                // 滑块
                 val draggableWidth = size.width - thumbW
                 val thumbX = draggableWidth * fraction
                 val thumbTop = center.y - thumbH / 2
                 val thumbOffset = Offset(thumbX, thumbTop)
 
-                // 构建滑块路径
+                // 滑块路径
                 buildCutPath(Size(thumbW, thumbH), thumbOffset, 2.dp.toPx())
 
-                // 绘制辉光
+                // 辉光
                 drawIntoCanvas { canvas ->
                     shadowPaint.setShadowLayer(
-                        8.dp.toPx(), // 半径
-                        0f, 0f,      // 偏移
+                        8.dp.toPx(),
+                        0f, 0f,
                         primaryColor.toArgb()
                     )
-                    // 绘制阴影
+                    // 阴影
                     canvas.nativeCanvas.drawPath(path.asAndroidPath(), shadowPaint)
                 }
 
-                // 绘制滑块主体
+                // 滑块主体
                 drawPath(path, Color.Black)
 
-                // 绘制滑块边框
+                // 滑块边框
                 drawPath(path, primaryColor, style = Stroke(1.dp.toPx()))
 
-                // 绘制中间亮线
+                // 亮线
                 drawLine(
                     Color.White,
                     start = Offset(thumbX + thumbW / 2, center.y - 6.dp.toPx()),

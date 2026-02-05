@@ -14,7 +14,8 @@ add_library(
         SHARED
         mirage_tank_encoder.cpp
         lsb_tank_encoder.cpp
-        lsb_tank_decoder.cpp)
+        lsb_tank_decoder.cpp
+        obfuscation.cpp)
 
 find_library(
         jnigraphics-lib
@@ -25,5 +26,5 @@ target_link_libraries(
         ${jnigraphics-lib}
         OpenMP::OpenMP_CXX)
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto -ffast-math -fvisibility=hidden -ffunction-sections -fdata-sections")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Os -flto -ffast-math -fvisibility=hidden -ffunction-sections -fdata-sections -fomit-frame-pointer")
 set_target_properties(tankfactory PROPERTIES LINK_FLAGS "-Wl,--gc-sections")

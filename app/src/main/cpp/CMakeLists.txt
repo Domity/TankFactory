@@ -1,13 +1,5 @@
 cmake_minimum_required(VERSION 3.22.1)
-
 project("tankfactory")
-
-find_package(OpenMP)
-if(OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
 
 add_library(
         tankfactory
@@ -15,16 +7,42 @@ add_library(
         mirage_tank_encoder.cpp
         lsb_tank_encoder.cpp
         lsb_tank_decoder.cpp
-        obfuscation.cpp)
+        obfuscation.cpp
+)
 
-find_library(
-        jnigraphics-lib
-        jnigraphics)
+find_library(jnigraphics-lib jnigraphics)
 
 target_link_libraries(
         tankfactory
         ${jnigraphics-lib}
-        OpenMP::OpenMP_CXX)
+)
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Os -flto -ffast-math -fvisibility=hidden -ffunction-sections -fdata-sections -fomit-frame-pointer")
-set_target_properties(tankfactory PROPERTIES LINK_FLAGS "-Wl,--gc-sections")
+target_compile_options(tankfactory PRIVATE
+        -Oz
+        -ffast-math
+        -fomit-frame-pointer
+
+        -fno-exceptions
+        -fno-rtti
+        -fno-unwind-tables
+        -fno-asynchronous-unwind-tables
+
+        -fvisibility=hidden
+        -fvisibility-inlines-hidden
+        -fmerge-all-constants
+        -ffunction-sections
+        -fdata-sections
+
+        -fno-stack-protector
+        -flto=thin
+)
+
+target_link_options(tankfactory PRIVATE
+        -Wl,--gc-sections
+        -Wl,--icf=all
+        -Wl,--strip-all
+        -Wl,--hash-style=gnu
+        -Wl,--exclude-libs,ALL
+        -fuse-ld=lld
+        -flto=thin
+)

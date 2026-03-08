@@ -28,10 +28,9 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
     val isDecoding: StateFlow<Boolean> = _isDecoding
     private val _isSaving = MutableStateFlow(false)
     val isSaving: StateFlow<Boolean> = _isSaving
-    //  大于此值则不进行预览直接保存
-    private val maxSafePixels = 50000000
-    //  大于此值则加载较小的位图副本到预览界面
-    private val maxDisplayDimension = 2500
+
+    private val maxSafePixels = 16_000_000
+    private val maxDisplayDimension = 1080
 
     fun setImageUri(uri: Uri) {
         _selectedImageUri.value = uri

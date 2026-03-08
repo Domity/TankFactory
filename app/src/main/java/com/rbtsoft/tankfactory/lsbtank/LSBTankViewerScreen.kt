@@ -1,11 +1,25 @@
 package com.rbtsoft.tankfactory.lsbtank
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.domity.cybertheme.atoms.CyberSurface
 import com.domity.cybertheme.atoms.CyberText
 import com.domity.cybertheme.foundation.CyberTheme
@@ -23,6 +36,7 @@ import com.domity.cybertheme.molecules.CyberButton
 import com.domity.cybertheme.molecules.CyberLoading
 import com.domity.cybertheme.templates.CyberScaffold
 import com.rbtsoft.tankfactory.R
+import com.rbtsoft.tankfactory.ui.components.FastUriImage
 
 @Composable
 fun LSBTankViewerScreen(
@@ -33,6 +47,9 @@ fun LSBTankViewerScreen(
     val isTooLarge by viewModel.isResultTooLarge.collectAsState()
     val isSaving by viewModel.isSaving.collectAsState()
     val isDecoding by viewModel.isDecoding.collectAsState()
+    val cachedDisplayBitmap = remember(displayBitmap) {
+        displayBitmap?.asImageBitmap()
+    }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -88,7 +105,7 @@ fun LSBTankViewerScreen(
                     CyberButton(
                         text = if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save),
                         onClick = { viewModel.saveImageToDownload() },
-                        enabled = (displayBitmap != null || isTooLarge) && !isSaving,
+                        enabled = (cachedDisplayBitmap != null || isTooLarge) && !isSaving,
                         modifier = Modifier.fillMaxWidth(),
                         isPrimary = false
                     )
@@ -102,7 +119,7 @@ fun LSBTankViewerScreen(
                     .weight(1f),
                 color = CyberTheme.colors.surface,
                 borderWidth = 1.dp,
-                borderColor = if (displayBitmap != null) CyberTheme.colors.primary else CyberTheme.colors.border
+                borderColor = if (cachedDisplayBitmap != null) CyberTheme.colors.primary else CyberTheme.colors.border
             ) {
                 Box(
                     modifier = Modifier
@@ -119,16 +136,14 @@ fun LSBTankViewerScreen(
                                 style = CyberTheme.typography.body
                             )
                         }
-
-                        displayBitmap != null -> {
+                        cachedDisplayBitmap != null -> {
                             Image(
-                                bitmap = displayBitmap!!.asImageBitmap(),
+                                bitmap = cachedDisplayBitmap,
                                 contentDescription = "Decoded Hidden Image",
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
-
                         else -> {
                             if (!isDecoding) {
                                 CyberText(
@@ -171,7 +186,7 @@ fun LSBTankViewerScreen(
 @Composable
 private fun ImageSelectionSlot(
     modifier: Modifier = Modifier,
-    uri: Any?,
+    uri: Uri?,
     placeholderText: String,
     onClick: () -> Unit
 ) {
@@ -195,9 +210,8 @@ private fun ImageSelectionSlot(
                     style = CyberTheme.typography.body
                 )
             } else {
-                AsyncImage(
-                    model = uri,
-                    contentDescription = null,
+                FastUriImage(
+                    uri = uri,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
                 )

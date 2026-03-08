@@ -27,7 +27,7 @@ object MirageTankCoder {
         return outputBitmap
     }
 
-    private external fun encodeNative(
+    external fun encodeNative(
         bitmap1: Bitmap,
         bitmap2: Bitmap,
         outputBitmap: Bitmap,

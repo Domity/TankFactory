@@ -99,13 +99,12 @@ Java_com_rbtsoft_tankfactory_lsbtank_LsbTankCoder_encodeNative(JNIEnv *env, jobj
         memcpy(raw_data + total_header_size, ins_pic_bytes_ptr, ins_pic_length);
 
         env->ReleaseByteArrayElements(ins_pic_byte_array, ins_pic_bytes_ptr, JNI_ABORT);
-        ins_pic_bytes_ptr = nullptr;
 
         AndroidBitmapInfo tank_pic_info;
         if (AndroidBitmap_getInfo(env, tank_pic, &tank_pic_info) < 0) break;
         if (AndroidBitmap_lockPixels(env, tank_pic, &tank_pixels_ptr) < 0) break;
 
-        uint32_t* pixels = (uint32_t*)tank_pixels_ptr;
+        auto* pixels = (uint32_t*)tank_pixels_ptr;
         int total_pixels = tank_pic_info.width * tank_pic_info.height;
 
         LsbBitStream stream;
@@ -161,7 +160,7 @@ jbyteArray bitmapToByteArray(JNIEnv* env, jobject bitmap) {
     jmethodID compressMethod = env->GetMethodID(bitmapClass, "compress", "(Landroid/graphics/Bitmap$CompressFormat;ILjava/io/OutputStream;)Z");
     env->CallBooleanMethod(bitmap, compressMethod, webpLossless, 100, byteArrayOutputStream);
     jmethodID toByteArrayMethod = env->GetMethodID(byteArrayOutputStreamClass, "toByteArray", "()[B");
-    jbyteArray byteArray = (jbyteArray)env->CallObjectMethod(byteArrayOutputStream, toByteArrayMethod);
+    auto byteArray = (jbyteArray)env->CallObjectMethod(byteArrayOutputStream, toByteArrayMethod);
     env->DeleteLocalRef(bitmapClass);
     env->DeleteLocalRef(compressFormatClass);
     env->DeleteLocalRef(webpLossless);

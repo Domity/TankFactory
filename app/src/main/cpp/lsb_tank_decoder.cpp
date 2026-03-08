@@ -9,16 +9,12 @@
         if (header_state == 0) { \
             if ((b) == 0x01) { \
                 header_state = 1; \
-                \
                 if (final_data_size == 0 || final_data_size > (size_t)(total_pixels * 3)) goto decode_error; \
-                 \
                 lsb_data = env->NewByteArray((jsize)final_data_size); \
                 if (!lsb_data) goto decode_error; \
-                 \
                 data_ptr = (uint8_t*)env->GetPrimitiveArrayCritical(lsb_data, nullptr); \
             } else if ((b) >= '0' && (b) <= '9') { \
-                \
-                final_data_size = final_data_size * 10 + ((b) - '0'); \
+               final_data_size = final_data_size * 10 + ((b) - '0'); \
             } else goto decode_error; \
         } else if (header_state == 1) { \
             if ((b) == 0x01) header_state = 2; \
@@ -39,7 +35,7 @@ Java_com_rbtsoft_tankfactory_lsbtank_LsbTankCoder_decodeNative(JNIEnv *env, jobj
     if (tank_pic_info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) return nullptr;
     if (AndroidBitmap_lockPixels(env, tank_pic, &tank_pixels_ptr) < 0) return nullptr;
 
-    uint32_t* pixels = (uint32_t*)tank_pixels_ptr;
+    auto* pixels = (uint32_t*)tank_pixels_ptr;
     int total_pixels = tank_pic_info.width * tank_pic_info.height;
     if (total_pixels <= 0) goto decode_error;
 

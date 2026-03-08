@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.general
+package com.rbtsoft.tankfactory.ui.components
 
 import android.content.ContentValues
 import android.content.Context

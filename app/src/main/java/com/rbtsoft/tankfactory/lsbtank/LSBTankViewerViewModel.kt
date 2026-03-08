@@ -79,14 +79,21 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
 
             val pixelCount = largeBitmap.width * largeBitmap.height
 
-            if (pixelCount > maxSafePixels) {
-                _isResultTooLarge.value = true
-                _displayBitmap.value = null
-                saveImageToDownload()
-            } else {
-                _isResultTooLarge.value = false
-                val scaledBitmap = scaleForDisplay(largeBitmap)
-                _displayBitmap.value = scaledBitmap
+                    if (pixelCount > maxSafePixels) {
+                        _isResultTooLarge.value = true
+                    } else {
+                        val scaledBitmap = withContext(Dispatchers.Default) {
+                            scaleForDisplay(largeBitmap)
+                        }
+                        _displayBitmap.value = scaledBitmap
+                    }
+                }
+            } catch (_: OutOfMemoryError) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(app, app.getString(R.string.image_too_large), Toast.LENGTH_LONG).show()
+                }
+            } finally {
+                _isDecoding.value = false
             }
         }
     }

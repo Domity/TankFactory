@@ -36,7 +36,7 @@ android {
             isJniDebuggable = false
             isDebuggable = false
             vcsInfo.include = false
-           // proguardFiles("proguard-rules.pro")
+            proguardFiles("proguard-rules.pro")
         }
     }
     compileOptions {

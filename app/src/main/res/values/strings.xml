@@ -13,6 +13,7 @@
     <string name="decoding">解码中</string>
     <string name="save_success">图片已保存到Download</string>
     <string name="save_failed">保存失败: %s</string>
+<!--    <string name="why_it_happened">内部错误</string>-->
 
     <string name="mirage_tank_maker_cover_image_brightness">表图亮度: %.2f</string>
     <string name="mirage_tank_maker_hidden_image_brightness">里图亮度: %.2f</string>

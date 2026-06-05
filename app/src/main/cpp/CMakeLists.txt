@@ -43,6 +43,7 @@ target_link_options(tankfactory PRIVATE
         -Wl,--strip-all
         -Wl,--hash-style=gnu
         -Wl,--exclude-libs,ALL
+        -Wl,-z,max-page-size=16384
         -fuse-ld=lld
         -flto=thin
 )

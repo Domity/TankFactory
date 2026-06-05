@@ -16,22 +16,33 @@ inline uint32_t rgb_to_gray_scalar(uint32_t c) {
     return (r * 19595 + g * 38469 + b * 7472) >> 16;
 }
 
+inline void* alloc_16k_aligned(size_t size) {
+    void* ptr = nullptr;
+    size_t aligned_size = (size + 16383) & ~16383;
+    posix_memalign(&ptr, 16384, aligned_size);
+    return ptr;
+}
+
 struct ScaleXTable {
-    int* src_indices;
+    int* src_x;
+    int* src_x_next;
     int* weights;
 };
 
 ScaleXTable precompute_x_table(int src_w, int dst_w) {
-    ScaleXTable table;
-    int* mem = new int[dst_w * 2];
-    table.src_indices = mem;
-    table.weights = mem + dst_w;
+    ScaleXTable table{};
+    int* mem = (int*)alloc_16k_aligned(dst_w * 3 * sizeof(int));
+    table.src_x = mem;
+    table.src_x_next = mem + dst_w;
+    table.weights = mem + 2 * dst_w;
     float x_ratio = dst_w > 1 ? (float)(src_w - 1) / (dst_w - 1) : 0;
+
     for (int x = 0; x < dst_w; ++x) {
         float src_xf = x * x_ratio;
-        int src_x = (int)src_xf;
-        table.src_indices[x] = src_x;
-        table.weights[x] = (int)((src_xf - src_x) * 256.0f);
+        int sx = (int)src_xf;
+        table.src_x[x] = sx;
+        table.src_x_next[x] = (sx + 1 < src_w) ? sx + 1 : sx;
+        table.weights[x] = (int)((src_xf - sx) * 256.0f);
     }
     return table;
 }
@@ -39,7 +50,7 @@ ScaleXTable precompute_x_table(int src_w, int dst_w) {
 __attribute__((always_inline))
 inline void get_scaled_gray_row(const uint8_t* srcPixels, int src_stride, int src_w, int src_h,
                                 int dst_y, int dst_w, float y_ratio,
-                                const int* p_idx, const int* p_w, uint8_t* out_row_buffer) {
+                                const ScaleXTable& table, uint8_t* out_row_buffer) {
     float src_yf = dst_y * y_ratio;
     int src_y = (int)src_yf;
     int y_weight = (int)((src_yf - src_y) * 256.0f);
@@ -49,9 +60,10 @@ inline void get_scaled_gray_row(const uint8_t* srcPixels, int src_stride, int sr
     const uint32_t* row1 = (const uint32_t*)(srcPixels + y1 * src_stride);
 
     for (int x = 0; x < dst_w; ++x) {
-        int sx = p_idx[x];
-        int xw = p_w[x];
-        int sx_next = (sx + 1 < src_w) ? sx + 1 : sx;
+        int sx = table.src_x[x];
+        int sx_next = table.src_x_next[x];
+        int xw = table.weights[x];
+
         uint32_t g00 = rgb_to_gray_scalar(row0[sx]);
         uint32_t g01 = rgb_to_gray_scalar(row0[sx_next]);
         uint32_t g10 = rgb_to_gray_scalar(row1[sx]);
@@ -63,41 +75,34 @@ inline void get_scaled_gray_row(const uint8_t* srcPixels, int src_stride, int sr
 }
 
 struct EncodeTaskContext {
-    uint32_t start_y;
-    uint32_t end_y;
-
-    const uint8_t* pixels1;
-    const uint8_t* pixels2;
+    uint32_t start_y, end_y;
+    const uint8_t *pixels1, *pixels2;
     uint8_t* outputPixels;
-
     int info1_stride, info1_w, info1_h;
     int info2_stride, info2_w, info2_h;
     int out_stride, out_w, out_h;
-
     float y_ratio1, y_ratio2;
     ScaleXTable table1, table2;
-
     int32_t k1_fixed, k2_fixed;
     int threshold;
-
     uint8_t* thread_buffer;
+    uint32_t row_size;
 };
 
 void* encode_worker_thread(void* arg) {
     auto* ctx = (EncodeTaskContext*)arg;
-
     int16x8_t v_threshold = vdupq_n_s16((int16_t)ctx->threshold);
     int16x8_t v_255 = vdupq_n_s16(255);
     int16x8_t v_0 = vdupq_n_s16(0);
 
     uint8_t* row1_gray = ctx->thread_buffer;
-    uint8_t* row2_gray = ctx->thread_buffer + ctx->out_w;
+    uint8_t* row2_gray = ctx->thread_buffer + ctx->row_size;
 
     for (uint32_t y = ctx->start_y; y < ctx->end_y; ++y) {
         get_scaled_gray_row(ctx->pixels1, ctx->info1_stride, ctx->info1_w, ctx->info1_h,
-                            y, ctx->out_w, ctx->y_ratio1, ctx->table1.src_indices, ctx->table1.weights, row1_gray);
+                            y, ctx->out_w, ctx->y_ratio1, ctx->table1, row1_gray);
         get_scaled_gray_row(ctx->pixels2, ctx->info2_stride, ctx->info2_w, ctx->info2_h,
-                            y, ctx->out_w, ctx->y_ratio2, ctx->table2.src_indices, ctx->table2.weights, row2_gray);
+                            y, ctx->out_w, ctx->y_ratio2, ctx->table2, row2_gray);
 
         auto* outRow = (uint32_t*)(ctx->outputPixels + y * ctx->out_stride);
         uint32_t x = 0;
@@ -110,21 +115,19 @@ void* encode_worker_thread(void* arg) {
 
             int32x4_t v1_lo_32 = vmulq_n_s32(vmovl_s16(vget_low_s16(g1_s16)), ctx->k1_fixed);
             int32x4_t v1_hi_32 = vmulq_n_s32(vmovl_s16(vget_high_s16(g1_s16)), ctx->k1_fixed);
-            int16x8_t v1_raw = vcombine_s16(vshrn_n_s32(v1_lo_32, 12), vshrn_n_s32(v1_hi_32, 12));
-            int16x8_t v1 = vminq_s16(vmaxq_s16(v1_raw, v_threshold), v_255);
+            int16x8_t v1 = vminq_s16(vmaxq_s16(vcombine_s16(vshrn_n_s32(v1_lo_32, 12), vshrn_n_s32(v1_hi_32, 12)), v_threshold), v_255);
 
             int32x4_t v2_lo_32 = vmulq_n_s32(vmovl_s16(vget_low_s16(g2_s16)), ctx->k2_fixed);
             int32x4_t v2_hi_32 = vmulq_n_s32(vmovl_s16(vget_high_s16(g2_s16)), ctx->k2_fixed);
-            int16x8_t v2_raw = vcombine_s16(vshrn_n_s32(v2_lo_32, 12), vshrn_n_s32(v2_hi_32, 12));
-            int16x8_t v2 = vminq_s16(vmaxq_s16(v2_raw, v_0), v_threshold);
+            int16x8_t v2 = vminq_s16(vmaxq_s16(vcombine_s16(vshrn_n_s32(v2_lo_32, 12), vshrn_n_s32(v2_hi_32, 12)), v_0), v_threshold);
 
             int16x8_t alpha_s16 = vsubq_s16(vaddq_s16(v_255, v2), v1);
 
             uint8x8x4_t out_vec;
-            out_vec.val[0] = vqmovun_s16(v2);         // R
-            out_vec.val[1] = out_vec.val[0];          // G
-            out_vec.val[2] = out_vec.val[0];          // B
-            out_vec.val[3] = vqmovun_s16(alpha_s16);  // A
+            out_vec.val[0] = vqmovun_s16(v2);
+            out_vec.val[1] = out_vec.val[0];
+            out_vec.val[2] = out_vec.val[0];
+            out_vec.val[3] = vqmovun_s16(alpha_s16);
             vst4_u8((uint8_t*)&outRow[x], out_vec);
         }
 
@@ -138,11 +141,9 @@ void* encode_worker_thread(void* arg) {
     return nullptr;
 }
 
-
 extern "C" JNIEXPORT void JNICALL
 Java_com_rbtsoft_tankfactory_miragetank_MirageTankCoder_encodeNative(
-        JNIEnv *env, jobject,
-        jobject bitmap1, jobject bitmap2, jobject outputBitmap,
+        JNIEnv *env, jobject, jobject bitmap1, jobject bitmap2, jobject outputBitmap,
         jfloat photo1K, jfloat photo2K, jint threshold) {
 
     AndroidBitmapInfo info1, info2, outInfo;
@@ -164,36 +165,37 @@ Java_com_rbtsoft_tankfactory_miragetank_MirageTankCoder_encodeNative(
     ScaleXTable table1 = precompute_x_table(info1.width, width);
     ScaleXTable table2 = precompute_x_table(info2.width, width);
 
-    const int32_t FIXED_SHIFT = 12;
-    const int32_t k1_fixed = (int32_t)(photo1K * (1 << FIXED_SHIFT));
-    const int32_t k2_fixed = (int32_t)(photo2K * (1 << FIXED_SHIFT));
+    const auto k1_fixed = (int32_t)(photo1K * 4096.0f);
+    const auto k2_fixed = (int32_t)(photo2K * 4096.0f);
 
     int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
     if (num_threads <= 0) num_threads = 4;
     if (num_threads > 8) num_threads = 8;
     if (height < (uint32_t)num_threads) num_threads = height;
 
-    pthread_t* threads = new pthread_t[num_threads];
-    EncodeTaskContext* tasks = new EncodeTaskContext[num_threads];
-    uint8_t* thread_buffers = new uint8_t[num_threads * width * 2];
+    auto* threads = new pthread_t[num_threads];
+    auto* tasks = new EncodeTaskContext[num_threads];
+
+    uint32_t row_size = (width + 63) & ~63;
+    auto* thread_buffers = (uint8_t*)alloc_16k_aligned(num_threads * row_size * 2);
 
     uint32_t rows_per_thread = height / num_threads;
     uint32_t remainder = height % num_threads;
     uint32_t current_y = 0;
 
     for (int i = 0; i < num_threads; ++i) {
-        tasks[i].pixels1 = (const uint8_t*)pixels1;
-        tasks[i].pixels2 = (const uint8_t*)pixels2;
+        tasks[i].pixels1 = (const uint8_t*)pixels1; tasks[i].pixels2 = (const uint8_t*)pixels2;
         tasks[i].outputPixels = (uint8_t*)outputPixels;
         tasks[i].info1_stride = info1.stride; tasks[i].info1_w = info1.width; tasks[i].info1_h = info1.height;
         tasks[i].info2_stride = info2.stride; tasks[i].info2_w = info2.width; tasks[i].info2_h = info2.height;
         tasks[i].out_stride = outInfo.stride; tasks[i].out_w = width;         tasks[i].out_h = height;
-        tasks[i].y_ratio1 = y_ratio1; tasks[i].y_ratio2 = y_ratio2;
-        tasks[i].table1 = table1;     tasks[i].table2 = table2;
-        tasks[i].k1_fixed = k1_fixed; tasks[i].k2_fixed = k2_fixed;
+        tasks[i].y_ratio1 = y_ratio1;         tasks[i].y_ratio2 = y_ratio2;
+        tasks[i].table1 = table1;             tasks[i].table2 = table2;
+        tasks[i].k1_fixed = k1_fixed;         tasks[i].k2_fixed = k2_fixed;
         tasks[i].threshold = threshold;
 
-        tasks[i].thread_buffer = thread_buffers + i * width * 2;
+        tasks[i].row_size = row_size;
+        tasks[i].thread_buffer = thread_buffers + i * row_size * 2;
 
         tasks[i].start_y = current_y;
         uint32_t count = rows_per_thread + (i < (int)remainder ? 1 : 0);
@@ -203,15 +205,13 @@ Java_com_rbtsoft_tankfactory_miragetank_MirageTankCoder_encodeNative(
         pthread_create(&threads[i], nullptr, encode_worker_thread, &tasks[i]);
     }
 
-    for (int i = 0; i < num_threads; ++i) {
-        pthread_join(threads[i], nullptr);
-    }
+    for (int i = 0; i < num_threads; ++i) pthread_join(threads[i], nullptr);
 
     delete[] threads;
     delete[] tasks;
-    delete[] thread_buffers;
-    delete[] table1.src_indices;
-    delete[] table2.src_indices;
+    free(thread_buffers);
+    free(table1.src_x);
+    free(table2.src_x);
 
     AndroidBitmap_unlockPixels(env, bitmap1);
     AndroidBitmap_unlockPixels(env, bitmap2);

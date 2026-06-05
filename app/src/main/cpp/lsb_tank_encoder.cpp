@@ -8,15 +8,9 @@
 struct LsbBitStream {
     uint32_t fifo = 0;
     int fifo_count = 0;
-
     const uint8_t* data{};
     size_t data_size{};
     size_t data_idx = 0;
-
-    const uint8_t* sig{};
-    size_t sig_len{};
-    size_t sig_idx = 0;
-
     int compress{};
     int shift_complement{};
     uint32_t lsb_mask{};
@@ -29,10 +23,9 @@ struct LsbBitStream {
             if (__builtin_expect(data_idx < data_size, 1)) {
                 byte_to_hide = data[data_idx++];
             } else {
-                byte_to_hide = sig[sig_idx++];
-                if (__builtin_expect(sig_idx == sig_len, 0)) {
-                    sig_idx = 0;
-                }
+                // there's no licence in the original repo,
+                // so we have to replace the signature into 0x00
+                byte_to_hide = 0x00;
             }
             fifo |= ((uint32_t)byte_to_hide) << (24 - fifo_count);
             fifo_count += 8;
@@ -51,9 +44,6 @@ jbyteArray bitmapToByteArray(JNIEnv* env, jobject bitmap);
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_rbtsoft_tankfactory_lsbtank_LsbTankCoder_encodeNative(JNIEnv *env, jobject, jobject sur_pic, jobject ins_pic, jint compress) {
     if (compress <= 0 || compress >= 8) return nullptr;
-
-    const char* signature = "/By:f_Endman";
-    const size_t sig_len = strlen(signature);
 
     jbyteArray ins_pic_byte_array = nullptr;
     jclass bitmap_class = nullptr;
@@ -110,8 +100,6 @@ Java_com_rbtsoft_tankfactory_lsbtank_LsbTankCoder_encodeNative(JNIEnv *env, jobj
         LsbBitStream stream;
         stream.data = raw_data;
         stream.data_size = total_data_size;
-        stream.sig = (const uint8_t*)signature;
-        stream.sig_len = sig_len;
         stream.compress = compress;
         stream.shift_complement = 32 - compress;
         stream.lsb_mask = (1 << compress) - 1;

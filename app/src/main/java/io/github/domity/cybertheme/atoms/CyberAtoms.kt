@@ -1,4 +1,4 @@
-package com.domity.cybertheme.atoms
+package io.github.domity.cybertheme.atoms
 
 
 import androidx.compose.foundation.layout.Box
@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.domity.cybertheme.foundation.CyberTheme
+import io.github.domity.cybertheme.foundation.CyberTheme
 
 @Composable
 fun CyberText(

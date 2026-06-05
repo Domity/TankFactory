@@ -84,18 +84,40 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             val app = getApplication<Application>()
             try {
+//                val largeBitmap = withContext(Dispatchers.IO) {
+//                    val photo1 = app.contentResolver.openInputStream(uri1)?.use {
+//                        BitmapFactory.decodeStream(it)
+//                    } ?: return@withContext null
+//
+//                    val photo2 = app.contentResolver.openInputStream(uri2)?.use {
+//                        BitmapFactory.decodeStream(it)
+//                    } ?: return@withContext null
+//
+//                    val lsbTank = LsbTankCoder.encode(photo1, photo2, compress)
+//                    photo1.recycle()
+//                    photo2.recycle()
+//                    lsbTank
                 val largeBitmap = withContext(Dispatchers.IO) {
+                    val options = BitmapFactory.Options().apply {
+                        inPreferredConfig = Bitmap.Config.ARGB_8888
+                        inMutable = true
+                        inScaled = false
+                    }
+
                     val photo1 = app.contentResolver.openInputStream(uri1)?.use {
-                        BitmapFactory.decodeStream(it)
+                        BitmapFactory.decodeStream(it, null, options)
                     } ?: return@withContext null
 
                     val photo2 = app.contentResolver.openInputStream(uri2)?.use {
-                        BitmapFactory.decodeStream(it)
+                        BitmapFactory.decodeStream(it, null, options)
                     } ?: return@withContext null
 
                     val lsbTank = LsbTankCoder.encode(photo1, photo2, compress)
-                    photo1.recycle()
+                    if (lsbTank !== photo1) {
+                        photo1.recycle()
+                    }
                     photo2.recycle()
+
                     lsbTank
                 }
 

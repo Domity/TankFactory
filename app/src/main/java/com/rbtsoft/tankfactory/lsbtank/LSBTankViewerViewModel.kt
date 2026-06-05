@@ -63,8 +63,13 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
             val app = getApplication<Application>()
             try {
                 val largeBitmap: Bitmap? = withContext(Dispatchers.Default) {
+                    val options = BitmapFactory.Options().apply {
+                        inPreferredConfig = Bitmap.Config.ARGB_8888
+                        inMutable = true
+                        inScaled = false
+                    }
                     val tankBitmap = app.contentResolver.openInputStream(uri)?.use { inputStream ->
-                        BitmapFactory.decodeStream(inputStream)
+                        BitmapFactory.decodeStream(inputStream,null,options)
                     }
                     if (tankBitmap != null) {
                         val decoded = LsbTankCoder.decode(tankBitmap)

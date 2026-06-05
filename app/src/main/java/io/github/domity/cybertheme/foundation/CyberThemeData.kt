@@ -1,4 +1,4 @@
-package com.domity.cybertheme.foundation
+package io.github.domity.cybertheme.foundation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider

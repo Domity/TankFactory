@@ -3,10 +3,10 @@ package com.rbtsoft.tankfactory.ui.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
-import com.domity.cybertheme.foundation.CyberColors
-import com.domity.cybertheme.foundation.CyberTypography
-import com.domity.cybertheme.foundation.LocalCyberColors
-import com.domity.cybertheme.foundation.LocalCyberTypography
+import io.github.domity.cybertheme.foundation.CyberColors
+import io.github.domity.cybertheme.foundation.CyberTypography
+import io.github.domity.cybertheme.foundation.LocalCyberColors
+import io.github.domity.cybertheme.foundation.LocalCyberTypography
 
 @Composable
 fun TankFactoryTheme(

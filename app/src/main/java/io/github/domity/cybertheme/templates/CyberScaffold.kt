@@ -1,4 +1,4 @@
-package com.domity.cybertheme.templates
+package io.github.domity.cybertheme.templates
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -10,16 +10,18 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.domity.cybertheme.atoms.CyberSurface
-import com.domity.cybertheme.foundation.CyberTheme
+import io.github.domity.cybertheme.atoms.CyberSurface
+import io.github.domity.cybertheme.foundation.CyberTheme
 
 @Composable
 fun CyberScaffold(
     modifier: Modifier = Modifier,
     useSafeArea: Boolean = true,
     topBar: (@Composable () -> Unit)? = null,
-    content: @Composable BoxScope.() -> Unit
-) {
+    bottomBar: (@Composable () -> Unit)? = null,
+    content: @Composable BoxScope.() -> Unit,
+
+    ) {
     // 背景色容器
     CyberSurface(
         modifier = modifier.fillMaxSize(),
@@ -48,6 +50,12 @@ fun CyberScaffold(
                     .weight(1f)
             ) {
                 content()
+            }
+
+            if (bottomBar != null) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    bottomBar()
+                }
             }
         }
     }

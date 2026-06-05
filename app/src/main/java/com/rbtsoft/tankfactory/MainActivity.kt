@@ -27,16 +27,17 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.domity.cybertheme.foundation.CyberTheme
-import com.domity.cybertheme.molecules.CyberButton
 import com.domity.cybertheme.molecules.NeonText
-import com.domity.cybertheme.templates.CyberScaffold
 import com.rbtsoft.tankfactory.lsbtank.LSBTankMakerScreen
 import com.rbtsoft.tankfactory.lsbtank.LSBTankViewerScreen
 import com.rbtsoft.tankfactory.miragetank.MirageTankMakerScreen
 import com.rbtsoft.tankfactory.miragetank.MirageTankViewerScreen
 import com.rbtsoft.tankfactory.ui.about.AboutDialog
 import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
+import io.github.domity.cybertheme.foundation.CyberTheme
+import io.github.domity.cybertheme.molecules.CutCorners
+import io.github.domity.cybertheme.molecules.CyberButton
+import io.github.domity.cybertheme.templates.CyberScaffold
 
 object ScreenRoutes {
     const val MAIN_MENU = "main_menu"
@@ -114,13 +115,15 @@ fun MainMenuScreen(
                     CyberButton(
                         text = stringResource(id = R.string.view_mirage_tank),
                         onClick = { onNavigate(ScreenRoutes.VIEW_MIRAGE) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        cutCorners = CutCorners(topLeft = 8.dp, topRight = 8.dp, bottomLeft = 8.dp, bottomRight = 8.dp)
                     )
                     CyberButton(
                         text = stringResource(id = R.string.make_mirage_tank),
                         onClick = { onNavigate(ScreenRoutes.MAKE_MIRAGE) },
                         isPrimary = true,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        cutCorners = CutCorners(topLeft = 8.dp, topRight = 8.dp, bottomLeft = 8.dp, bottomRight = 8.dp)
                     )
                 }
 
@@ -132,13 +135,15 @@ fun MainMenuScreen(
                     CyberButton(
                         text = stringResource(id = R.string.view_lsb_tank),
                         onClick = { onNavigate(ScreenRoutes.VIEW_LSB) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        cutCorners = CutCorners(topLeft = 8.dp, topRight = 8.dp, bottomLeft = 8.dp, bottomRight = 8.dp)
                     )
                     CyberButton(
                         text = stringResource(id = R.string.make_lsb_tank),
                         onClick = { onNavigate(ScreenRoutes.MAKE_LSB) },
                         isPrimary = true,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f) ,
+                        cutCorners = CutCorners(topLeft = 8.dp, topRight = 8.dp, bottomLeft = 8.dp, bottomRight = 8.dp)
                     )
                 }
             }
@@ -152,7 +157,8 @@ fun MainMenuScreen(
                     text = stringResource(id = R.string.about),
                     onClick = { showAboutDialog = true },
                     isPrimary = false,
-                    modifier = Modifier.width(120.dp)
+                    modifier = Modifier.width(120.dp),
+                    cutCorners = CutCorners(topLeft = 8.dp, topRight = 8.dp, bottomLeft = 8.dp, bottomRight = 8.dp)
                 )
             }
         }

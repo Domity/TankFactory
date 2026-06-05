@@ -29,14 +29,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.domity.cybertheme.atoms.CyberSurface
-import com.domity.cybertheme.atoms.CyberText
-import com.domity.cybertheme.foundation.CyberTheme
-import com.domity.cybertheme.molecules.CyberButton
 import com.domity.cybertheme.molecules.CyberLoading
-import com.domity.cybertheme.templates.CyberScaffold
 import com.rbtsoft.tankfactory.R
 import com.rbtsoft.tankfactory.ui.components.FastUriImage
+import io.github.domity.cybertheme.atoms.CyberSurface
+import io.github.domity.cybertheme.atoms.CyberText
+import io.github.domity.cybertheme.foundation.CyberTheme
+import io.github.domity.cybertheme.molecules.CyberButton
+import io.github.domity.cybertheme.templates.CyberScaffold
 
 @Composable
 fun LSBTankViewerScreen(

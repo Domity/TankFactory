@@ -10,12 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.domity.cybertheme.atoms.CyberText
-import com.domity.cybertheme.foundation.CyberTheme
-import com.domity.cybertheme.molecules.CyberButton
-import com.domity.cybertheme.molecules.CyberDialog
 import com.rbtsoft.tankfactory.BuildConfig
 import com.rbtsoft.tankfactory.R
+import io.github.domity.cybertheme.atoms.CyberText
+import io.github.domity.cybertheme.foundation.CyberTheme
+import io.github.domity.cybertheme.molecules.CyberButton
+import io.github.domity.cybertheme.molecules.CyberDialog
 
 @Composable
 fun AboutDialog(onDismiss: () -> Unit) {

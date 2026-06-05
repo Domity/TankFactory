@@ -1,5 +1,6 @@
-package com.domity.cybertheme.molecules
+package io.github.domity.cybertheme.molecules
 
+import android.graphics.Paint
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
@@ -22,7 +23,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import com.domity.cybertheme.foundation.CyberTheme
+import io.github.domity.cybertheme.foundation.CyberTheme
 import kotlin.math.roundToInt
 
 @Composable
@@ -39,9 +40,9 @@ fun CyberSlider(
     val path = remember { Path() }
 
     val shadowPaint = remember {
-        android.graphics.Paint().apply {
+        Paint().apply {
             color = android.graphics.Color.BLACK
-            style = android.graphics.Paint.Style.FILL
+            style = Paint.Style.FILL
         }
     }
 

@@ -24,14 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.domity.cybertheme.atoms.CyberSurface
-import com.domity.cybertheme.atoms.CyberText
-import com.domity.cybertheme.foundation.CyberTheme
-import com.domity.cybertheme.molecules.CyberSwitch
-import com.domity.cybertheme.templates.CyberScaffold
 import com.rbtsoft.tankfactory.R
 import com.rbtsoft.tankfactory.ui.components.FastUriImage
 import com.rbtsoft.tankfactory.ui.theme.MirageTankImageTheme
+import io.github.domity.cybertheme.atoms.CyberSurface
+import io.github.domity.cybertheme.atoms.CyberText
+import io.github.domity.cybertheme.foundation.CyberTheme
+import io.github.domity.cybertheme.molecules.CyberSwitch
+import io.github.domity.cybertheme.templates.CyberScaffold
 
 @Composable
 fun MirageTankViewerScreen() {

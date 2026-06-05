@@ -1,4 +1,4 @@
-package com.domity.cybertheme.molecules
+package io.github.domity.cybertheme.molecules
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +13,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.domity.cybertheme.foundation.CyberTheme
+import io.github.domity.cybertheme.foundation.CyberTheme
 
 @Composable
 fun CyberSwitch(
@@ -33,7 +34,7 @@ fun CyberSwitch(
             .toggleable(
                 value = checked,
                 onValueChange = onCheckedChange,
-                role = androidx.compose.ui.semantics.Role.Switch,
+                role = Role.Switch,
                 indication = null,
                 interactionSource = null
             )

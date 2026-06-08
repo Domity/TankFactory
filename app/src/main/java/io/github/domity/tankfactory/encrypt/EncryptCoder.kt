@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.encrypt
+package io.github.domity.tankfactory.encrypt
 
 object EncryptCoder {
     fun generatePassword(): String = TankCipher.generateSecurePassword()

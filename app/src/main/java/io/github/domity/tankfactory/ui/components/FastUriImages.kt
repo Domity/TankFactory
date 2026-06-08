@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.ui.components
+package io.github.domity.tankfactory.ui.components
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

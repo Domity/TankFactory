@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.ui.theme
+package io.github.domity.tankfactory.ui.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider

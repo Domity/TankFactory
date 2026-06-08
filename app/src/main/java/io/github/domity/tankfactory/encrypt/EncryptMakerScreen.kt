@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.encrypt
+package io.github.domity.tankfactory.encrypt
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,7 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.domity.cybertheme.molecules.CyberLoading
-import com.rbtsoft.tankfactory.R
+import io.github.domity.tankfactory.R
 import io.github.domity.cybertheme.atoms.CyberSurface
 import io.github.domity.cybertheme.atoms.CyberText
 import io.github.domity.cybertheme.foundation.CyberTheme

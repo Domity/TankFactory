@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.encrypt
+package io.github.domity.tankfactory.encrypt
 
 import java.security.MessageDigest
 import java.security.SecureRandom

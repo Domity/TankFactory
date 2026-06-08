@@ -1,16 +1,17 @@
-package com.rbtsoft.tankfactory.miragetank
+package io.github.domity.tankfactory.miragetank
 
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.net.Uri
 import android.widget.Toast
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.rbtsoft.tankfactory.R
-import com.rbtsoft.tankfactory.ui.components.saveImageToDownload
+import io.github.domity.tankfactory.R
+import io.github.domity.tankfactory.ui.components.saveImageToDownload
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,7 +74,7 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
 
     private fun getOrReuseBitmap(currentBitmap: Bitmap?, width: Int, height: Int): Bitmap {
         return if (currentBitmap != null && currentBitmap.width == width && currentBitmap.height == height) {
-            currentBitmap.eraseColor(android.graphics.Color.TRANSPARENT)
+            currentBitmap.eraseColor(Color.TRANSPARENT)
             currentBitmap
         } else {
             currentBitmap?.recycle()

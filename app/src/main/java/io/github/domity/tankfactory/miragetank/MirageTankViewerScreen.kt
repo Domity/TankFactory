@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.miragetank
+package io.github.domity.tankfactory.miragetank
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -24,9 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.rbtsoft.tankfactory.R
-import com.rbtsoft.tankfactory.ui.components.FastUriImage
-import com.rbtsoft.tankfactory.ui.theme.MirageTankImageTheme
+import io.github.domity.tankfactory.R
+import io.github.domity.tankfactory.ui.components.FastUriImage
+import io.github.domity.tankfactory.ui.theme.MirageTankImageTheme
 import io.github.domity.cybertheme.atoms.CyberSurface
 import io.github.domity.cybertheme.atoms.CyberText
 import io.github.domity.cybertheme.foundation.CyberTheme

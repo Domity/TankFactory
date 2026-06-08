@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.lsbtank
+package io.github.domity.tankfactory.lsbtank
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.domity.cybertheme.molecules.CyberLoading
-import com.rbtsoft.tankfactory.R
-import com.rbtsoft.tankfactory.ui.components.FastUriImage
+import io.github.domity.tankfactory.R
+import io.github.domity.tankfactory.ui.components.FastUriImage
 import io.github.domity.cybertheme.atoms.CyberSurface
 import io.github.domity.cybertheme.atoms.CyberText
 import io.github.domity.cybertheme.foundation.CyberTheme

@@ -42,7 +42,7 @@ struct LsbBitStream {
 jbyteArray bitmapToByteArray(JNIEnv* env, jobject bitmap);
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_com_rbtsoft_tankfactory_lsbtank_LsbTankCoder_encodeNative(JNIEnv *env, jobject, jobject sur_pic, jobject ins_pic, jint compress) {
+Java_io_github_domity_tankfactory_lsbtank_LsbTankCoder_encodeNative(JNIEnv *env, jobject, jobject sur_pic, jobject ins_pic, jint compress) {
     if (compress <= 0 || compress >= 8) return nullptr;
 
     jbyteArray ins_pic_byte_array = nullptr;

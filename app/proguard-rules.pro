@@ -41,6 +41,5 @@
     native <methods>;
 }
 
--keep class com.rbtsoft.tankfactory.miragetank.MirageTankCoder { *; }
-#-keep class com.rbtsoft.tankfactory.obfuscation.ObfuscationCoder { *; }
--keep class com.rbtsoft.tankfactory.lsbtank.LSBTankCoder { *; }
+#-keep class io.github.domity.tankfactory.miragetank.MirageTankCoder { *; }
+#-keep class com.rbtsoft.tankfactory.lsbtank.LSBTankCoder { *; }

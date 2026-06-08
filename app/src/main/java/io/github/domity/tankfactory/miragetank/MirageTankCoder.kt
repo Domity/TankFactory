@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.miragetank
+package io.github.domity.tankfactory.miragetank
 
 import android.graphics.Bitmap
 

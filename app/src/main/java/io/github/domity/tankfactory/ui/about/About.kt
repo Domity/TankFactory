@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.ui.about
+package io.github.domity.tankfactory.ui.about
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.rbtsoft.tankfactory.BuildConfig
-import com.rbtsoft.tankfactory.R
+import io.github.domity.tankfactory.BuildConfig
+import io.github.domity.tankfactory.R
 import io.github.domity.cybertheme.atoms.CyberText
 import io.github.domity.cybertheme.foundation.CyberTheme
 import io.github.domity.cybertheme.molecules.CyberButton

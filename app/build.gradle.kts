@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.rbtsoft.tankfactory"
+    namespace = "io.github.domity.tankfactory"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.rbtsoft.tankfactory"
+        applicationId = "io.github.domity.tankfactory"
         minSdk = 31
         targetSdk = 36
         versionCode = 112

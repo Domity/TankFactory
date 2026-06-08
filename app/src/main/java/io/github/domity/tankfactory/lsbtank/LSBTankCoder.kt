@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.lsbtank
+package io.github.domity.tankfactory.lsbtank
 
 import android.graphics.Bitmap
 

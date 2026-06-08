@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory
+package io.github.domity.tankfactory
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,18 +28,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.domity.cybertheme.molecules.NeonText
-import com.rbtsoft.tankfactory.encrypt.EncryptMakerScreen
-import com.rbtsoft.tankfactory.encrypt.EncryptViewerScreen
-import com.rbtsoft.tankfactory.lsbtank.LSBTankMakerScreen
-import com.rbtsoft.tankfactory.lsbtank.LSBTankViewerScreen
-import com.rbtsoft.tankfactory.miragetank.MirageTankMakerScreen
-import com.rbtsoft.tankfactory.miragetank.MirageTankViewerScreen
-import com.rbtsoft.tankfactory.ui.about.AboutDialog
-import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
 import io.github.domity.cybertheme.foundation.CyberTheme
 import io.github.domity.cybertheme.molecules.CutCorners
 import io.github.domity.cybertheme.molecules.CyberButton
 import io.github.domity.cybertheme.templates.CyberScaffold
+import io.github.domity.tankfactory.encrypt.EncryptMakerScreen
+import io.github.domity.tankfactory.encrypt.EncryptViewerScreen
+import io.github.domity.tankfactory.lsbtank.LSBTankMakerScreen
+import io.github.domity.tankfactory.lsbtank.LSBTankViewerScreen
+import io.github.domity.tankfactory.miragetank.MirageTankMakerScreen
+import io.github.domity.tankfactory.miragetank.MirageTankViewerScreen
+import io.github.domity.tankfactory.ui.about.AboutDialog
+import io.github.domity.tankfactory.ui.theme.TankFactoryTheme
 
 object ScreenRoutes {
     const val MAIN_MENU = "main_menu"

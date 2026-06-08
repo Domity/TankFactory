@@ -142,7 +142,7 @@ void* encode_worker_thread(void* arg) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_rbtsoft_tankfactory_miragetank_MirageTankCoder_encodeNative(
+Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeNative(
         JNIEnv *env, jobject, jobject bitmap1, jobject bitmap2, jobject outputBitmap,
         jfloat photo1K, jfloat photo2K, jint threshold) {
 

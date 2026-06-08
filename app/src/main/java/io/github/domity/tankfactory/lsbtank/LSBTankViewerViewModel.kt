@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.lsbtank
+package io.github.domity.tankfactory.lsbtank
 
 import android.app.Application
 import android.graphics.Bitmap
@@ -8,8 +8,8 @@ import android.widget.Toast
 import androidx.core.graphics.scale
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.rbtsoft.tankfactory.R
-import com.rbtsoft.tankfactory.ui.components.saveImageToDownload
+import io.github.domity.tankfactory.R
+import io.github.domity.tankfactory.ui.components.saveImageToDownload
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,12 +17,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.max
 
-class LSBTankMakerViewModel(application: Application) : AndroidViewModel(application) {
-    private val _selectedImage1Uri = MutableStateFlow<Uri?>(null)
-    val selectedImage1Uri: StateFlow<Uri?> = _selectedImage1Uri
-
-    private val _selectedImage2Uri = MutableStateFlow<Uri?>(null)
-    val selectedImage2Uri: StateFlow<Uri?> = _selectedImage2Uri
+class LSBTankViewerViewModel(application: Application) : AndroidViewModel(application) {
+    private val _selectedImageUri = MutableStateFlow<Uri?>(null)
+    val selectedImageUri: StateFlow<Uri?> = _selectedImageUri
 
     private var originalResultBitmap: Bitmap? = null
 
@@ -32,8 +29,8 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
     private val _isResultTooLarge = MutableStateFlow(false)
     val isResultTooLarge: StateFlow<Boolean> = _isResultTooLarge
 
-    private val _isGenerating = MutableStateFlow(false)
-    val isGenerating: StateFlow<Boolean> = _isGenerating
+    private val _isDecoding = MutableStateFlow(false)
+    val isDecoding: StateFlow<Boolean> = _isDecoding
 
     private val _isSaving = MutableStateFlow(false)
     val isSaving: StateFlow<Boolean> = _isSaving
@@ -41,16 +38,12 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
     private val maxSafePixels = 16_000_000
     private val maxDisplayDimension = 1080
 
-    fun setImage1Uri(uri: Uri) { _selectedImage1Uri.value = uri }
-    fun setImage2Uri(uri: Uri) { _selectedImage2Uri.value = uri }
-
-    fun onMakerScreenEntered() {
-        _selectedImage1Uri.value = null
-        _selectedImage2Uri.value = null
+    fun setImageUri(uri: Uri) {
+        _selectedImageUri.value = uri
         clearBitmaps()
     }
 
-    fun onPressMakerButton() {
+    fun onPressDecoderButton(){
         clearBitmaps()
     }
 
@@ -61,51 +54,28 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
         _isResultTooLarge.value = false
     }
 
-    fun saveImageToDownload() {
-        val bitmapToSave = originalResultBitmap ?: return
-        _isSaving.value = true
-        viewModelScope.launch {
-            saveImageToDownload(
-                context = getApplication(),
-                bitmap = bitmapToSave,
-                filename = "LSBTank_${System.currentTimeMillis()}.webp"
-            )
-            _isSaving.value = false
-        }
-    }
-
-    fun generateLSBTank(compress: Int) {
-        val uri1 = _selectedImage1Uri.value ?: return
-        val uri2 = _selectedImage2Uri.value ?: return
-
+    fun decodeLSBTank() {
+        val uri = _selectedImageUri.value ?: return
         clearBitmaps()
-        _isGenerating.value = true
+        _isDecoding.value = true
 
         viewModelScope.launch {
             val app = getApplication<Application>()
             try {
-                val largeBitmap = withContext(Dispatchers.IO) {
+                val largeBitmap: Bitmap? = withContext(Dispatchers.Default) {
                     val options = BitmapFactory.Options().apply {
                         inPreferredConfig = Bitmap.Config.ARGB_8888
                         inMutable = true
                         inScaled = false
                     }
-
-                    val photo1 = app.contentResolver.openInputStream(uri1)?.use {
-                        BitmapFactory.decodeStream(it, null, options)
-                    } ?: return@withContext null
-
-                    val photo2 = app.contentResolver.openInputStream(uri2)?.use {
-                        BitmapFactory.decodeStream(it, null, options)
-                    } ?: return@withContext null
-
-                    val lsbTank = LsbTankCoder.encode(photo1, photo2, compress)
-                    if (lsbTank !== photo1) {
-                        photo1.recycle()
+                    val tankBitmap = app.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        BitmapFactory.decodeStream(inputStream,null,options)
                     }
-                    photo2.recycle()
-
-                    lsbTank
+                    if (tankBitmap != null) {
+                        val decoded = LsbTankCoder.decode(tankBitmap)
+                        tankBitmap.recycle()
+                        decoded
+                    } else null
                 }
 
                 if (largeBitmap != null) {
@@ -126,7 +96,7 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
                     Toast.makeText(app, app.getString(R.string.image_too_large), Toast.LENGTH_LONG).show()
                 }
             } finally {
-                _isGenerating.value = false
+                _isDecoding.value = false
             }
         }
     }
@@ -143,5 +113,18 @@ class LSBTankMakerViewModel(application: Application) : AndroidViewModel(applica
         val newHeight = (currentHeight * scaleFactor).toInt()
 
         return bitmap.scale(newWidth, newHeight)
+    }
+
+    fun saveImageToDownload() {
+        val bitmapToSave = originalResultBitmap ?: return
+        _isSaving.value = true
+        viewModelScope.launch {
+            saveImageToDownload(
+                context = getApplication(),
+                bitmap = bitmapToSave,
+                filename = "LSB_Decoded_${System.currentTimeMillis()}.webp"
+            )
+            _isSaving.value = false
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.ui.components
+package io.github.domity.tankfactory.ui.components
 
 import android.content.ContentValues
 import android.content.Context
@@ -6,7 +6,7 @@ import android.graphics.Bitmap
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
-import com.rbtsoft.tankfactory.R
+import io.github.domity.tankfactory.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedOutputStream

@@ -24,7 +24,7 @@
     }
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_com_rbtsoft_tankfactory_lsbtank_LsbTankCoder_decodeNative(JNIEnv *env, jobject, jobject tank_pic) {
+Java_io_github_domity_tankfactory_lsbtank_LsbTankCoder_decodeNative(JNIEnv *env, jobject, jobject tank_pic) {
     void* tank_pixels_ptr = nullptr;
     jbyteArray lsb_data = nullptr;
     uint8_t* data_ptr = nullptr;

@@ -28,12 +28,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.domity.cybertheme.molecules.NeonText
+import com.rbtsoft.tankfactory.encrypt.EncryptMakerScreen
+import com.rbtsoft.tankfactory.encrypt.EncryptViewerScreen
 import com.rbtsoft.tankfactory.lsbtank.LSBTankMakerScreen
 import com.rbtsoft.tankfactory.lsbtank.LSBTankViewerScreen
 import com.rbtsoft.tankfactory.miragetank.MirageTankMakerScreen
 import com.rbtsoft.tankfactory.miragetank.MirageTankViewerScreen
-import com.rbtsoft.tankfactory.obfuscation.ObfuscationMakerScreen
-import com.rbtsoft.tankfactory.obfuscation.ObfuscationViewerScreen
 import com.rbtsoft.tankfactory.ui.about.AboutDialog
 import com.rbtsoft.tankfactory.ui.theme.TankFactoryTheme
 import io.github.domity.cybertheme.foundation.CyberTheme
@@ -47,8 +47,8 @@ object ScreenRoutes {
     const val MAKE_MIRAGE = "make_Mtank"
     const val VIEW_LSB = "view_LSBTank"
     const val MAKE_LSB = "make_LSBtank"
-    const val VIEW_OBFUSCATION = "view_obfuscation"
-    const val MAKE_OBFUSCATION = "make_obfuscation"
+    const val VIEW_ENCRYPT = "view_encrypt"
+    const val MAKE_ENCRYPT = "make_encrypt"
 }
 
 class MainActivity : ComponentActivity() {
@@ -80,8 +80,8 @@ fun AppNavigator() {
         composable(ScreenRoutes.MAKE_MIRAGE) { MirageTankMakerScreen() }
         composable(ScreenRoutes.MAKE_LSB) { LSBTankMakerScreen() }
         composable(ScreenRoutes.VIEW_LSB) { LSBTankViewerScreen() }
-        composable(ScreenRoutes.VIEW_OBFUSCATION) { ObfuscationViewerScreen() }
-        composable(ScreenRoutes.MAKE_OBFUSCATION) { ObfuscationMakerScreen() }
+        composable(ScreenRoutes.VIEW_ENCRYPT) { EncryptViewerScreen() }
+        composable(ScreenRoutes.MAKE_ENCRYPT) { EncryptMakerScreen() }
     }
 }
 
@@ -159,14 +159,14 @@ fun MainMenuScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     CyberButton(
-                        text = stringResource(id = R.string.view_obfuscation),
-                        onClick = { onNavigate(ScreenRoutes.VIEW_OBFUSCATION) },
+                        text = stringResource(id = R.string.view_encrypt),
+                        onClick = { onNavigate(ScreenRoutes.VIEW_ENCRYPT) },
                         modifier = Modifier.weight(1f),
                         cutCorners = CutCorners(topLeft = 8.dp, topRight = 8.dp, bottomLeft = 8.dp, bottomRight = 8.dp)
                     )
                     CyberButton(
-                        text = stringResource(id = R.string.make_obfuscation),
-                        onClick = { onNavigate(ScreenRoutes.MAKE_OBFUSCATION) },
+                        text = stringResource(id = R.string.make_encrypt),
+                        onClick = { onNavigate(ScreenRoutes.MAKE_ENCRYPT) },
                         isPrimary = true,
                         modifier = Modifier.weight(1f),
                         cutCorners = CutCorners(topLeft = 8.dp, topRight = 8.dp, bottomLeft = 8.dp, bottomRight = 8.dp)

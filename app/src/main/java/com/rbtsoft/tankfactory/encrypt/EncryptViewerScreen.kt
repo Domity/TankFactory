@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.obfuscation
+package com.rbtsoft.tankfactory.encrypt
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,8 +33,8 @@ import io.github.domity.cybertheme.molecules.CyberInput
 import io.github.domity.cybertheme.templates.CyberScaffold
 
 @Composable
-fun ObfuscationViewerScreen(
-    viewModel: ObfuscationViewerViewModel = viewModel()
+fun EncryptViewerScreen(
+    viewModel: EncryptViewerViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) {
         viewModel.onScreenEntered()
@@ -68,7 +68,7 @@ fun ObfuscationViewerScreen(
                     .height(120.dp),
                 isFileSelected = isFileSelected,
                 fileName = selectedFileName,
-                placeholderText = stringResource(id = R.string.obfuscation_viewer_select_file),
+                placeholderText = stringResource(id = R.string.encrypt_viewer_select_file),
                 onClick = { filePickerLauncher.launch("*/*") }
             )
 
@@ -80,7 +80,7 @@ fun ObfuscationViewerScreen(
                     password.value = it
                     viewModel.setPassword(it)
                 },
-                placeholder = stringResource(id = R.string.obfuscation_viewer_enter_password),
+                placeholder = stringResource(id = R.string.encrypt_viewer_enter_password),
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isProcessing
             )
@@ -106,7 +106,7 @@ fun ObfuscationViewerScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         CyberText(
                             text = stringResource(
-                                id = R.string.obfuscation_viewer_decrypt_done,
+                                id = R.string.encrypt_viewer_decrypt_done,
                                 decryptedFileName ?: ""
                             ),
                             color = CyberTheme.colors.primary,
@@ -137,7 +137,7 @@ fun ObfuscationViewerScreen(
                     CyberLoading(size = 48.dp, color = CyberTheme.colors.primary)
                 }
                 CyberText(
-                    text = stringResource(id = R.string.obfuscation_viewer_decrypting),
+                    text = stringResource(id = R.string.encrypt_viewer_decrypting),
                     color = CyberTheme.colors.textDim,
                     style = CyberTheme.typography.body
                 )
@@ -145,8 +145,8 @@ fun ObfuscationViewerScreen(
             }
 
             CyberButton(
-                text = if (isProcessing) stringResource(id = R.string.obfuscation_viewer_decrypting)
-                       else stringResource(id = R.string.obfuscation_viewer_decrypt),
+                text = if (isProcessing) stringResource(id = R.string.encrypt_viewer_decrypting)
+                       else stringResource(id = R.string.encrypt_viewer_decrypt),
                 onClick = { viewModel.decrypt() },
                 enabled = isFileSelected && password.value.isNotEmpty() && !isProcessing,
                 modifier = Modifier.fillMaxWidth(0.65f),
@@ -156,7 +156,7 @@ fun ObfuscationViewerScreen(
             Spacer(Modifier.height(16.dp))
 
             CyberText(
-                text = stringResource(id = R.string.obfuscation_viewer_tips),
+                text = stringResource(id = R.string.encrypt_viewer_tips),
                 color = CyberTheme.colors.text,
                 style = CyberTheme.typography.body.copy(fontSize = 12.sp)
             )

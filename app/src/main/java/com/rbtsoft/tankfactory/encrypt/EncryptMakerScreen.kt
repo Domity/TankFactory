@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.obfuscation
+package com.rbtsoft.tankfactory.encrypt
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,8 +33,8 @@ import io.github.domity.cybertheme.molecules.CyberButton
 import io.github.domity.cybertheme.templates.CyberScaffold
 
 @Composable
-fun ObfuscationMakerScreen(
-    viewModel: ObfuscationMakerViewModel = viewModel()
+fun EncryptMakerScreen(
+    viewModel: EncryptMakerViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) {
         viewModel.onScreenEntered()
@@ -85,13 +85,13 @@ fun ObfuscationMakerScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         CyberText(
-                            text = stringResource(id = R.string.obfuscation_maker_encrypt_done),
+                            text = stringResource(id = R.string.encrypt_maker_encrypt_done),
                             color = CyberTheme.colors.primary,
                             style = CyberTheme.typography.body
                         )
                         Spacer(Modifier.height(8.dp))
                         CyberText(
-                            text = stringResource(id = R.string.obfuscation_maker_password, password),
+                            text = stringResource(id = R.string.encrypt_maker_password, password),
                             color = CyberTheme.colors.text,
                             style = CyberTheme.typography.button
                         )
@@ -101,7 +101,7 @@ fun ObfuscationMakerScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             CyberButton(
-                                text = stringResource(id = R.string.obfuscation_maker_copy_password),
+                                text = stringResource(id = R.string.encrypt_maker_copy_password),
                                 onClick = { viewModel.copyPasswordToClipboard() },
                                 isPrimary = false,
                                 modifier = Modifier.weight(1f)
@@ -131,7 +131,7 @@ fun ObfuscationMakerScreen(
                     CyberLoading(size = 48.dp, color = CyberTheme.colors.primary)
                 }
                 CyberText(
-                    text = stringResource(id = R.string.obfuscation_maker_encrypting),
+                    text = stringResource(id = R.string.encrypt_maker_encrypting),
                     color = CyberTheme.colors.textDim,
                     style = CyberTheme.typography.body
                 )
@@ -139,8 +139,8 @@ fun ObfuscationMakerScreen(
             }
 
             CyberButton(
-                text = if (isProcessing) stringResource(id = R.string.obfuscation_maker_encrypting)
-                       else stringResource(id = R.string.obfuscation_maker_encrypt),
+                text = if (isProcessing) stringResource(id = R.string.encrypt_maker_encrypting)
+                       else stringResource(id = R.string.encrypt_maker_encrypt),
                 onClick = { viewModel.encrypt() },
                 enabled = isFileSelected && !isProcessing,
                 modifier = Modifier.fillMaxWidth(0.65f),
@@ -150,7 +150,7 @@ fun ObfuscationMakerScreen(
             Spacer(Modifier.height(16.dp))
 
             CyberText(
-                text = stringResource(id = R.string.obfuscation_maker_tips),
+                text = stringResource(id = R.string.encrypt_maker_tips),
                 color = CyberTheme.colors.text
             )
         }

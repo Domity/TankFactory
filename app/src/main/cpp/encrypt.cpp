@@ -73,7 +73,7 @@ namespace Cipher {
     };
 }
 extern "C" JNIEXPORT void JNICALL
-Java_com_rbtsoft_tankfactory_obfuscation_TankCipher_nativeChaCha20Process(JNIEnv* env, jobject,jbyteArray data_array,jbyteArray key32_array)
+Java_com_rbtsoft_tankfactory_encrypt_TankCipher_nativeChaCha20Process(JNIEnv* env, jobject,jbyteArray data_array,jbyteArray key32_array)
 {
     uint8_t key32[32];
     env->GetByteArrayRegion(key32_array, 0, 32, reinterpret_cast<jbyte*>(key32));

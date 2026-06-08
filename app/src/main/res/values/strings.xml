@@ -25,27 +25,27 @@
     <string name="lsb_tank_maker_tips">提示\n1.更低的压缩度意味着更好的表图质量和更长的制作时间\n2.图片过大时制作和保存速度会变慢，请耐心等待\n3.图片默认保存到Download目录</string>
     <string name="lsb_tank_viewer_tips">提示\n1.如果无法显示解码后的图片，那么它很有可能已经损坏，或不是无影坦克\n2.如果确定图片没有问题，请更换解码软件</string>
 
-    <string name="obfuscation_maker_password">密码: %s</string>
-    <string name="obfuscation_maker_copy_password">复制密码</string>
-    <string name="obfuscation_maker_password_copied">密码已复制</string>
-    <string name="obfuscation_maker_encrypting">加密中…</string>
-    <string name="obfuscation_maker_encrypt">加密</string>
-    <string name="obfuscation_maker_encrypt_done">加密完成</string>
-    <string name="obfuscation_maker_tips">提示\n1. 密码是解密文件的唯一凭证，请务必妥善保存\n2. 加密后的文件扩展名为 .tankfactory\n3. 文件默认保存到Download目录</string>
-    <string name="obfuscation_viewer_select_file">选择要解密的文件</string>
-    <string name="obfuscation_viewer_enter_password">输入密码</string>
-    <string name="obfuscation_viewer_decrypting">解密中…</string>
-    <string name="obfuscation_viewer_decrypt">解密</string>
-    <string name="obfuscation_viewer_decrypt_done">解密完成: %s</string>
-    <string name="obfuscation_viewer_decrypt_failed">解密失败，密码可能不正确</string>
-    <string name="obfuscation_viewer_tips">提示\n1. 请输入加密时生成的密码\n2. 如果密码不正确，解密会失败\n3. 图片默认保存到Download目录</string>
+    <string name="encrypt_maker_password">密码: %s</string>
+    <string name="encrypt_maker_copy_password">复制密码</string>
+    <string name="encrypt_maker_password_copied">密码已复制</string>
+    <string name="encrypt_maker_encrypting">加密中…</string>
+    <string name="encrypt_maker_encrypt">加密</string>
+    <string name="encrypt_maker_encrypt_done">加密完成</string>
+    <string name="encrypt_maker_tips">提示\n1. 密码是解密文件的唯一凭证，请务必妥善保存\n2. 加密后的文件扩展名为 .tankfactory\n3. 文件默认保存到Download目录</string>
+    <string name="encrypt_viewer_select_file">选择要解密的文件</string>
+    <string name="encrypt_viewer_enter_password">输入密码</string>
+    <string name="encrypt_viewer_decrypting">解密中…</string>
+    <string name="encrypt_viewer_decrypt">解密</string>
+    <string name="encrypt_viewer_decrypt_done">解密完成: %s</string>
+    <string name="encrypt_viewer_decrypt_failed">解密失败，密码可能不正确</string>
+    <string name="encrypt_viewer_tips">提示\n1. 请输入加密时生成的密码\n2. 如果密码不正确，解密会失败\n3. 图片默认保存到Download目录</string>
 
     <string name="view_mirage_tank">查看幻影坦克</string>
     <string name="make_mirage_tank">制作幻影坦克</string>
     <string name="view_lsb_tank">查看无影坦克</string>
     <string name="make_lsb_tank">制作无影坦克</string>
-    <string name="make_obfuscation">图片加密</string>
-    <string name="view_obfuscation">图片解密</string>
+    <string name="make_encrypt">图片加密</string>
+    <string name="view_encrypt">图片解密</string>
     <string name="about">关于</string>
 
     <string name="about_dialog_description">一个图片处理应用</string>

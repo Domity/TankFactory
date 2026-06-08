@@ -1,4 +1,4 @@
-package com.rbtsoft.tankfactory.obfuscation
+package com.rbtsoft.tankfactory.encrypt
 
 import java.security.MessageDigest
 import java.security.SecureRandom

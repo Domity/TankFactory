@@ -7,7 +7,7 @@ add_library(
         mirage_tank_encoder.cpp
         lsb_tank_encoder.cpp
         lsb_tank_decoder.cpp
-        obfuscation.cpp
+        encrypt.cpp
 )
 
 find_library(jnigraphics-lib jnigraphics)

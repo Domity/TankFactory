@@ -18,4 +18,3 @@ local.properties
 /app/release
 /app/build
 /app/src/androidTest
-/app/src/main/cpp/obfuscation.cpp

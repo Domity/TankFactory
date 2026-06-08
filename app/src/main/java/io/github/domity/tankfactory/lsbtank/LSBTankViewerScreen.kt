@@ -27,16 +27,15 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.domity.cybertheme.molecules.CyberLoading
-import io.github.domity.tankfactory.R
-import io.github.domity.tankfactory.ui.components.FastUriImage
 import io.github.domity.cybertheme.atoms.CyberSurface
 import io.github.domity.cybertheme.atoms.CyberText
 import io.github.domity.cybertheme.foundation.CyberTheme
 import io.github.domity.cybertheme.molecules.CyberButton
 import io.github.domity.cybertheme.templates.CyberScaffold
+import io.github.domity.tankfactory.R
+import io.github.domity.tankfactory.ui.components.FastUriImage
 
 @Composable
 fun LSBTankViewerScreen(
@@ -176,7 +175,6 @@ fun LSBTankViewerScreen(
             CyberText(
                 stringResource(id = R.string.lsb_tank_viewer_tips),
                 color = CyberTheme.colors.text,
-                style = CyberTheme.typography.body.copy(fontSize = 12.sp),
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }

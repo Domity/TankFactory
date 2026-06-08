@@ -21,16 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.domity.cybertheme.molecules.CyberLoading
-import io.github.domity.tankfactory.R
 import io.github.domity.cybertheme.atoms.CyberSurface
 import io.github.domity.cybertheme.atoms.CyberText
 import io.github.domity.cybertheme.foundation.CyberTheme
 import io.github.domity.cybertheme.molecules.CyberButton
 import io.github.domity.cybertheme.molecules.CyberInput
 import io.github.domity.cybertheme.templates.CyberScaffold
+import io.github.domity.tankfactory.R
 
 @Composable
 fun EncryptViewerScreen(
@@ -158,7 +157,6 @@ fun EncryptViewerScreen(
             CyberText(
                 text = stringResource(id = R.string.encrypt_viewer_tips),
                 color = CyberTheme.colors.text,
-                style = CyberTheme.typography.body.copy(fontSize = 12.sp)
             )
         }
     }

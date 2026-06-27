@@ -2,6 +2,7 @@ package io.github.domity.tankfactory.encrypt
 
 import android.app.Application
 import android.content.ContentValues
+import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
@@ -13,30 +14,32 @@ import io.github.domity.tankfactory.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class EncryptViewerViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _selectedFileName = MutableStateFlow<String?>(null)
-    val selectedFileName: StateFlow<String?> = _selectedFileName
+    val selectedFileName: StateFlow<String?> = _selectedFileName.asStateFlow()
 
     private var password: String = ""
 
     private val _isProcessing = MutableStateFlow(false)
-    val isProcessing: StateFlow<Boolean> = _isProcessing
+    val isProcessing: StateFlow<Boolean> = _isProcessing.asStateFlow()
 
     private val _isDone = MutableStateFlow(false)
-    val isDone: StateFlow<Boolean> = _isDone
+    val isDone: StateFlow<Boolean> = _isDone.asStateFlow()
 
     private val _decryptedFileName = MutableStateFlow<String?>(null)
-    val decryptedFileName: StateFlow<String?> = _decryptedFileName
+    val decryptedFileName: StateFlow<String?> = _decryptedFileName.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
     private var encryptedData: ByteArray? = null
     private var decryptedData: ByteArray? = null
+    private val context: Context get() = getApplication()
 
     fun onScreenEntered() {
         _selectedFileName.value = null
@@ -57,24 +60,17 @@ class EncryptViewerViewModel(application: Application) : AndroidViewModel(applic
         decryptedData = null
 
         viewModelScope.launch(Dispatchers.IO) {
-            val app = getApplication<Application>()
             try {
-                app.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
                     if (cursor.moveToFirst()) {
-                        val nameIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                        if (nameIdx >= 0) {
-                            val name = cursor.getString(nameIdx)
-                            _selectedFileName.value = name
-                            _decryptedFileName.value = if (name.endsWith(".tankfactory")) {
-                                name.removeSuffix(".tankfactory")
-                            } else {
-                                "decrypted_$name"
-                            }
-                        }
+                        val name = cursor.getString(0)
+                        _selectedFileName.value = name
+                        _decryptedFileName.value = if (name.endsWith(".tankfactory")) {
+                            name.removeSuffix(".tankfactory")
+                        } else { "decrypted_$name" }
                     }
                 }
-
-                encryptedData = app.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                encryptedData = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
             } catch (_: Exception) {}
         }
     }
@@ -95,18 +91,16 @@ class EncryptViewerViewModel(application: Application) : AndroidViewModel(applic
         decryptedData = null
 
         viewModelScope.launch(Dispatchers.Default) {
-            val app = getApplication<Application>()
             try {
                 val result = EncryptCoder.decrypt(data, pwd)
                 if (result != null) {
                     decryptedData = result
                     _isDone.value = true
                 } else {
-                    decryptedData = null
-                    _errorMessage.value = app.getString(R.string.encrypt_viewer_decrypt_failed)
+                    _errorMessage.value = context.getString(R.string.encrypt_viewer_decrypt_failed)
                 }
             } catch (_: Exception) {
-                _errorMessage.value = app.getString(R.string.encrypt_viewer_decrypt_failed)
+                _errorMessage.value = context.getString(R.string.encrypt_viewer_decrypt_failed)
             } finally {
                 _isProcessing.value = false
             }
@@ -115,7 +109,6 @@ class EncryptViewerViewModel(application: Application) : AndroidViewModel(applic
 
     fun saveDecryptedFile() {
         val data = decryptedData ?: return
-        val app = getApplication<Application>()
         val outputName = _decryptedFileName.value ?: "decrypted_file"
 
         _isProcessing.value = true
@@ -128,21 +121,17 @@ class EncryptViewerViewModel(application: Application) : AndroidViewModel(applic
                     put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
                 }
-                app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
-                    app.contentResolver.openOutputStream(uri)?.use { os ->
+                context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
+                    context.contentResolver.openOutputStream(uri)?.use { os ->
                         os.write(data)
                         success = true
                     }
                 }
-            } catch (_: Exception) { }
-
-            withContext(Dispatchers.Main) {
+            } catch (_: Exception) {}
+            withContext(Dispatchers.Main.immediate) {
                 _isProcessing.value = false
-                if (success) {
-                    Toast.makeText(app, app.getString(R.string.save_success), Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(app, app.getString(R.string.save_failed, ""), Toast.LENGTH_LONG).show()
-                }
+                val msgRes = if (success) R.string.save_success else R.string.save_failed
+                Toast.makeText(context, context.getString(msgRes), Toast.LENGTH_LONG).show()
             }
         }
     }

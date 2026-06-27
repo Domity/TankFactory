@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -44,14 +45,12 @@ fun EncryptViewerScreen(
     val isDone by viewModel.isDone.collectAsState()
     val decryptedFileName by viewModel.decryptedFileName.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
-
-    val isFileSelected = selectedFileName != null
-    val password = remember { mutableStateOf("") }
-
+    var password by remember { mutableStateOf("") }
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri -> if (uri != null) viewModel.setFileUri(uri) }
     )
+    val onSelectFileClick = remember { { filePickerLauncher.launch("*/*") } }
 
     CyberScaffold(useSafeArea = true) {
         Column(
@@ -65,90 +64,53 @@ fun EncryptViewerScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                isFileSelected = isFileSelected,
                 fileName = selectedFileName,
                 placeholderText = stringResource(id = R.string.encrypt_viewer_select_file),
-                onClick = { filePickerLauncher.launch("*/*") }
+                onClick = onSelectFileClick
             )
 
             Spacer(Modifier.height(24.dp))
 
             CyberInput(
-                value = password.value,
+                value = password,
                 onValueChange = {
-                    password.value = it
+                    password = it
                     viewModel.setPassword(it)
                 },
                 placeholder = stringResource(id = R.string.encrypt_viewer_enter_password),
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isProcessing
             )
-
-            if (errorMessage != null) {
+            errorMessage?.let { message ->
                 Spacer(Modifier.height(12.dp))
                 CyberText(
-                    text = errorMessage!!,
+                    text = message,
                     color = CyberTheme.colors.secondary,
                     style = CyberTheme.typography.body
                 )
             }
 
             Spacer(Modifier.height(24.dp))
-
             if (isDone) {
-                CyberSurface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = CyberTheme.colors.surface,
-                    borderWidth = 1.dp,
-                    borderColor = CyberTheme.colors.primary
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        CyberText(
-                            text = stringResource(
-                                id = R.string.encrypt_viewer_decrypt_done,
-                                decryptedFileName ?: ""
-                            ),
-                            color = CyberTheme.colors.primary,
-                            style = CyberTheme.typography.body
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        CyberButton(
-                            text = if (isProcessing) stringResource(id = R.string.saving)
-                                   else stringResource(id = R.string.save),
-                            onClick = { viewModel.saveDecryptedFile() },
-                            enabled = !isProcessing,
-                            isPrimary = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-
+                DecryptedSuccessPanel(
+                    decryptedFileName = decryptedFileName,
+                    isProcessing = isProcessing,
+                    onSave = viewModel::saveDecryptedFile
+                )
                 Spacer(Modifier.height(24.dp))
             }
-
             if (isProcessing && !isDone) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(80.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CyberLoading(size = 48.dp, color = CyberTheme.colors.primary)
-                }
-                CyberText(
-                    text = stringResource(id = R.string.encrypt_viewer_decrypting),
-                    color = CyberTheme.colors.textDim,
-                    style = CyberTheme.typography.body
-                )
+                DecryptProcessingIndicator()
                 Spacer(Modifier.height(24.dp))
             }
 
             CyberButton(
-                text = if (isProcessing) stringResource(id = R.string.encrypt_viewer_decrypting)
-                       else stringResource(id = R.string.encrypt_viewer_decrypt),
-                onClick = { viewModel.decrypt() },
-                enabled = isFileSelected && password.value.isNotEmpty() && !isProcessing,
-                modifier = Modifier.fillMaxWidth(0.65f),
+                text = stringResource(
+                    id = if (isProcessing) R.string.encrypt_viewer_decrypting else R.string.encrypt_viewer_decrypt
+                ),
+                onClick = viewModel::decrypt,
+                enabled = selectedFileName != null && password.isNotEmpty() && !isProcessing,
+                modifier = Modifier.fillMaxWidth(0.5f),
                 isPrimary = true
             )
 
@@ -160,4 +122,55 @@ fun EncryptViewerScreen(
             )
         }
     }
+}
+
+@Composable
+private fun DecryptedSuccessPanel(
+    decryptedFileName: String?,
+    isProcessing: Boolean,
+    onSave: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    CyberSurface(
+        modifier = modifier.fillMaxWidth(),
+        color = CyberTheme.colors.surface,
+        borderWidth = 1.dp,
+        borderColor = CyberTheme.colors.primary
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            CyberText(
+                text = stringResource(
+                    id = R.string.encrypt_viewer_decrypt_done,
+                    decryptedFileName ?: ""
+                ),
+                color = CyberTheme.colors.primary,
+                style = CyberTheme.typography.body
+            )
+            Spacer(Modifier.height(12.dp))
+            CyberButton(
+                text = stringResource(id = if (isProcessing) R.string.saving else R.string.save),
+                onClick = onSave,
+                enabled = !isProcessing,
+                isPrimary = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+private fun DecryptProcessingIndicator() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CyberLoading(size = 48.dp, color = CyberTheme.colors.primary)
+    }
+    CyberText(
+        text = stringResource(id = R.string.encrypt_viewer_decrypting),
+        color = CyberTheme.colors.textDim,
+        style = CyberTheme.typography.body
+    )
 }

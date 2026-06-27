@@ -16,25 +16,27 @@ import io.github.domity.tankfactory.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class EncryptMakerViewModel(application: Application) : AndroidViewModel(application) {
-
     private val _selectedFileName = MutableStateFlow<String?>(null)
-    val selectedFileName: StateFlow<String?> = _selectedFileName
+    val selectedFileName: StateFlow<String?> = _selectedFileName.asStateFlow()
 
     private val _password = MutableStateFlow("")
-    val password: StateFlow<String> = _password
+    val password: StateFlow<String> = _password.asStateFlow()
 
     private val _isProcessing = MutableStateFlow(false)
-    val isProcessing: StateFlow<Boolean> = _isProcessing
+    val isProcessing: StateFlow<Boolean> = _isProcessing.asStateFlow()
 
     private val _isDone = MutableStateFlow(false)
-    val isDone: StateFlow<Boolean> = _isDone
+    val isDone: StateFlow<Boolean> = _isDone.asStateFlow()
 
     private var encryptedData: ByteArray? = null
     private var originalData: ByteArray? = null
+
+    private val context: Context get() = getApplication()
 
     fun onScreenEntered() {
         _selectedFileName.value = null
@@ -52,18 +54,11 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
         originalData = null
 
         viewModelScope.launch(Dispatchers.IO) {
-            val app = getApplication<Application>()
             try {
-                app.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                    if (cursor.moveToFirst()) {
-                        val nameIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                        if (nameIdx >= 0) {
-                            _selectedFileName.value = cursor.getString(nameIdx)
-                        }
-                    }
+                context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) { _selectedFileName.value = cursor.getString(0) }
                 }
-
-                originalData = app.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                originalData = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
             } catch (_: Exception) {}
         }
     }
@@ -77,21 +72,17 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
         encryptedData = null
 
         viewModelScope.launch(Dispatchers.Default) {
-            val app = getApplication<Application>()
             try {
                 val pwd = EncryptCoder.generatePassword()
-                val result = EncryptCoder.encrypt(data, pwd)
-                encryptedData = result
+                encryptedData = EncryptCoder.encrypt(data, pwd)
                 _password.value = pwd
                 _isDone.value = true
                 originalData = null
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(app, e.message ?: app.getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
+                withContext(Dispatchers.Main.immediate) {
+                    Toast.makeText(context, e.message ?: context.getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
                 }
-            } finally {
-                _isProcessing.value = false
-            }
+            } finally { _isProcessing.value = false }
         }
     }
 
@@ -99,17 +90,14 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
         val pwd = _password.value
         if (pwd.isEmpty()) return
 
-        val app = getApplication<Application>()
-        val clipboard = app.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText("tank_password", pwd))
-        Toast.makeText(app, app.getString(R.string.encrypt_maker_password_copied), Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.encrypt_maker_password_copied), Toast.LENGTH_SHORT).show()
     }
 
     fun saveEncryptedFile() {
         val data = encryptedData ?: return
-        val app = getApplication<Application>()
-        val originalName = _selectedFileName.value ?: "image"
-        val outputName = "${originalName}.tankfactory"
+        val outputName = "${_selectedFileName.value ?: "image"}.tankfactory"
 
         _isProcessing.value = true
 
@@ -121,21 +109,18 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
                     put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
                 }
-                app.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
-                    app.contentResolver.openOutputStream(uri)?.use { os ->
+                context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
+                    context.contentResolver.openOutputStream(uri)?.use { os ->
                         os.write(data)
                         success = true
                     }
                 }
-            } catch (_: Exception) { }
+            } catch (_: Exception) {}
 
-            withContext(Dispatchers.Main) {
+            withContext(Dispatchers.Main.immediate) {
                 _isProcessing.value = false
-                if (success) {
-                    Toast.makeText(app, app.getString(R.string.save_success), Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(app, app.getString(R.string.save_failed, ""), Toast.LENGTH_LONG).show()
-                }
+                val msgRes = if (success) R.string.save_success else R.string.save_failed
+                Toast.makeText(context, context.getString(msgRes), Toast.LENGTH_LONG).show()
             }
         }
     }

@@ -41,5 +41,3 @@
     native <methods>;
 }
 
-#-keep class io.github.domity.tankfactory.miragetank.MirageTankCoder { *; }
-#-keep class com.rbtsoft.tankfactory.lsbtank.LSBTankCoder { *; }

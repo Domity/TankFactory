@@ -208,7 +208,7 @@ fun LSBTankMakerScreen(
                     viewModel.generateLSBTank(compress)
                 },
                 enabled = selectedImage1Uri != null && selectedImage2Uri != null && !isGenerating,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(0.5f),
                 isPrimary = true
             )
 

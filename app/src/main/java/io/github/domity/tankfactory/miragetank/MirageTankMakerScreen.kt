@@ -218,7 +218,7 @@ fun MirageTankMakerScreen(
                     viewModel.saveMirageTank(photo1K, photo2K, threshold.toInt())
                 },
                 enabled = selectedImage1Uri != null && selectedImage2Uri != null && !isSaving,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(0.5f),
                 isPrimary = false
             )
 

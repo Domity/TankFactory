@@ -39,6 +39,9 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
     private val _isDone = MutableStateFlow(false)
     val isDone: StateFlow<Boolean> = _isDone.asStateFlow()
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
     private var encryptedData: ByteArray? = null
     private var originalData: ByteArray? = null
 
@@ -60,12 +63,14 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
         _isPasswordAvailable.value = false
         _isProcessing.value = false
         _isDone.value = false
+        _errorMessage.value = null
         encryptedData = encryptedData.secureClear()
         originalData = originalData.secureClear()
     }
 
     fun setFileUri(uri: Uri) {
         _isDone.value = false
+        _errorMessage.value = null
         generatedPassword = generatedPassword.secureClear()
         _isPasswordAvailable.value = false
         encryptedData = encryptedData.secureClear()
@@ -78,9 +83,7 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
                 }
                 originalData = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
             } catch (_: Exception) {
-                withContext(Dispatchers.Main.immediate) {
-                    Toast.makeText(context, R.string.save_failed, Toast.LENGTH_SHORT).show()
-                }
+                _errorMessage.value = context.getString(R.string.save_failed)
             }
         }
     }
@@ -90,6 +93,7 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
 
         _isProcessing.value = true
         _isDone.value = false
+        _errorMessage.value = null
         generatedPassword = generatedPassword.secureClear()
         _isPasswordAvailable.value = false
         encryptedData = encryptedData.secureClear()
@@ -103,9 +107,7 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
                 _isDone.value = true
                 originalData = originalData.secureClear()
             } catch (e: Exception) {
-                withContext(Dispatchers.Main.immediate) {
-                    Toast.makeText(context, e.message ?: context.getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
-                }
+                _errorMessage.value = e.message ?: context.getString(R.string.save_failed)
             } finally { _isProcessing.value = false }
         }
     }

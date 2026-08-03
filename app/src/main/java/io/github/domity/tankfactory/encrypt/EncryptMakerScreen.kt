@@ -42,6 +42,7 @@ fun EncryptMakerScreen(
     val isPasswordAvailable by viewModel.isPasswordAvailable.collectAsState()
     val isProcessing by viewModel.isProcessing.collectAsState()
     val isDone by viewModel.isDone.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -67,6 +68,14 @@ fun EncryptMakerScreen(
             )
 
             Spacer(Modifier.height(24.dp))
+            errorMessage?.let { message ->
+                CyberText(
+                    text = message,
+                    color = CyberTheme.colors.secondary,
+                    style = CyberTheme.typography.body
+                )
+                Spacer(Modifier.height(12.dp))
+            }
             if (isDone && isPasswordAvailable) {
                 SuccessPanel(
                     isProcessing = isProcessing,
@@ -152,11 +161,6 @@ private fun ProcessingIndicator() {
     ) {
         CyberLoading(size = 48.dp, color = CyberTheme.colors.primary)
     }
-    CyberText(
-        text = stringResource(id = R.string.encrypt_maker_encrypting),
-        color = CyberTheme.colors.textDim,
-        style = CyberTheme.typography.body
-    )
 }
 
 @Composable

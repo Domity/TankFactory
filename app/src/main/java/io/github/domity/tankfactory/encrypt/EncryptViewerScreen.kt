@@ -183,9 +183,4 @@ private fun DecryptProcessingIndicator() {
     ) {
         CyberLoading(size = 48.dp, color = CyberTheme.colors.primary)
     }
-    CyberText(
-        text = stringResource(id = R.string.encrypt_viewer_decrypting),
-        color = CyberTheme.colors.textDim,
-        style = CyberTheme.typography.body
-    )
 }

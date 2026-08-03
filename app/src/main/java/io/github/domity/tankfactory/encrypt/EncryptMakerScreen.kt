@@ -39,9 +39,10 @@ fun EncryptMakerScreen(
     LaunchedEffect(Unit) { viewModel.onScreenEntered() }
 
     val selectedFileName by viewModel.selectedFileName.collectAsState()
-    val password by viewModel.password.collectAsState()
+    val isPasswordAvailable by viewModel.isPasswordAvailable.collectAsState()
     val isProcessing by viewModel.isProcessing.collectAsState()
     val isDone by viewModel.isDone.collectAsState()
+
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri -> if (uri != null) viewModel.setFileUri(uri) }
@@ -66,9 +67,8 @@ fun EncryptMakerScreen(
             )
 
             Spacer(Modifier.height(24.dp))
-            if (isDone && password.isNotEmpty()) {
+            if (isDone && isPasswordAvailable) {
                 SuccessPanel(
-                    password = password,
                     isProcessing = isProcessing,
                     onCopy = viewModel::copyPasswordToClipboard,
                     onSave = viewModel::saveEncryptedFile
@@ -99,7 +99,6 @@ fun EncryptMakerScreen(
 
 @Composable
 private fun SuccessPanel(
-    password: String,
     isProcessing: Boolean,
     onCopy: () -> Unit,
     onSave: () -> Unit,
@@ -119,12 +118,6 @@ private fun SuccessPanel(
                 text = stringResource(id = R.string.encrypt_maker_encrypt_done),
                 color = CyberTheme.colors.primary,
                 style = CyberTheme.typography.body
-            )
-            Spacer(Modifier.height(8.dp))
-            CyberText(
-                text = stringResource(id = R.string.encrypt_maker_password, password),
-                color = CyberTheme.colors.text,
-                style = CyberTheme.typography.button
             )
             Spacer(Modifier.height(12.dp))
             Row(

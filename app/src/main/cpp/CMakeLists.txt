@@ -33,7 +33,7 @@ target_compile_options(tankfactory PRIVATE
         -ffunction-sections
         -fdata-sections
 
-        -fno-stack-protector
+        -fstack-protector-strong
         -flto=thin
 )
 

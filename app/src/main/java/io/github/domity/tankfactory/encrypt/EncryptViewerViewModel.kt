@@ -17,13 +17,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Arrays
 
 class EncryptViewerViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _selectedFileName = MutableStateFlow<String?>(null)
     val selectedFileName: StateFlow<String?> = _selectedFileName.asStateFlow()
 
-    private var password: String = ""
+    private var password: CharArray? = null
 
     private val _isProcessing = MutableStateFlow(false)
     val isProcessing: StateFlow<Boolean> = _isProcessing.asStateFlow()
@@ -41,23 +42,33 @@ class EncryptViewerViewModel(application: Application) : AndroidViewModel(applic
     private var decryptedData: ByteArray? = null
     private val context: Context get() = getApplication()
 
+    private fun ByteArray?.secureClear(): ByteArray? {
+        if (this != null) Arrays.fill(this, 0.toByte())
+        return null
+    }
+
+    private fun CharArray?.secureClear(): CharArray? {
+        if (this != null) Arrays.fill(this, '\u0000')
+        return null
+    }
+
     fun onScreenEntered() {
         _selectedFileName.value = null
-        password = ""
+        password = password.secureClear()
         _isProcessing.value = false
         _isDone.value = false
         _decryptedFileName.value = null
         _errorMessage.value = null
-        encryptedData = null
-        decryptedData = null
+        encryptedData = encryptedData.secureClear()
+        decryptedData = decryptedData.secureClear()
     }
 
     fun setFileUri(uri: Uri) {
         _isDone.value = false
         _decryptedFileName.value = null
         _errorMessage.value = null
-        encryptedData = null
-        decryptedData = null
+        encryptedData = encryptedData.secureClear()
+        decryptedData = decryptedData.secureClear()
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -76,23 +87,25 @@ class EncryptViewerViewModel(application: Application) : AndroidViewModel(applic
     }
 
     fun setPassword(pwd: String) {
-        password = pwd
+        password = password.secureClear()
+        password = pwd.toCharArray()
         _errorMessage.value = null
     }
 
     fun decrypt() {
         val data = encryptedData ?: return
         val pwd = password
-        if (pwd.isEmpty()) return
+        if (pwd == null || pwd.isEmpty()) return
 
         _isProcessing.value = true
         _isDone.value = false
         _errorMessage.value = null
-        decryptedData = null
+        decryptedData = decryptedData.secureClear()
 
         viewModelScope.launch(Dispatchers.Default) {
             try {
                 val result = EncryptCoder.decrypt(data, pwd)
+                password = password.secureClear()
                 if (result != null) {
                     decryptedData = result
                     _isDone.value = true
@@ -138,7 +151,8 @@ class EncryptViewerViewModel(application: Application) : AndroidViewModel(applic
 
     override fun onCleared() {
         super.onCleared()
-        encryptedData = null
-        decryptedData = null
+        password = password.secureClear()
+        encryptedData = encryptedData.secureClear()
+        decryptedData = decryptedData.secureClear()
     }
 }

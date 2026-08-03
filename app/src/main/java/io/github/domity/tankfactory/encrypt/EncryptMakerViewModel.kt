@@ -2,11 +2,14 @@ package io.github.domity.tankfactory.encrypt
 
 import android.app.Application
 import android.content.ClipData
+import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
+import android.os.PersistableBundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.widget.Toast
@@ -19,13 +22,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Arrays
 
 class EncryptMakerViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedFileName = MutableStateFlow<String?>(null)
     val selectedFileName: StateFlow<String?> = _selectedFileName.asStateFlow()
 
-    private val _password = MutableStateFlow("")
-    val password: StateFlow<String> = _password.asStateFlow()
+    private var generatedPassword: CharArray? = null
+
+    private val _isPasswordAvailable = MutableStateFlow(false)
+    val isPasswordAvailable: StateFlow<Boolean> = _isPasswordAvailable.asStateFlow()
 
     private val _isProcessing = MutableStateFlow(false)
     val isProcessing: StateFlow<Boolean> = _isProcessing.asStateFlow()
@@ -38,20 +44,32 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
 
     private val context: Context get() = getApplication()
 
+    private fun ByteArray?.secureClear(): ByteArray? {
+        if (this != null) Arrays.fill(this, 0.toByte())
+        return null
+    }
+
+    private fun CharArray?.secureClear(): CharArray? {
+        if (this != null) Arrays.fill(this, '\u0000')
+        return null
+    }
+
     fun onScreenEntered() {
         _selectedFileName.value = null
-        _password.value = ""
+        generatedPassword = generatedPassword.secureClear()
+        _isPasswordAvailable.value = false
         _isProcessing.value = false
         _isDone.value = false
-        encryptedData = null
-        originalData = null
+        encryptedData = encryptedData.secureClear()
+        originalData = originalData.secureClear()
     }
 
     fun setFileUri(uri: Uri) {
         _isDone.value = false
-        _password.value = ""
-        encryptedData = null
-        originalData = null
+        generatedPassword = generatedPassword.secureClear()
+        _isPasswordAvailable.value = false
+        encryptedData = encryptedData.secureClear()
+        originalData = originalData.secureClear()
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -59,7 +77,11 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
                     if (cursor.moveToFirst()) { _selectedFileName.value = cursor.getString(0) }
                 }
                 originalData = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+                withContext(Dispatchers.Main.immediate) {
+                    Toast.makeText(context, R.string.save_failed, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -68,16 +90,18 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
 
         _isProcessing.value = true
         _isDone.value = false
-        _password.value = ""
-        encryptedData = null
+        generatedPassword = generatedPassword.secureClear()
+        _isPasswordAvailable.value = false
+        encryptedData = encryptedData.secureClear()
 
         viewModelScope.launch(Dispatchers.Default) {
             try {
                 val pwd = EncryptCoder.generatePassword()
                 encryptedData = EncryptCoder.encrypt(data, pwd)
-                _password.value = pwd
+                generatedPassword = pwd
+                _isPasswordAvailable.value = true
                 _isDone.value = true
-                originalData = null
+                originalData = originalData.secureClear()
             } catch (e: Exception) {
                 withContext(Dispatchers.Main.immediate) {
                     Toast.makeText(context, e.message ?: context.getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
@@ -87,11 +111,16 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun copyPasswordToClipboard() {
-        val pwd = _password.value
-        if (pwd.isEmpty()) return
-
+        val pwd = generatedPassword ?: return
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText("tank_password", pwd))
+        val clipData = ClipData.newPlainText("tank_password", String(pwd)).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                description.extras = PersistableBundle().apply {
+                    putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true)
+                }
+            }
+        }
+        clipboard.setPrimaryClip(clipData)
         Toast.makeText(context, context.getString(R.string.encrypt_maker_password_copied), Toast.LENGTH_SHORT).show()
     }
 
@@ -127,7 +156,8 @@ class EncryptMakerViewModel(application: Application) : AndroidViewModel(applica
 
     override fun onCleared() {
         super.onCleared()
-        encryptedData = null
-        originalData = null
+        generatedPassword = generatedPassword.secureClear()
+        encryptedData = encryptedData.secureClear()
+        originalData = originalData.secureClear()
     }
 }

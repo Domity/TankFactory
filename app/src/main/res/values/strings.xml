@@ -23,6 +23,11 @@
 <!--    <string name="gray_weight_r">灰度R: %.2f</string>-->
 <!--    <string name="gray_weight_g">灰度G: %.2f</string>-->
 <!--    <string name="gray_weight_b">灰度B: %.2f</string>-->
+    <string name="scale_inner">里图色阶: %.2f</string>
+    <string name="scale_cover">表图色阶: %.2f</string>
+    <string name="desat_inner">里图去饱和: %.2f</string>
+    <string name="desat_cover">表图去饱和: %.2f</string>
+    <string name="weight_inner">里图权重: %.2f</string>
     <string name="format_png">PNG</string>
     <string name="format_webp">WEBP</string>
 

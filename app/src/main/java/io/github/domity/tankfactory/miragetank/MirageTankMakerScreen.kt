@@ -70,6 +70,13 @@ fun MirageTankMakerScreen(
     var threshold by remember { mutableFloatStateOf(127f) }
     var generatedImageDarkBackground by remember { mutableStateOf(false) }
     var colorMode by remember { mutableStateOf(false) }
+    
+    var scaleInner by remember { mutableFloatStateOf(0.3f) }
+    var scaleCover by remember { mutableFloatStateOf(0.2f) }
+    var desatInner by remember { mutableFloatStateOf(0.0f) }
+    var desatCover by remember { mutableFloatStateOf(0.0f) }
+    var weightInner by remember { mutableFloatStateOf(0.7f) }
+    
     var saveFormat by remember { mutableStateOf(ImageFormat.WEBP) }
 
     val imagePickerLauncher1 = rememberLauncherForActivityResult(
@@ -82,7 +89,11 @@ fun MirageTankMakerScreen(
     )
 
     val updatePreview = {
-        viewModel.updatePreview(photo1K, photo2K, threshold.toInt(), colorMode, 0.299f, 0.587f, 0.114f)
+        viewModel.updatePreview(
+            photo1K, photo2K, threshold.toInt(), colorMode,
+            scaleInner, scaleCover, desatInner, desatCover, weightInner,
+            0.299f, 0.587f, 0.114f
+        )
     }
 
     CyberScaffold(useSafeArea = true) {
@@ -116,47 +127,113 @@ fun MirageTankMakerScreen(
             }
             Spacer(Modifier.height(24.dp))
 
-            CyberSurface(
-                modifier = Modifier.fillMaxWidth(),
-                color = CyberTheme.colors.surface,
-                borderWidth = 1.dp,
-                borderColor = CyberTheme.colors.border
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    ControlRow(
-                        label = stringResource(id = R.string.mirage_tank_maker_cover_image_brightness, photo1K),
-                        value = photo1K,
-                        range = 0.1f..2.0f,
-                        onValueChange = {
-                            photo1K = it
-                            updatePreview()
-                        }
-                    )
-                    Spacer(Modifier.height(16.dp))
+            if (!colorMode) {
+                CyberSurface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = CyberTheme.colors.surface,
+                    borderWidth = 1.dp,
+                    borderColor = CyberTheme.colors.border
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        ControlRow(
+                            label = stringResource(id = R.string.mirage_tank_maker_cover_image_brightness, photo1K),
+                            value = photo1K,
+                            range = 0.1f..2.0f,
+                            onValueChange = {
+                                photo1K = it
+                                updatePreview()
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
 
-                    ControlRow(
-                        label = stringResource(id = R.string.mirage_tank_maker_hidden_image_brightness, photo2K),
-                        value = photo2K,
-                        range = 0.1f..2.0f,
-                        onValueChange = {
-                            photo2K = it
-                            updatePreview()
-                        }
-                    )
+                        ControlRow(
+                            label = stringResource(id = R.string.mirage_tank_maker_hidden_image_brightness, photo2K),
+                            value = photo2K,
+                            range = 0.1f..2.0f,
+                            onValueChange = {
+                                photo2K = it
+                                updatePreview()
+                            }
+                        )
 
-                    Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(16.dp))
 
-                    ControlRow(
-                        label = stringResource(id = R.string.mirage_tank_maker_threshold, threshold.toInt()),
-                        value = threshold,
-                        range = 1f..250f,
-                        onValueChange = {
-                            threshold = it
-                            updatePreview()
-                        }
-                    )
+                        ControlRow(
+                            label = stringResource(id = R.string.mirage_tank_maker_threshold, threshold.toInt()),
+                            value = threshold,
+                            range = 1f..250f,
+                            onValueChange = {
+                                threshold = it
+                                updatePreview()
+                            }
+                        )
+                    }
+                }
+            } else {
+                CyberSurface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = CyberTheme.colors.surface,
+                    borderWidth = 1.dp,
+                    borderColor = CyberTheme.colors.border
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        ControlRow(
+                            label = stringResource(id = R.string.scale_cover, scaleCover),
+                            value = scaleCover,
+                            range = 0f..1f,
+                            onValueChange = {
+                                scaleCover = it
+                                updatePreview()
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
+
+                        ControlRow(
+                            label = stringResource(id = R.string.scale_inner, scaleInner),
+                            value = scaleInner,
+                            range = 0f..1f,
+                            onValueChange = {
+                                scaleInner = it
+                                updatePreview()
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
+
+                        ControlRow(
+                            label = stringResource(id = R.string.desat_cover, desatCover),
+                            value = desatCover,
+                            range = 0f..1f,
+                            onValueChange = {
+                                desatCover = it
+                                updatePreview()
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
+
+                        ControlRow(
+                            label = stringResource(id = R.string.desat_inner, desatInner),
+                            value = desatInner,
+                            range = 0f..1f,
+                            onValueChange = {
+                                desatInner = it
+                                updatePreview()
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
+
+                        ControlRow(
+                            label = stringResource(id = R.string.weight_inner, weightInner),
+                            value = weightInner,
+                            range = 0f..1f,
+                            onValueChange = {
+                                weightInner = it
+                                updatePreview()
+                            }
+                        )
+                    }
                 }
             }
+
             Spacer(Modifier.height(24.dp))
 
             Row(
@@ -210,17 +287,13 @@ fun MirageTankMakerScreen(
 
                 Column(
                     modifier = Modifier.width(120.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ){
-                        CyberSwitch(
-                            checked = generatedImageDarkBackground,
-                            onCheckedChange = { generatedImageDarkBackground = it }
-                        )
-                }
+                    CyberSwitch(
+                        checked = generatedImageDarkBackground,
+                        onCheckedChange = { generatedImageDarkBackground = it }
+                    )
                     CyberButton(
                         text = stringResource(id = R.string.color_mode),
                         onClick = {
@@ -232,26 +305,25 @@ fun MirageTankMakerScreen(
                         isPrimary = colorMode
                     )
 
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
                         CyberText(
                             text = if (saveFormat == ImageFormat.PNG) stringResource(id = R.string.format_png) else stringResource(id = R.string.format_webp),
                             color = CyberTheme.colors.text,
                             style = CyberTheme.typography.body
                         )
-                        Spacer(Modifier.height(4.dp))
                         CyberSwitch(
                             checked = saveFormat == ImageFormat.PNG,
                             onCheckedChange = { saveFormat = if (it) ImageFormat.PNG else ImageFormat.WEBP }
                         )
-                    }
+
 
                     CyberButton(
                         text = if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save),
                         onClick = {
-                            viewModel.saveMirageTank(photo1K, photo2K, threshold.toInt(), colorMode, 0.299f, 0.587f, 0.114f, saveFormat)
+                            viewModel.saveMirageTank(
+                                photo1K, photo2K, threshold.toInt(), colorMode,
+                                scaleInner, scaleCover, desatInner, desatCover, weightInner,
+                                0.299f, 0.587f, 0.114f, saveFormat
+                            )
                         },
                         enabled = selectedImage1Uri != null && selectedImage2Uri != null && !isSaving,
                         modifier = Modifier.fillMaxWidth(),
@@ -260,7 +332,8 @@ fun MirageTankMakerScreen(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
+
 
             CyberText(
                 text = stringResource(id = R.string.mirage_tank_maker_tips),
@@ -309,3 +382,4 @@ private fun ControlRow(
         CyberSlider(value = value, onValueChange = onValueChange, range = range)
     }
 }
+

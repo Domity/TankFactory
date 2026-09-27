@@ -35,10 +35,12 @@ ScaleXTable precompute_x_table(int src_w, int dst_w) {
     table.src_x = mem;
     table.src_x_next = mem + dst_w;
     table.weights = mem + 2 * dst_w;
-    float x_ratio = dst_w > 1 ? (float)(src_w - 1) / (dst_w - 1) : 0;
+    float x_ratio = dst_w > 0 ? (float)src_w / dst_w : 1.0f;
 
     for (int x = 0; x < dst_w; ++x) {
-        float src_xf = x * x_ratio;
+        float src_xf = (x + 0.5f) * x_ratio - 0.5f;
+        if (src_xf < 0) src_xf = 0;
+        if (src_xf > src_w - 1) src_xf = src_w - 1;
         int sx = (int)src_xf;
         table.src_x[x] = sx;
         table.src_x_next[x] = (sx + 1 < src_w) ? sx + 1 : sx;
@@ -51,7 +53,9 @@ __attribute__((always_inline))
 inline void get_scaled_gray_row(const uint8_t* srcPixels, int src_stride, int src_w, int src_h,
                                 int dst_y, int dst_w, float y_ratio,
                                 const ScaleXTable& table, uint8_t* out_row_buffer, int32_t wr, int32_t wg, int32_t wb) {
-    float src_yf = dst_y * y_ratio;
+    float src_yf = (dst_y + 0.5f) * y_ratio - 0.5f;
+    if (src_yf < 0) src_yf = 0;
+    if (src_yf > src_h - 1) src_yf = src_h - 1;
     int src_y = (int)src_yf;
     int y_weight = (int)((src_yf - src_y) * 256.0f);
     int y0 = src_y;
@@ -78,7 +82,9 @@ __attribute__((always_inline))
 inline void get_scaled_color_row(const uint8_t* srcPixels, int src_stride, int src_w, int src_h,
                                  int dst_y, int dst_w, float y_ratio, const ScaleXTable& table,
                                  uint8_t* out_row_r, uint8_t* out_row_g, uint8_t* out_row_b) {
-    float src_yf = dst_y * y_ratio;
+    float src_yf = (dst_y + 0.5f) * y_ratio - 0.5f;
+    if (src_yf < 0) src_yf = 0;
+    if (src_yf > src_h - 1) src_yf = src_h - 1;
     int src_y = (int)src_yf;
     int y_weight = (int)((src_yf - src_y) * 256.0f);
     int y0 = src_y;
@@ -121,7 +127,7 @@ struct GrayEncodeTaskContext {
     uint8_t* outputPixels;
     int info1_stride, info1_w, info1_h;
     int info2_stride, info2_w, info2_h;
-    int out_stride, out_w, out_h;
+    [[maybe_unused]] int out_stride, out_w, out_h;
     float y_ratio1, y_ratio2;
     ScaleXTable table1, table2;
     int32_t k1_fixed, k2_fixed;
@@ -189,20 +195,18 @@ struct ColorEncodeTaskContext {
     uint8_t* outputPixels;
     int info1_stride, info1_w, info1_h;
     int info2_stride, info2_w, info2_h;
-    int out_stride, out_w, out_h;
+    [[maybe_unused]] int out_stride, out_w, out_h;
     float y_ratio1, y_ratio2;
     ScaleXTable table1, table2;
-    int32_t k1_fixed, k2_fixed;
-    int threshold;
+    int32_t scale_i_fixed, scale_c_fixed;
+    int32_t desat_i_fixed, desat_c_fixed, weight_i_fixed;
+    int32_t gray_wr, gray_wg, gray_wb;
     uint8_t* thread_buffer;
     uint32_t row_size;
 };
 
 void* color_encode_worker_thread(void* arg) {
     auto* ctx = (ColorEncodeTaskContext*)arg;
-    int16x8_t v_threshold = vdupq_n_s16((int16_t)ctx->threshold);
-    int16x8_t v_255 = vdupq_n_s16(255);
-    int16x8_t v_0 = vdupq_n_s16(0);
 
     uint8_t* row1_r = ctx->thread_buffer;
     uint8_t* row1_g = ctx->thread_buffer + ctx->row_size;
@@ -218,70 +222,55 @@ void* color_encode_worker_thread(void* arg) {
                              y, ctx->out_w, ctx->y_ratio2, ctx->table2, row2_r, row2_g, row2_b);
 
         auto* outRow = (uint32_t*)(ctx->outputPixels + y * ctx->out_stride);
-        uint32_t x = 0;
 
-        for (; x <= (uint32_t)ctx->out_w - 8; x += 8) {
-            uint8x8_t r1 = vld1_u8(&row1_r[x]);
-            uint8x8_t g1 = vld1_u8(&row1_g[x]);
-            uint8x8_t b1 = vld1_u8(&row1_b[x]);
-            uint8x8_t r2 = vld1_u8(&row2_r[x]);
-            uint8x8_t g2 = vld1_u8(&row2_g[x]);
-            uint8x8_t b2 = vld1_u8(&row2_b[x]);
+        for (uint32_t x = 0; x < (uint32_t)ctx->out_w; ++x) {
+            int r1 = row1_r[x];
+            int g1 = row1_g[x];
+            int b1 = row1_b[x];
+            int r2 = row2_r[x];
+            int g2 = row2_g[x];
+            int b2 = row2_b[x];
 
-            int16x8_t r1_s16 = vreinterpretq_s16_u16(vmovl_u8(r1));
-            int16x8_t g1_s16 = vreinterpretq_s16_u16(vmovl_u8(g1));
-            int16x8_t b1_s16 = vreinterpretq_s16_u16(vmovl_u8(b1));
-            int16x8_t r2_s16 = vreinterpretq_s16_u16(vmovl_u8(r2));
-            int16x8_t g2_s16 = vreinterpretq_s16_u16(vmovl_u8(g2));
-            int16x8_t b2_s16 = vreinterpretq_s16_u16(vmovl_u8(b2));
+            int r1_scaled = (r1 * ctx->scale_i_fixed) >> 12;
+            int g1_scaled = (g1 * ctx->scale_i_fixed) >> 12;
+            int b1_scaled = (b1 * ctx->scale_i_fixed) >> 12;
 
-            int32x4_t r1_lo = vmulq_n_s32(vmovl_s16(vget_low_s16(r1_s16)), ctx->k1_fixed);
-            int32x4_t r1_hi = vmulq_n_s32(vmovl_s16(vget_high_s16(r1_s16)), ctx->k1_fixed);
-            int16x8_t vr1 = vminq_s16(vmaxq_s16(vcombine_s16(vshrn_n_s32(r1_lo, 12), vshrn_n_s32(r1_hi, 12)), v_threshold), v_255);
+            int gray1 = (r1_scaled * ctx->gray_wr + g1_scaled * ctx->gray_wg + b1_scaled * ctx->gray_wb) >> 16;
 
-            int32x4_t g1_lo = vmulq_n_s32(vmovl_s16(vget_low_s16(g1_s16)), ctx->k1_fixed);
-            int32x4_t g1_hi = vmulq_n_s32(vmovl_s16(vget_high_s16(g1_s16)), ctx->k1_fixed);
-            int16x8_t vg1 = vminq_s16(vmaxq_s16(vcombine_s16(vshrn_n_s32(g1_lo, 12), vshrn_n_s32(g1_hi, 12)), v_threshold), v_255);
+            int r1_desat = r1_scaled + ((gray1 - r1_scaled) * ctx->desat_i_fixed >> 12);
+            int g1_desat = g1_scaled + ((gray1 - g1_scaled) * ctx->desat_i_fixed >> 12);
+            int b1_desat = b1_scaled + ((gray1 - b1_scaled) * ctx->desat_i_fixed >> 12);
 
-            int32x4_t b1_lo = vmulq_n_s32(vmovl_s16(vget_low_s16(b1_s16)), ctx->k1_fixed);
-            int32x4_t b1_hi = vmulq_n_s32(vmovl_s16(vget_high_s16(b1_s16)), ctx->k1_fixed);
-            int16x8_t vb1 = vminq_s16(vmaxq_s16(vcombine_s16(vshrn_n_s32(b1_lo, 12), vshrn_n_s32(b1_hi, 12)), v_threshold), v_255);
 
-            int32x4_t r2_lo = vmulq_n_s32(vmovl_s16(vget_low_s16(r2_s16)), ctx->k2_fixed);
-            int32x4_t r2_hi = vmulq_n_s32(vmovl_s16(vget_high_s16(r2_s16)), ctx->k2_fixed);
-            int16x8_t vr2 = vminq_s16(vmaxq_s16(vcombine_s16(vshrn_n_s32(r2_lo, 12), vshrn_n_s32(r2_hi, 12)), v_0), v_threshold);
+            int r2_inv = ((255 << 12) - ((255 - r2) * ctx->scale_c_fixed)) >> 12;
+            int g2_inv = ((255 << 12) - ((255 - g2) * ctx->scale_c_fixed)) >> 12;
+            int b2_inv = ((255 << 12) - ((255 - b2) * ctx->scale_c_fixed)) >> 12;
 
-            int32x4_t g2_lo = vmulq_n_s32(vmovl_s16(vget_low_s16(g2_s16)), ctx->k2_fixed);
-            int32x4_t g2_hi = vmulq_n_s32(vmovl_s16(vget_high_s16(g2_s16)), ctx->k2_fixed);
-            int16x8_t vg2 = vminq_s16(vmaxq_s16(vcombine_s16(vshrn_n_s32(g2_lo, 12), vshrn_n_s32(g2_hi, 12)), v_0), v_threshold);
 
-            int32x4_t b2_lo = vmulq_n_s32(vmovl_s16(vget_low_s16(b2_s16)), ctx->k2_fixed);
-            int32x4_t b2_hi = vmulq_n_s32(vmovl_s16(vget_high_s16(b2_s16)), ctx->k2_fixed);
-            int16x8_t vb2 = vminq_s16(vmaxq_s16(vcombine_s16(vshrn_n_s32(b2_lo, 12), vshrn_n_s32(b2_hi, 12)), v_0), v_threshold);
+            int gray2 = (r2_inv * ctx->gray_wr + g2_inv * ctx->gray_wg + b2_inv * ctx->gray_wb) >> 16;
 
-            int16x8_t gray1 = vshrq_n_s16(vaddq_s16(vaddq_s16(vr1, vg1), vb1), 1);
-            int16x8_t gray2 = vshrq_n_s16(vaddq_s16(vaddq_s16(vr2, vg2), vb2), 1);
-            int16x8_t alpha_s16 = vsubq_s16(vaddq_s16(v_255, gray2), gray1);
 
-            uint8x8x4_t out_vec;
-            out_vec.val[0] = vqmovun_s16(vr2);
-            out_vec.val[1] = vqmovun_s16(vg2);
-            out_vec.val[2] = vqmovun_s16(vb2);
-            out_vec.val[3] = vqmovun_s16(alpha_s16);
-            vst4_u8((uint8_t*)&outRow[x], out_vec);
-        }
+            int r2_desat = r2_inv + ((gray2 - r2_inv) * ctx->desat_c_fixed >> 12);
+            int g2_desat = g2_inv + ((gray2 - g2_inv) * ctx->desat_c_fixed >> 12);
+            int b2_desat = b2_inv + ((gray2 - b2_inv) * ctx->desat_c_fixed >> 12);
 
-        for (; x < (uint32_t)ctx->out_w; ++x) {
-            int vr1 = min_int(max_int((row1_r[x] * ctx->k1_fixed) >> 12, ctx->threshold), 255);
-            int vg1 = min_int(max_int((row1_g[x] * ctx->k1_fixed) >> 12, ctx->threshold), 255);
-            int vb1 = min_int(max_int((row1_b[x] * ctx->k1_fixed) >> 12, ctx->threshold), 255);
-            int vr2 = min_int(max_int((row2_r[x] * ctx->k2_fixed) >> 12, 0), ctx->threshold);
-            int vg2 = min_int(max_int((row2_g[x] * ctx->k2_fixed) >> 12, 0), ctx->threshold);
-            int vb2 = min_int(max_int((row2_b[x] * ctx->k2_fixed) >> 12, 0), ctx->threshold);
-            int gray1 = (vr1 + vg1 + vb1) / 3;
-            int gray2 = (vr2 + vg2 + vb2) / 3;
-            int alpha = 255 - gray1 + gray2;
-            outRow[x] = (alpha << 24) | (vb2 << 16) | (vg2 << 8) | vr2;
+            int alpha_raw = 255 + gray1 - gray2;
+            int alpha_i = min_int(max_int(alpha_raw, 0), 255);
+            int alpha = max_int(alpha_i, 1);
+
+            int out_r = ((r1_desat - alpha_i + 255 - r2_desat) * ctx->weight_i_fixed >> 12) + alpha_i - 255 + r2_desat;
+            int out_g = ((g1_desat - alpha_i + 255 - g2_desat) * ctx->weight_i_fixed >> 12) + alpha_i - 255 + g2_desat;
+            int out_b = ((b1_desat - alpha_i + 255 - b2_desat) * ctx->weight_i_fixed >> 12) + alpha_i - 255 + b2_desat;
+
+            out_r = (out_r * 255) / alpha;
+            out_g = (out_g * 255) / alpha;
+            out_b = (out_b * 255) / alpha;
+
+            out_r = min_int(max_int(out_r, 0), 255);
+            out_g = min_int(max_int(out_g, 0), 255);
+            out_b = min_int(max_int(out_b, 0), 255);
+
+            outRow[x] = (alpha_i << 24) | (out_b << 16) | (out_g << 8) | out_r;
         }
     }
     return nullptr;
@@ -306,8 +295,8 @@ Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeGrayNative(
     uint32_t width = outInfo.width;
     uint32_t height = outInfo.height;
 
-    float y_ratio1 = height > 1 ? (float)(info1.height - 1) / (height - 1) : 0;
-    float y_ratio2 = height > 1 ? (float)(info2.height - 1) / (height - 1) : 0;
+    float y_ratio1 = height > 0 ? (float)info1.height / height : 1.0f;
+    float y_ratio2 = height > 0 ? (float)info2.height / height : 1.0f;
 
     ScaleXTable table1 = precompute_x_table(info1.width, width);
     ScaleXTable table2 = precompute_x_table(info2.width, width);
@@ -374,7 +363,9 @@ Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeGrayNative(
 extern "C" JNIEXPORT void JNICALL
 Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeColorNative(
         JNIEnv *env, jobject, jobject bitmap1, jobject bitmap2, jobject outputBitmap,
-        jfloat photo1K, jfloat photo2K, jint threshold) {
+        jfloat scaleInner, jfloat scaleCover,
+        jfloat desatInner, jfloat desatCover, jfloat weightInner,
+        jfloat grayWeightR, jfloat grayWeightG, jfloat grayWeightB) {
 
     AndroidBitmapInfo info1, info2, outInfo;
     if (AndroidBitmap_getInfo(env, bitmap1, &info1) < 0 ||
@@ -389,14 +380,20 @@ Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeColorNative(
     uint32_t width = outInfo.width;
     uint32_t height = outInfo.height;
 
-    float y_ratio1 = height > 1 ? (float)(info1.height - 1) / (height - 1) : 0;
-    float y_ratio2 = height > 1 ? (float)(info2.height - 1) / (height - 1) : 0;
+    float y_ratio1 = height > 0 ? (float)info1.height / height : 1.0f;
+    float y_ratio2 = height > 0 ? (float)info2.height / height : 1.0f;
 
     ScaleXTable table1 = precompute_x_table(info1.width, width);
     ScaleXTable table2 = precompute_x_table(info2.width, width);
 
-    const auto k1_fixed = (int32_t)(photo1K * 4096.0f);
-    const auto k2_fixed = (int32_t)(photo2K * 4096.0f);
+    const auto scale_i_fixed = (int32_t)(scaleInner * 4096.0f);
+    const auto scale_c_fixed = (int32_t)((1.0f - scaleCover) * 4096.0f);
+    const auto desat_i_fixed = (int32_t)(desatInner * 4096.0f);
+    const auto desat_c_fixed = (int32_t)(desatCover * 4096.0f);
+    const auto weight_i_fixed = (int32_t)(weightInner * 4096.0f);
+    const auto wr = (int32_t)(grayWeightR * 65536.0f);
+    const auto wg = (int32_t)(grayWeightG * 65536.0f);
+    const auto wb = (int32_t)(grayWeightB * 65536.0f);
 
     int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
     if (num_threads <= 0) num_threads = 4;
@@ -421,8 +418,14 @@ Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeColorNative(
         tasks[i].out_stride = outInfo.stride; tasks[i].out_w = width;         tasks[i].out_h = height;
         tasks[i].y_ratio1 = y_ratio1;         tasks[i].y_ratio2 = y_ratio2;
         tasks[i].table1 = table1;             tasks[i].table2 = table2;
-        tasks[i].k1_fixed = k1_fixed;         tasks[i].k2_fixed = k2_fixed;
-        tasks[i].threshold = threshold;
+        tasks[i].scale_i_fixed = scale_i_fixed;
+        tasks[i].scale_c_fixed = scale_c_fixed;
+        tasks[i].desat_i_fixed = desat_i_fixed;
+        tasks[i].desat_c_fixed = desat_c_fixed;
+        tasks[i].weight_i_fixed = weight_i_fixed;
+        tasks[i].gray_wr = wr;
+        tasks[i].gray_wg = wg;
+        tasks[i].gray_wb = wb;
 
         tasks[i].row_size = row_size;
         tasks[i].thread_buffer = thread_buffers + i * row_size * 6;

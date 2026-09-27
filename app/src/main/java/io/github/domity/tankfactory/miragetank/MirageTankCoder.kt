@@ -24,8 +24,13 @@ object MirageTankCoder {
         bitmap1: Bitmap,
         bitmap2: Bitmap,
         outputBitmap: Bitmap,
-        photo1K: Float,
-        photo2K: Float,
-        threshold: Int
+        scaleInner: Float,
+        scaleCover: Float,
+        desatInner: Float,
+        desatCover: Float,
+        weightInner: Float,
+        grayWeightR: Float,
+        grayWeightG: Float,
+        grayWeightB: Float
     )
 }

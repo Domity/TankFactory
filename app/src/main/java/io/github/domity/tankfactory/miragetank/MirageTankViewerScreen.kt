@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,23 +26,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.domity.tankfactory.R
 import io.github.domity.tankfactory.ui.components.FastUriImage
+import io.github.domity.tankfactory.ui.components.ImageFormat
 import io.github.domity.tankfactory.ui.theme.MirageTankImageTheme
 import io.github.domity.cybertheme.atoms.CyberSurface
 import io.github.domity.cybertheme.atoms.CyberText
 import io.github.domity.cybertheme.foundation.CyberTheme
+import io.github.domity.cybertheme.molecules.CyberButton
 import io.github.domity.cybertheme.molecules.CyberSwitch
 import io.github.domity.cybertheme.templates.CyberScaffold
 
 @Composable
-fun MirageTankViewerScreen() {
+fun MirageTankViewerScreen(
+    viewModel: MirageTankViewerViewModel = viewModel()
+) {
     var isDarkMode by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var saveFormat by remember { mutableStateOf(ImageFormat.WEBP) }
+
+    val isSaving by viewModel.isSaving.collectAsState()
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
-        onResult = { uri -> selectedImageUri = uri }
+        onResult = { uri ->
+            selectedImageUri = uri
+            if (uri != null) viewModel.setImageUri(uri)
+        }
     )
 
     CyberScaffold(useSafeArea = true) {
@@ -54,7 +67,7 @@ fun MirageTankViewerScreen() {
                 CyberSurface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.6f)
+                        .fillMaxHeight(0.5f)
                         .padding(24.dp)
                         .clickable { photoPickerLauncher.launch("image/*") },
                     color = CyberTheme.colors.background,
@@ -82,17 +95,54 @@ fun MirageTankViewerScreen() {
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            Spacer(modifier = Modifier.height(24.dp))
+            Column(
+                modifier = Modifier.width(220.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                CyberSwitch(
-                    checked = isDarkMode,
-                    onCheckedChange = { isDarkMode = it },
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CyberSwitch(
+                            checked = isDarkMode,
+                            onCheckedChange = { isDarkMode = it },
+                        )
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CyberText(
+                            text = if (saveFormat == ImageFormat.PNG) stringResource(id = R.string.format_png) else stringResource(id = R.string.format_webp),
+                            color = CyberTheme.colors.text,
+                            style = CyberTheme.typography.body
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        CyberSwitch(
+                            checked = saveFormat == ImageFormat.PNG,
+                            onCheckedChange = { saveFormat = if (it) ImageFormat.PNG else ImageFormat.WEBP }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                CyberButton(
+                    text = if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save),
+                    onClick = { viewModel.saveImage(isDarkMode, saveFormat) },
+                    enabled = selectedImageUri != null && !isSaving,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    isPrimary = false
                 )
             }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             CyberText(

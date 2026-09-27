@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,9 +35,11 @@ import io.github.domity.cybertheme.atoms.CyberSurface
 import io.github.domity.cybertheme.atoms.CyberText
 import io.github.domity.cybertheme.foundation.CyberTheme
 import io.github.domity.cybertheme.molecules.CyberButton
+import io.github.domity.cybertheme.molecules.CyberSwitch
 import io.github.domity.cybertheme.templates.CyberScaffold
 import io.github.domity.tankfactory.R
 import io.github.domity.tankfactory.ui.components.FastUriImage
+import io.github.domity.tankfactory.ui.components.ImageFormat
 
 @Composable
 fun LSBTankViewerScreen(
@@ -46,6 +50,7 @@ fun LSBTankViewerScreen(
     val isTooLarge by viewModel.isResultTooLarge.collectAsState()
     val isSaving by viewModel.isSaving.collectAsState()
     val isDecoding by viewModel.isDecoding.collectAsState()
+    var saveFormat by remember { mutableStateOf(ImageFormat.WEBP) }
     val cachedDisplayBitmap = remember(displayBitmap) {
         displayBitmap?.asImageBitmap()
     }
@@ -71,24 +76,21 @@ fun LSBTankViewerScreen(
                     .fillMaxWidth()
                     .height(200.dp)
             ) {
-                Box(
+                ImageSelectionSlot(
                     modifier = Modifier
                         .weight(2f)
-                        .fillMaxHeight()
-                ) {
-                    ImageSelectionSlot(
-                        modifier = Modifier.fillMaxSize(),
-                        uri = selectedImageUri,
-                        placeholderText = stringResource(id = R.string.select_image).uppercase(),
-                        onClick = { imagePickerLauncher.launch("image/*") }
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
+                        .fillMaxHeight(),
+                    uri = selectedImageUri,
+                    placeholderText = stringResource(id = R.string.select_image).uppercase(),
+                    onClick = { imagePickerLauncher.launch("image/*") }
+                )
 
+                Spacer(modifier = Modifier.width(16.dp))
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceEvenly
                 ) {
                     CyberButton(
@@ -101,9 +103,21 @@ fun LSBTankViewerScreen(
                         modifier = Modifier.fillMaxWidth(),
                         isPrimary = true
                     )
+
+                    CyberText(
+                        text = if (saveFormat == ImageFormat.PNG) stringResource(id = R.string.format_png) else stringResource(id = R.string.format_webp),
+                        color = CyberTheme.colors.text,
+                        style = CyberTheme.typography.body
+                    )
+
+                    CyberSwitch(
+                        checked = saveFormat == ImageFormat.PNG,
+                        onCheckedChange = { saveFormat = if (it) ImageFormat.PNG else ImageFormat.WEBP }
+                    )
+
                     CyberButton(
                         text = if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save),
-                        onClick = { viewModel.saveImageToDownload() },
+                        onClick = { viewModel.saveImageToDownload(saveFormat) },
                         enabled = (cachedDisplayBitmap != null || isTooLarge) && !isSaving,
                         modifier = Modifier.fillMaxWidth(),
                         isPrimary = false

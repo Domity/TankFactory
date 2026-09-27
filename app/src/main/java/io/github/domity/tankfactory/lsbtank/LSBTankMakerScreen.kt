@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,9 +40,11 @@ import io.github.domity.cybertheme.atoms.CyberText
 import io.github.domity.cybertheme.foundation.CyberTheme
 import io.github.domity.cybertheme.molecules.CyberButton
 import io.github.domity.cybertheme.molecules.CyberSlider
+import io.github.domity.cybertheme.molecules.CyberSwitch
 import io.github.domity.cybertheme.templates.CyberScaffold
 import io.github.domity.tankfactory.R
 import io.github.domity.tankfactory.ui.components.FastUriImage
+import io.github.domity.tankfactory.ui.components.ImageFormat
 import kotlin.math.roundToInt
 
 @Composable
@@ -59,6 +62,7 @@ fun LSBTankMakerScreen(
     val isSaving by viewModel.isSaving.collectAsState()
     val isGenerating by viewModel.isGenerating.collectAsState()
     var compress by remember { mutableIntStateOf(4) }
+    var saveFormat by remember { mutableStateOf(ImageFormat.WEBP) }
     val cachedDisplayBitmap = remember(displayBitmap) {
         displayBitmap?.asImageBitmap()
     }
@@ -188,10 +192,29 @@ fun LSBTankMakerScreen(
 
                 Spacer(Modifier.width(16.dp))
 
-                Column {
+                Column(
+                    modifier = Modifier.height(200.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CyberText(
+                        text = if (saveFormat == ImageFormat.PNG) stringResource(id = R.string.format_png) else stringResource(id = R.string.format_webp),
+                        color = CyberTheme.colors.text,
+                        style = CyberTheme.typography.body
+                    )
+
+                    Spacer(Modifier.height(4.dp))
+
+                    CyberSwitch(
+                        checked = saveFormat == ImageFormat.PNG,
+                        onCheckedChange = { saveFormat = if (it) ImageFormat.PNG else ImageFormat.WEBP }
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
                     CyberButton(
                         text = if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save),
-                        onClick = { viewModel.saveImageToDownload() },
+                        onClick = { viewModel.saveImageToDownload(saveFormat) },
                         enabled = (cachedDisplayBitmap != null || isTooLarge) && !isSaving,
                         isPrimary = false,
                         modifier = Modifier.width(100.dp)

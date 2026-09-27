@@ -115,14 +115,15 @@ class LSBTankViewerViewModel(application: Application) : AndroidViewModel(applic
         return bitmap.scale(newWidth, newHeight)
     }
 
-    fun saveImageToDownload() {
+    fun saveImageToDownload(format: io.github.domity.tankfactory.ui.components.ImageFormat) {
         val bitmapToSave = originalResultBitmap ?: return
         _isSaving.value = true
         viewModelScope.launch {
             saveImageToDownload(
                 context = getApplication(),
                 bitmap = bitmapToSave,
-                filename = "LSB_Decoded_${System.currentTimeMillis()}.webp"
+                filename = "LSBTank_Decoded_${System.currentTimeMillis()}",
+                format = format
             )
             _isSaving.value = false
         }

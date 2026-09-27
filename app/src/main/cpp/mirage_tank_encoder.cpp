@@ -231,30 +231,30 @@ void* color_encode_worker_thread(void* arg) {
             int g2 = row2_g[x];
             int b2 = row2_b[x];
 
+            int gray1_original = (r1 * ctx->gray_wr + g1 * ctx->gray_wg + b1 * ctx->gray_wb) >> 16;
+            int gray2_original = (r2 * ctx->gray_wr + g2 * ctx->gray_wg + b2 * ctx->gray_wb) >> 16;
+
             int r1_scaled = (r1 * ctx->scale_i_fixed) >> 12;
             int g1_scaled = (g1 * ctx->scale_i_fixed) >> 12;
             int b1_scaled = (b1 * ctx->scale_i_fixed) >> 12;
 
-            int gray1 = (r1_scaled * ctx->gray_wr + g1_scaled * ctx->gray_wg + b1_scaled * ctx->gray_wb) >> 16;
+            int gray1_scaled = (gray1_original * ctx->scale_i_fixed) >> 12;
 
-            int r1_desat = r1_scaled + ((gray1 - r1_scaled) * ctx->desat_i_fixed >> 12);
-            int g1_desat = g1_scaled + ((gray1 - g1_scaled) * ctx->desat_i_fixed >> 12);
-            int b1_desat = b1_scaled + ((gray1 - b1_scaled) * ctx->desat_i_fixed >> 12);
-
+            int r1_desat = r1_scaled + ((gray1_scaled - r1_scaled) * ctx->desat_i_fixed >> 12);
+            int g1_desat = g1_scaled + ((gray1_scaled - g1_scaled) * ctx->desat_i_fixed >> 12);
+            int b1_desat = b1_scaled + ((gray1_scaled - b1_scaled) * ctx->desat_i_fixed >> 12);
 
             int r2_inv = ((255 << 12) - ((255 - r2) * ctx->scale_c_fixed)) >> 12;
             int g2_inv = ((255 << 12) - ((255 - g2) * ctx->scale_c_fixed)) >> 12;
             int b2_inv = ((255 << 12) - ((255 - b2) * ctx->scale_c_fixed)) >> 12;
 
+            int gray2_scaled = ((255 << 12) - ((255 - gray2_original) * ctx->scale_c_fixed)) >> 12;
 
-            int gray2 = (r2_inv * ctx->gray_wr + g2_inv * ctx->gray_wg + b2_inv * ctx->gray_wb) >> 16;
+            int r2_desat = r2_inv + ((gray2_scaled - r2_inv) * ctx->desat_c_fixed >> 12);
+            int g2_desat = g2_inv + ((gray2_scaled - g2_inv) * ctx->desat_c_fixed >> 12);
+            int b2_desat = b2_inv + ((gray2_scaled - b2_inv) * ctx->desat_c_fixed >> 12);
 
-
-            int r2_desat = r2_inv + ((gray2 - r2_inv) * ctx->desat_c_fixed >> 12);
-            int g2_desat = g2_inv + ((gray2 - g2_inv) * ctx->desat_c_fixed >> 12);
-            int b2_desat = b2_inv + ((gray2 - b2_inv) * ctx->desat_c_fixed >> 12);
-
-            int alpha_raw = 255 + gray1 - gray2;
+            int alpha_raw = 255 + gray1_scaled - gray2_scaled;
             int alpha_i = min_int(max_int(alpha_raw, 0), 255);
             int alpha = max_int(alpha_i, 1);
 

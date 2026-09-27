@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -17,6 +16,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,6 +44,7 @@ import io.github.domity.cybertheme.molecules.CyberSwitch
 import io.github.domity.cybertheme.templates.CyberScaffold
 import io.github.domity.tankfactory.R
 import io.github.domity.tankfactory.ui.components.FastUriImage
+import io.github.domity.tankfactory.ui.components.ImageFormat
 import io.github.domity.tankfactory.ui.theme.MirageTankImageTheme
 
 @Composable
@@ -66,6 +69,8 @@ fun MirageTankMakerScreen(
     var photo2K by remember { mutableFloatStateOf(1.0f) }
     var threshold by remember { mutableFloatStateOf(127f) }
     var generatedImageDarkBackground by remember { mutableStateOf(false) }
+    var colorMode by remember { mutableStateOf(false) }
+    var saveFormat by remember { mutableStateOf(ImageFormat.WEBP) }
 
     val imagePickerLauncher1 = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -76,11 +81,16 @@ fun MirageTankMakerScreen(
         onResult = { uri -> if (uri != null) viewModel.setImage2Uri(uri) }
     )
 
+    val updatePreview = {
+        viewModel.updatePreview(photo1K, photo2K, threshold.toInt(), colorMode, 0.299f, 0.587f, 0.114f)
+    }
+
     CyberScaffold(useSafeArea = true) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -119,7 +129,7 @@ fun MirageTankMakerScreen(
                         range = 0.1f..2.0f,
                         onValueChange = {
                             photo1K = it
-                            viewModel.updatePreview(photo1K, photo2K, threshold.toInt())
+                            updatePreview()
                         }
                     )
                     Spacer(Modifier.height(16.dp))
@@ -130,7 +140,7 @@ fun MirageTankMakerScreen(
                         range = 0.1f..2.0f,
                         onValueChange = {
                             photo2K = it
-                            viewModel.updatePreview(photo1K, photo2K, threshold.toInt())
+                            updatePreview()
                         }
                     )
 
@@ -142,7 +152,7 @@ fun MirageTankMakerScreen(
                         range = 1f..250f,
                         onValueChange = {
                             threshold = it
-                            viewModel.updatePreview(photo1K, photo2K, threshold.toInt())
+                            updatePreview()
                         }
                     )
                 }
@@ -150,15 +160,16 @@ fun MirageTankMakerScreen(
             Spacer(Modifier.height(24.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
                 MirageTankImageTheme(isDarkMode = generatedImageDarkBackground) {
                     CyberSurface(
                         modifier = Modifier
                             .weight(1f)
-                            .height(200.dp),
+                            .fillMaxHeight(),
                         color = CyberTheme.colors.background,
                         borderWidth = 1.dp,
                         borderColor = CyberTheme.colors.border
@@ -192,35 +203,62 @@ fun MirageTankMakerScreen(
                                     size = 48.dp,
                                     color = CyberTheme.colors.primary
                                 )
-
                             }
                         }
                     }
                 }
 
                 Column(
-                    modifier = Modifier.fillMaxHeight(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    modifier = Modifier.width(120.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    CyberSwitch(
-                        checked = generatedImageDarkBackground,
-                        onCheckedChange = { generatedImageDarkBackground = it }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ){
+                        CyberSwitch(
+                            checked = generatedImageDarkBackground,
+                            onCheckedChange = { generatedImageDarkBackground = it }
+                        )
+                }
+                    CyberButton(
+                        text = stringResource(id = R.string.color_mode),
+                        onClick = {
+                            colorMode = !colorMode
+                            updatePreview()
+                        },
+                        enabled = !isSaving,
+                        modifier = Modifier.fillMaxWidth(),
+                        isPrimary = colorMode
+                    )
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        CyberText(
+                            text = if (saveFormat == ImageFormat.PNG) stringResource(id = R.string.format_png) else stringResource(id = R.string.format_webp),
+                            color = CyberTheme.colors.text,
+                            style = CyberTheme.typography.body
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        CyberSwitch(
+                            checked = saveFormat == ImageFormat.PNG,
+                            onCheckedChange = { saveFormat = if (it) ImageFormat.PNG else ImageFormat.WEBP }
+                        )
+                    }
+
+                    CyberButton(
+                        text = if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save),
+                        onClick = {
+                            viewModel.saveMirageTank(photo1K, photo2K, threshold.toInt(), colorMode, 0.299f, 0.587f, 0.114f, saveFormat)
+                        },
+                        enabled = selectedImage1Uri != null && selectedImage2Uri != null && !isSaving,
+                        modifier = Modifier.fillMaxWidth(),
+                        isPrimary = false
                     )
                 }
             }
-            Spacer(Modifier.height(32.dp))
-
-            CyberButton(
-                text = if (isSaving) stringResource(id = R.string.saving) else stringResource(id = R.string.save),
-                onClick = {
-                    viewModel.saveMirageTank(photo1K, photo2K, threshold.toInt())
-                },
-                enabled = selectedImage1Uri != null && selectedImage2Uri != null && !isSaving,
-                modifier = Modifier.fillMaxWidth(0.5f),
-                isPrimary = false
-            )
 
             Spacer(Modifier.height(16.dp))
 

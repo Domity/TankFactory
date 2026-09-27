@@ -108,18 +108,22 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
             previewOutputBmp?.recycle()
             previewOutputBmp = createBitmap(targetW, targetH)
 
-            updatePreview(1.0f, 1.0f, 127)
+            updatePreview(1.0f, 1.0f, 127, false, 0.299f, 0.587f, 0.114f)
         }
     }
 
-    fun updatePreview(photo1K: Float, photo2K: Float, threshold: Int) {
+    fun updatePreview(photo1K: Float, photo2K: Float, threshold: Int, colorMode: Boolean, grayR: Float, grayG: Float, grayB: Float) {
         val p1 = previewBmp1 ?: return
         val p2 = previewBmp2 ?: return
         val out = previewOutputBmp ?: return
 
         previewJob?.cancel()
         previewJob = viewModelScope.launch(Dispatchers.Default) {
-            MirageTankCoder.encodeNative(p1, p2, out, photo1K, photo2K, threshold)
+            if (colorMode) {
+                MirageTankCoder.encodeColorNative(p1, p2, out, photo1K, photo2K, threshold)
+            } else {
+                MirageTankCoder.encodeGrayNative(p1, p2, out, photo1K, photo2K, threshold, grayR, grayG, grayB)
+            }
             _previewTrigger.value++
         }
     }
@@ -149,7 +153,7 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
         return inSampleSize
     }
 
-    fun saveMirageTank(photo1K: Float, photo2K: Float, threshold: Int) {
+    fun saveMirageTank(photo1K: Float, photo2K: Float, threshold: Int, colorMode: Boolean, grayR: Float, grayG: Float, grayB: Float, format: io.github.domity.tankfactory.ui.components.ImageFormat) {
         val uri1 = _selectedImage1Uri.value ?: return
         val uri2 = _selectedImage2Uri.value ?: return
 
@@ -166,7 +170,11 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
                     val targetH = max(photo1.height, photo2.height)
                     val out = createBitmap(targetW, targetH)
 
-                    MirageTankCoder.encodeNative(photo1, photo2, out, photo1K, photo2K, threshold)
+                    if (colorMode) {
+                        MirageTankCoder.encodeColorNative(photo1, photo2, out, photo1K, photo2K, threshold)
+                    } else {
+                        MirageTankCoder.encodeGrayNative(photo1, photo2, out, photo1K, photo2K, threshold, grayR, grayG, grayB)
+                    }
 
                     photo1.recycle()
                     photo2.recycle()
@@ -177,7 +185,8 @@ class MirageTankMakerViewModel(application: Application) : AndroidViewModel(appl
                     saveImageToDownload(
                         context = app,
                         bitmap = largeBitmap,
-                        filename = "MirageTank_${System.currentTimeMillis()}.webp"
+                        filename = "MirageTank_${System.currentTimeMillis()}",
+                        format = format
                     )
                     largeBitmap.recycle()
                 }

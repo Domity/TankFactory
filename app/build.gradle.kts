@@ -15,7 +15,9 @@ android {
         versionCode = 113
         versionName = "1.1.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        resourceConfigurations += setOf("zh")
+        androidResources{
+            localeFilters += listOf("zh")
+        }
         externalNativeBuild {
             cmake {
                 cppFlags.add("-std=c++17")

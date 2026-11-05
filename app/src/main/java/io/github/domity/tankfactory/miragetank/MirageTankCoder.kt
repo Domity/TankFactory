@@ -9,8 +9,8 @@ object MirageTankCoder {
     }
 
     external fun encodeGrayNative(
-        bitmap1: Bitmap,
-        bitmap2: Bitmap,
+        coverBitmap: Bitmap,
+        innerBitmap: Bitmap,
         outputBitmap: Bitmap,
         photo1K: Float,
         photo2K: Float,
@@ -21,8 +21,8 @@ object MirageTankCoder {
     )
 
     external fun encodeColorNative(
-        bitmap1: Bitmap,
-        bitmap2: Bitmap,
+        coverBitmap: Bitmap,
+        innerBitmap: Bitmap,
         outputBitmap: Bitmap,
         scaleInner: Float,
         scaleCover: Float,

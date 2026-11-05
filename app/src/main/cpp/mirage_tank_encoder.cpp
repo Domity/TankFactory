@@ -8,12 +8,22 @@
 inline int min_int(int a, int b) { return a < b ? a : b; }
 inline int max_int(int a, int b) { return a > b ? a : b; }
 
+inline int clamp_int(int v, int lo, int hi) { return max_int(lo, min_int(v, hi)); }
+
+__attribute__((always_inline))
+inline int luma(int r, int g, int b, int32_t wr, int32_t wg, int32_t wb) {
+    return (r * wr + g * wg + b * wb + 32768) >> 16;
+}
+
+__attribute__((always_inline))
+inline int mul_q12(int v, int32_t k) { return (v * k + 2048) >> 12; }
+
 __attribute__((always_inline))
 inline uint32_t rgb_to_gray_scalar(uint32_t c, int32_t wr, int32_t wg, int32_t wb) {
     uint32_t r = c & 0xFF;
     uint32_t g = (c >> 8) & 0xFF;
     uint32_t b = (c >> 16) & 0xFF;
-    return (r * wr + g * wg + b * wb) >> 16;
+    return (uint32_t)luma((int)r, (int)g, (int)b, wr, wg, wb);
 }
 
 inline void* alloc_16k_aligned(size_t size) {
@@ -72,9 +82,9 @@ inline void get_scaled_gray_row(const uint8_t* srcPixels, int src_stride, int sr
         uint32_t g01 = rgb_to_gray_scalar(row0[sx_next], wr, wg, wb);
         uint32_t g10 = rgb_to_gray_scalar(row1[sx], wr, wg, wb);
         uint32_t g11 = rgb_to_gray_scalar(row1[sx_next], wr, wg, wb);
-        uint32_t g0 = g00 + (((g01 - g00) * xw) >> 8);
-        uint32_t g1 = g10 + (((g11 - g10) * xw) >> 8);
-        out_row_buffer[x] = (uint8_t)(g0 + (((g1 - g0) * y_weight) >> 8));
+        uint32_t g0 = g00 + (((g01 - g00) * xw + 128) >> 8);
+        uint32_t g1 = g10 + (((g11 - g10) * xw + 128) >> 8);
+        out_row_buffer[x] = (uint8_t)(g0 + (((g1 - g0) * y_weight + 128) >> 8));
     }
 }
 
@@ -107,17 +117,17 @@ inline void get_scaled_color_row(const uint8_t* srcPixels, int src_stride, int s
         uint32_t r10 = c10 & 0xFF, g10 = (c10 >> 8) & 0xFF, b10 = (c10 >> 16) & 0xFF;
         uint32_t r11 = c11 & 0xFF, g11 = (c11 >> 8) & 0xFF, b11 = (c11 >> 16) & 0xFF;
 
-        uint32_t r0 = r00 + (((r01 - r00) * xw) >> 8);
-        uint32_t r1 = r10 + (((r11 - r10) * xw) >> 8);
-        out_row_r[x] = (uint8_t)(r0 + (((r1 - r0) * y_weight) >> 8));
+        uint32_t r0 = r00 + (((r01 - r00) * xw + 128) >> 8);
+        uint32_t r1 = r10 + (((r11 - r10) * xw + 128) >> 8);
+        out_row_r[x] = (uint8_t)(r0 + (((r1 - r0) * y_weight + 128) >> 8));
 
-        uint32_t g0 = g00 + (((g01 - g00) * xw) >> 8);
-        uint32_t g1 = g10 + (((g11 - g10) * xw) >> 8);
-        out_row_g[x] = (uint8_t)(g0 + (((g1 - g0) * y_weight) >> 8));
+        uint32_t g0 = g00 + (((g01 - g00) * xw + 128) >> 8);
+        uint32_t g1 = g10 + (((g11 - g10) * xw + 128) >> 8);
+        out_row_g[x] = (uint8_t)(g0 + (((g1 - g0) * y_weight + 128) >> 8));
 
-        uint32_t b0 = b00 + (((b01 - b00) * xw) >> 8);
-        uint32_t b1 = b10 + (((b11 - b10) * xw) >> 8);
-        out_row_b[x] = (uint8_t)(b0 + (((b1 - b0) * y_weight) >> 8));
+        uint32_t b0 = b00 + (((b01 - b00) * xw + 128) >> 8);
+        uint32_t b1 = b10 + (((b11 - b10) * xw + 128) >> 8);
+        out_row_b[x] = (uint8_t)(b0 + (((b1 - b0) * y_weight + 128) >> 8));
     }
 }
 
@@ -189,15 +199,65 @@ void* gray_encode_worker_thread(void* arg) {
     return nullptr;
 }
 
+struct ColorParams {
+    int32_t scale_i_fixed;   // 里图色阶
+    int32_t scale_c_fixed;   // 表图色阶
+    int32_t desat_i_fixed;   // 里图去饱和
+    int32_t desat_c_fixed;   // 表图去饱和
+    int32_t weight_i_fixed;  // 里图权重
+    int32_t gray_wr;
+    int32_t gray_wg;
+    int32_t gray_wb;
+};
+
+inline uint32_t compute_color_pixel(const ColorParams& p,
+                                    int ir, int ig, int ib,
+                                    int cr, int cg, int cb) {
+    const int i_r_scaled = mul_q12(ir, p.scale_i_fixed);
+    const int i_g_scaled = mul_q12(ig, p.scale_i_fixed);
+    const int i_b_scaled = mul_q12(ib, p.scale_i_fixed);
+
+    const int i_gray_original = luma(ir, ig, ib, p.gray_wr, p.gray_wg, p.gray_wb);
+    const int i_gray_scaled = mul_q12(i_gray_original, p.scale_i_fixed);
+
+    const int i_r_desat = i_r_scaled + mul_q12(i_gray_scaled - i_r_scaled, p.desat_i_fixed);
+    const int i_g_desat = i_g_scaled + mul_q12(i_gray_scaled - i_g_scaled, p.desat_i_fixed);
+    const int i_b_desat = i_b_scaled + mul_q12(i_gray_scaled - i_b_scaled, p.desat_i_fixed);
+
+    const int c_r_inv = 255 - mul_q12(255 - cr, p.scale_c_fixed);
+    const int c_g_inv = 255 - mul_q12(255 - cg, p.scale_c_fixed);
+    const int c_b_inv = 255 - mul_q12(255 - cb, p.scale_c_fixed);
+
+    const int c_gray_original = luma(cr, cg, cb, p.gray_wr, p.gray_wg, p.gray_wb);
+    const int c_gray_scaled = 255 - mul_q12(255 - c_gray_original, p.scale_c_fixed);
+
+    const int c_r_desat = c_r_inv + mul_q12(c_gray_scaled - c_r_inv, p.desat_c_fixed);
+    const int c_g_desat = c_g_inv + mul_q12(c_gray_scaled - c_g_inv, p.desat_c_fixed);
+    const int c_b_desat = c_b_inv + mul_q12(c_gray_scaled - c_b_inv, p.desat_c_fixed);
+
+    const int alpha_i = clamp_int(255 + i_gray_scaled - c_gray_scaled, 0, 255);
+
+    const int num_r = mul_q12(i_r_desat - alpha_i + 255 - c_r_desat, p.weight_i_fixed) + alpha_i - 255 + c_r_desat;
+    const int num_g = mul_q12(i_g_desat - alpha_i + 255 - c_g_desat, p.weight_i_fixed) + alpha_i - 255 + c_g_desat;
+    const int num_b = mul_q12(i_b_desat - alpha_i + 255 - c_b_desat, p.weight_i_fixed) + alpha_i - 255 + c_b_desat;
+
+    const int out_r = clamp_int(num_r, 0, alpha_i);
+    const int out_g = clamp_int(num_g, 0, alpha_i);
+    const int out_b = clamp_int(num_b, 0, alpha_i);
+
+    return ((uint32_t)alpha_i << 24) | ((uint32_t)out_b << 16) |
+           ((uint32_t)out_g << 8) | (uint32_t)out_r;
+}
+
 struct ColorEncodeTaskContext {
     uint32_t start_y, end_y;
-    const uint8_t *pixels1, *pixels2;
+    const uint8_t *innerPixels, *coverPixels;
     uint8_t* outputPixels;
-    int info1_stride, info1_w, info1_h;
-    int info2_stride, info2_w, info2_h;
+    int inner_stride, inner_w, inner_h;
+    int cover_stride, cover_w, cover_h;
     [[maybe_unused]] int out_stride, out_w, out_h;
-    float y_ratio1, y_ratio2;
-    ScaleXTable table1, table2;
+    float y_ratio_inner, y_ratio_cover;
+    ScaleXTable table_inner, table_cover;
     int32_t scale_i_fixed, scale_c_fixed;
     int32_t desat_i_fixed, desat_c_fixed, weight_i_fixed;
     int32_t gray_wr, gray_wg, gray_wb;
@@ -208,69 +268,31 @@ struct ColorEncodeTaskContext {
 void* color_encode_worker_thread(void* arg) {
     auto* ctx = (ColorEncodeTaskContext*)arg;
 
-    uint8_t* row1_r = ctx->thread_buffer;
-    uint8_t* row1_g = ctx->thread_buffer + ctx->row_size;
-    uint8_t* row1_b = ctx->thread_buffer + ctx->row_size * 2;
-    uint8_t* row2_r = ctx->thread_buffer + ctx->row_size * 3;
-    uint8_t* row2_g = ctx->thread_buffer + ctx->row_size * 4;
-    uint8_t* row2_b = ctx->thread_buffer + ctx->row_size * 5;
+    uint8_t* row_i_r = ctx->thread_buffer;
+    uint8_t* row_i_g = ctx->thread_buffer + ctx->row_size;
+    uint8_t* row_i_b = ctx->thread_buffer + ctx->row_size * 2;
+    uint8_t* row_c_r = ctx->thread_buffer + ctx->row_size * 3;
+    uint8_t* row_c_g = ctx->thread_buffer + ctx->row_size * 4;
+    uint8_t* row_c_b = ctx->thread_buffer + ctx->row_size * 5;
+
+    const ColorParams params{
+        ctx->scale_i_fixed, ctx->scale_c_fixed,
+        ctx->desat_i_fixed, ctx->desat_c_fixed, ctx->weight_i_fixed,
+        ctx->gray_wr, ctx->gray_wg, ctx->gray_wb
+    };
 
     for (uint32_t y = ctx->start_y; y < ctx->end_y; ++y) {
-        get_scaled_color_row(ctx->pixels1, ctx->info1_stride, ctx->info1_w, ctx->info1_h,
-                             y, ctx->out_w, ctx->y_ratio1, ctx->table1, row1_r, row1_g, row1_b);
-        get_scaled_color_row(ctx->pixels2, ctx->info2_stride, ctx->info2_w, ctx->info2_h,
-                             y, ctx->out_w, ctx->y_ratio2, ctx->table2, row2_r, row2_g, row2_b);
+        get_scaled_color_row(ctx->innerPixels, ctx->inner_stride, ctx->inner_w, ctx->inner_h,
+                             y, ctx->out_w, ctx->y_ratio_inner, ctx->table_inner, row_i_r, row_i_g, row_i_b);
+        get_scaled_color_row(ctx->coverPixels, ctx->cover_stride, ctx->cover_w, ctx->cover_h,
+                             y, ctx->out_w, ctx->y_ratio_cover, ctx->table_cover, row_c_r, row_c_g, row_c_b);
 
         auto* outRow = (uint32_t*)(ctx->outputPixels + y * ctx->out_stride);
 
         for (uint32_t x = 0; x < (uint32_t)ctx->out_w; ++x) {
-            int r1 = row1_r[x];
-            int g1 = row1_g[x];
-            int b1 = row1_b[x];
-            int r2 = row2_r[x];
-            int g2 = row2_g[x];
-            int b2 = row2_b[x];
-
-            int gray1_original = (r1 * ctx->gray_wr + g1 * ctx->gray_wg + b1 * ctx->gray_wb) >> 16;
-            int gray2_original = (r2 * ctx->gray_wr + g2 * ctx->gray_wg + b2 * ctx->gray_wb) >> 16;
-
-            int r1_scaled = (r1 * ctx->scale_i_fixed) >> 12;
-            int g1_scaled = (g1 * ctx->scale_i_fixed) >> 12;
-            int b1_scaled = (b1 * ctx->scale_i_fixed) >> 12;
-
-            int gray1_scaled = (gray1_original * ctx->scale_i_fixed) >> 12;
-
-            int r1_desat = r1_scaled + ((gray1_scaled - r1_scaled) * ctx->desat_i_fixed >> 12);
-            int g1_desat = g1_scaled + ((gray1_scaled - g1_scaled) * ctx->desat_i_fixed >> 12);
-            int b1_desat = b1_scaled + ((gray1_scaled - b1_scaled) * ctx->desat_i_fixed >> 12);
-
-            int r2_inv = ((255 << 12) - ((255 - r2) * ctx->scale_c_fixed)) >> 12;
-            int g2_inv = ((255 << 12) - ((255 - g2) * ctx->scale_c_fixed)) >> 12;
-            int b2_inv = ((255 << 12) - ((255 - b2) * ctx->scale_c_fixed)) >> 12;
-
-            int gray2_scaled = ((255 << 12) - ((255 - gray2_original) * ctx->scale_c_fixed)) >> 12;
-
-            int r2_desat = r2_inv + ((gray2_scaled - r2_inv) * ctx->desat_c_fixed >> 12);
-            int g2_desat = g2_inv + ((gray2_scaled - g2_inv) * ctx->desat_c_fixed >> 12);
-            int b2_desat = b2_inv + ((gray2_scaled - b2_inv) * ctx->desat_c_fixed >> 12);
-
-            int alpha_raw = 255 + gray1_scaled - gray2_scaled;
-            int alpha_i = min_int(max_int(alpha_raw, 0), 255);
-            int alpha = max_int(alpha_i, 1);
-
-            int out_r = ((r1_desat - alpha_i + 255 - r2_desat) * ctx->weight_i_fixed >> 12) + alpha_i - 255 + r2_desat;
-            int out_g = ((g1_desat - alpha_i + 255 - g2_desat) * ctx->weight_i_fixed >> 12) + alpha_i - 255 + g2_desat;
-            int out_b = ((b1_desat - alpha_i + 255 - b2_desat) * ctx->weight_i_fixed >> 12) + alpha_i - 255 + b2_desat;
-
-            out_r = (out_r * 255) / alpha;
-            out_g = (out_g * 255) / alpha;
-            out_b = (out_b * 255) / alpha;
-
-            out_r = min_int(max_int(out_r, 0), 255);
-            out_g = min_int(max_int(out_g, 0), 255);
-            out_b = min_int(max_int(out_b, 0), 255);
-
-            outRow[x] = (alpha_i << 24) | (out_b << 16) | (out_g << 8) | out_r;
+            outRow[x] = compute_color_pixel(params,
+                row_i_r[x], row_i_g[x], row_i_b[x],
+                row_c_r[x], row_c_g[x], row_c_b[x]);
         }
     }
     return nullptr;
@@ -362,29 +384,29 @@ Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeGrayNative(
 
 extern "C" JNIEXPORT void JNICALL
 Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeColorNative(
-        JNIEnv *env, jobject, jobject bitmap1, jobject bitmap2, jobject outputBitmap,
+        JNIEnv *env, jobject, jobject coverBitmap, jobject innerBitmap, jobject outputBitmap,
         jfloat scaleInner, jfloat scaleCover,
         jfloat desatInner, jfloat desatCover, jfloat weightInner,
         jfloat grayWeightR, jfloat grayWeightG, jfloat grayWeightB) {
 
-    AndroidBitmapInfo info1, info2, outInfo;
-    if (AndroidBitmap_getInfo(env, bitmap1, &info1) < 0 ||
-        AndroidBitmap_getInfo(env, bitmap2, &info2) < 0 ||
+    AndroidBitmapInfo coverInfo, innerInfo, outInfo;
+    if (AndroidBitmap_getInfo(env, coverBitmap, &coverInfo) < 0 ||
+        AndroidBitmap_getInfo(env, innerBitmap, &innerInfo) < 0 ||
         AndroidBitmap_getInfo(env, outputBitmap, &outInfo) < 0) return;
 
-    void *pixels1, *pixels2, *outputPixels;
-    if (AndroidBitmap_lockPixels(env, bitmap1, &pixels1) < 0 ||
-        AndroidBitmap_lockPixels(env, bitmap2, &pixels2) < 0 ||
+    void *coverPixels, *innerPixels, *outputPixels;
+    if (AndroidBitmap_lockPixels(env, coverBitmap, &coverPixels) < 0 ||
+        AndroidBitmap_lockPixels(env, innerBitmap, &innerPixels) < 0 ||
         AndroidBitmap_lockPixels(env, outputBitmap, &outputPixels) < 0) return;
 
     uint32_t width = outInfo.width;
     uint32_t height = outInfo.height;
 
-    float y_ratio1 = height > 0 ? (float)info1.height / height : 1.0f;
-    float y_ratio2 = height > 0 ? (float)info2.height / height : 1.0f;
+    float y_ratio_inner = height > 0 ? (float)innerInfo.height / height : 1.0f;
+    float y_ratio_cover = height > 0 ? (float)coverInfo.height / height : 1.0f;
 
-    ScaleXTable table1 = precompute_x_table(info1.width, width);
-    ScaleXTable table2 = precompute_x_table(info2.width, width);
+    ScaleXTable table_inner = precompute_x_table(innerInfo.width, width);
+    ScaleXTable table_cover = precompute_x_table(coverInfo.width, width);
 
     const auto scale_i_fixed = (int32_t)(scaleInner * 4096.0f);
     const auto scale_c_fixed = (int32_t)((1.0f - scaleCover) * 4096.0f);
@@ -399,6 +421,14 @@ Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeColorNative(
     if (num_threads <= 0) num_threads = 4;
     if (num_threads > 8) num_threads = 8;
     if (height < (uint32_t)num_threads) num_threads = height;
+    if (num_threads <= 0) {
+        AndroidBitmap_unlockPixels(env, coverBitmap);
+        AndroidBitmap_unlockPixels(env, innerBitmap);
+        AndroidBitmap_unlockPixels(env, outputBitmap);
+        free(table_inner.src_x);
+        free(table_cover.src_x);
+        return;
+    }
 
     auto* threads = new pthread_t[num_threads];
     auto* tasks = new ColorEncodeTaskContext[num_threads];
@@ -411,13 +441,16 @@ Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeColorNative(
     uint32_t current_y = 0;
 
     for (int i = 0; i < num_threads; ++i) {
-        tasks[i].pixels1 = (const uint8_t*)pixels1; tasks[i].pixels2 = (const uint8_t*)pixels2;
+        tasks[i].innerPixels = (const uint8_t*)innerPixels;
+        tasks[i].coverPixels = (const uint8_t*)coverPixels;
         tasks[i].outputPixels = (uint8_t*)outputPixels;
-        tasks[i].info1_stride = info1.stride; tasks[i].info1_w = info1.width; tasks[i].info1_h = info1.height;
-        tasks[i].info2_stride = info2.stride; tasks[i].info2_w = info2.width; tasks[i].info2_h = info2.height;
-        tasks[i].out_stride = outInfo.stride; tasks[i].out_w = width;         tasks[i].out_h = height;
-        tasks[i].y_ratio1 = y_ratio1;         tasks[i].y_ratio2 = y_ratio2;
-        tasks[i].table1 = table1;             tasks[i].table2 = table2;
+        tasks[i].inner_stride = innerInfo.stride;
+        tasks[i].inner_w = innerInfo.width;     tasks[i].inner_h = innerInfo.height;
+        tasks[i].cover_stride = coverInfo.stride;
+        tasks[i].cover_w = coverInfo.width;     tasks[i].cover_h = coverInfo.height;
+        tasks[i].out_stride = outInfo.stride;   tasks[i].out_w = width;         tasks[i].out_h = height;
+        tasks[i].y_ratio_inner = y_ratio_inner; tasks[i].y_ratio_cover = y_ratio_cover;
+        tasks[i].table_inner = table_inner;     tasks[i].table_cover = table_cover;
         tasks[i].scale_i_fixed = scale_i_fixed;
         tasks[i].scale_c_fixed = scale_c_fixed;
         tasks[i].desat_i_fixed = desat_i_fixed;
@@ -443,10 +476,10 @@ Java_io_github_domity_tankfactory_miragetank_MirageTankCoder_encodeColorNative(
     delete[] threads;
     delete[] tasks;
     free(thread_buffers);
-    free(table1.src_x);
-    free(table2.src_x);
+    free(table_inner.src_x);
+    free(table_cover.src_x);
 
-    AndroidBitmap_unlockPixels(env, bitmap1);
-    AndroidBitmap_unlockPixels(env, bitmap2);
+    AndroidBitmap_unlockPixels(env, coverBitmap);
+    AndroidBitmap_unlockPixels(env, innerBitmap);
     AndroidBitmap_unlockPixels(env, outputBitmap);
 }

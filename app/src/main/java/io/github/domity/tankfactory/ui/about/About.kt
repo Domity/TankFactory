@@ -55,7 +55,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
             CyberButton(
                 text = stringResource(id = R.string.about_dialog_project_home),
                 onClick = { uriHandler.openUri("https://github.com/Domity/TankFactory") },
-                isPrimary = false,
+                isPrimary = true,
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(16.dp))

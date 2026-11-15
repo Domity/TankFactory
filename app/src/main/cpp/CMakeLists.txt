@@ -18,7 +18,7 @@ target_link_libraries(
 )
 
 target_compile_options(tankfactory PRIVATE
-        -Oz
+        -O3
         -ffast-math
         -fomit-frame-pointer
 

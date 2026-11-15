@@ -1,4 +1,8 @@
--assumenosideeffects class java.io.PrintStream{*;}
+-assumenosideeffects class java.io.PrintStream {
+    public void print(...);
+    public void println(...);
+    public java.io.PrintStream append(...);
+}
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics {
     public static void checkNotNull(...);
     public static void checkExpressionValueIsNotNull(...);
@@ -10,19 +14,13 @@
 -allowaccessmodification
 -mergeinterfacesaggressively
 
--keep public class * extends android.app.Activity
--keep public class * extends android.app.Application
--keep public class * extends android.app.Service
--keep public class * extends android.content.BroadcastReceiver
--keep public class * extends android.content.ContentProvider
--keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
--keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
--keep class androidx.compose.ui.platform.WrappedComposition { *; }
--keep class androidx.navigation.Navigator$Name { *; }
--keep @androidx.navigation.Navigator$Name class *
--keep class androidx.navigation.compose.** { *; }
--keepattributes !SourceFile,!LineNumberTable
--assumenoexternalsideeffects class * { *; }
+-keep,allowoptimization public class * extends android.app.Activity
+-keep,allowoptimization public class * extends android.app.Application
+-keep,allowoptimization public class * extends android.app.Service
+-keep,allowoptimization public class * extends android.content.BroadcastReceiver
+-keep,allowoptimization public class * extends android.content.ContentProvider
+-keep,allowoptimization class androidx.navigation.Navigator$Name { *; }
+-keep,allowoptimization @androidx.navigation.Navigator$Name class *
 -assumenosideeffects class android.util.Log {
     public static boolean isLoggable(java.lang.String, int);
     public static int v(...);
@@ -40,4 +38,3 @@
 -keepclasseswithmembernames class * {
     native <methods>;
 }
-

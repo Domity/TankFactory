@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -7,14 +9,14 @@ plugins {
 android {
     namespace = "io.github.domity.tankfactory"
     compileSdk = 36
+    ndkVersion = "28.2.13676358"
 
     defaultConfig {
         applicationId = "io.github.domity.tankfactory"
         minSdk = 31
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 114
         versionName = "1.1.4"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         androidResources{
             localeFilters += listOf("zh")
         }
@@ -27,9 +29,6 @@ android {
             abiFilters.addAll(listOf("arm64-v8a"))
         }
     }
-
-    @Suppress("UnstableApiUsage")
-    experimentalProperties["android.experimental.vcs-info.include"] = false
 
     buildTypes {
         release {
@@ -45,9 +44,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -61,11 +57,6 @@ android {
 
     androidResources {
         ignoreAssetsPatterns.add("dexopt")
-        ignoreAssetsPatterns.add("*.prof")
-    }
-
-    aaptOptions {
-        ignoreAssetsPattern = ".git:.svn:.ds_store:*.scc:.*:Gcv:cvs:thumbs.db:picasa.ini:*~:baseline.prof:dexopt"
     }
 
     packaging {
@@ -77,21 +68,28 @@ android {
         }
         resources {
             excludes += "**/dexopt/**"
-            excludes += "dexopt/**"
+            excludes += "**/LICENSE.txt"
+            excludes += "**/NOTICE.txt"
+            excludes += "**/META-INF/*.txt"
+            excludes += "**/META-INF/*.textproto"
+            excludes += "**/META-INF/*.version"
             excludes += "**/META-INF/com/**"
-            excludes += "META-INF/{AL2.0,LGPL2.1}"
-            excludes += "META-INF/services/**"
-            excludes += "META-INF/**"
+            excludes += "kotlin/**"
             excludes += "**/kotlin-tooling-metadata.json"
             excludes += "**/DebugProbesKt.bin"
-            excludes += "kotlin/**"
-            excludes += "**/okhttp3/**"
-            excludes += "**/*.version"
-            excludes += "**/*.txt"
-            excludes += "**/*.properties"
         }
     }
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
 }
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
+    }
+}
+
 configurations.all {
     exclude(group = "androidx.profileinstaller", module = "profileinstaller")
 }

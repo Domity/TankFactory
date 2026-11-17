@@ -27,7 +27,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.domity.cybertheme.molecules.CyberLoading
+import io.github.domity.cybertheme.molecules.CyberLoading
 import io.github.domity.cybertheme.atoms.CyberSurface
 import io.github.domity.cybertheme.atoms.CyberText
 import io.github.domity.cybertheme.foundation.CyberTheme

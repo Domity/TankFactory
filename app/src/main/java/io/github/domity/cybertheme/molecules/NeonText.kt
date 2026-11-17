@@ -1,4 +1,4 @@
-package com.domity.cybertheme.molecules
+package io.github.domity.cybertheme.molecules
 
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable

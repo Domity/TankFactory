@@ -27,7 +27,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.domity.cybertheme.molecules.NeonText
+import io.github.domity.cybertheme.molecules.NeonText
 import io.github.domity.cybertheme.foundation.CyberTheme
 import io.github.domity.cybertheme.molecules.CutCorners
 import io.github.domity.cybertheme.molecules.CyberButton
@@ -78,8 +78,10 @@ fun AppNavigator() {
         }
         composable(ScreenRoutes.VIEW_MIRAGE) { MirageTankViewerScreen() }
         composable(ScreenRoutes.MAKE_MIRAGE) { MirageTankMakerScreen() }
-        composable(ScreenRoutes.MAKE_LSB) { LSBTankMakerScreen() }
         composable(ScreenRoutes.VIEW_LSB) { LSBTankViewerScreen() }
+        composable(ScreenRoutes.MAKE_LSB) { LSBTankMakerScreen() }
+        composable(ScreenRoutes.VIEW_PRISM){PrismTankViewerScreen()}
+        composable(ScreenRoutes.MAKE_PRISM){PrismTankMakerScreen()}
         composable(ScreenRoutes.VIEW_ENCRYPT) { EncryptViewerScreen() }
         composable(ScreenRoutes.MAKE_ENCRYPT) { EncryptMakerScreen() }
     }
@@ -147,6 +149,26 @@ fun MainMenuScreen(
                     CyberButton(
                         text = stringResource(id = R.string.make_lsb_tank),
                         onClick = { onNavigate(ScreenRoutes.MAKE_LSB) },
+                        isPrimary = true,
+                        modifier = Modifier.weight(1f) ,
+                        cutCorners = CutCorners(topLeft = 8.dp, topRight = 8.dp, bottomLeft = 8.dp, bottomRight = 8.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CyberButton(
+                        text = stringResource(id = R.string.view_prism_tank),
+                        onClick = { onNavigate(ScreenRoutes.VIEW_PRISM },
+                        modifier = Modifier.weight(1f),
+                        cutCorners = CutCorners(topLeft = 8.dp, topRight = 8.dp, bottomLeft = 8.dp, bottomRight = 8.dp)
+                    )
+                    CyberButton(
+                        text = stringResource(id = R.string.make_prism_tank),
+                        onClick = { onNavigate(ScreenRoutes.MAKE_PRISM) },
                         isPrimary = true,
                         modifier = Modifier.weight(1f) ,
                         cutCorners = CutCorners(topLeft = 8.dp, topRight = 8.dp, bottomLeft = 8.dp, bottomRight = 8.dp)

@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.domity.cybertheme.molecules.CyberLoading
+import io.github.domity.cybertheme.molecules.CyberLoading
 import io.github.domity.tankfactory.R
 import io.github.domity.cybertheme.atoms.CyberSurface
 import io.github.domity.cybertheme.atoms.CyberText

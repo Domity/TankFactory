@@ -1,4 +1,4 @@
-package com.domity.cybertheme.molecules
+package io.github.domity.cybertheme.molecules
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat

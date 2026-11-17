@@ -28,6 +28,7 @@
     <string name="desat_inner">里图去饱和: %.2f</string>
     <string name="desat_cover">表图去饱和: %.2f</string>
     <string name="weight_inner">里图权重: %.2f</string>
+
     <string name="format_png">PNG</string>
     <string name="format_webp">WEBP</string>
 
@@ -39,13 +40,13 @@
     <string name="encrypt_maker_password">密码: %s</string>
     <string name="encrypt_maker_copy_password">复制密码</string>
     <string name="encrypt_maker_password_copied">密码已复制</string>
-    <string name="encrypt_maker_encrypting">加密中…</string>
+    <string name="encrypt_maker_encrypting">加密中</string>
     <string name="encrypt_maker_encrypt">加密</string>
     <string name="encrypt_maker_encrypt_done">加密完成</string>
     <string name="encrypt_maker_tips">提示\n1. 密码是解密文件的唯一凭证，请务必妥善保存\n2. 加密后的文件扩展名为 .tankfactory\n3. 文件默认保存到Download目录</string>
     <string name="encrypt_viewer_select_file">选择要解密的文件</string>
     <string name="encrypt_viewer_enter_password">输入密码</string>
-    <string name="encrypt_viewer_decrypting">解密中…</string>
+    <string name="encrypt_viewer_decrypting">解密中</string>
     <string name="encrypt_viewer_decrypt">解密</string>
     <string name="encrypt_viewer_decrypt_done">解密完成: %s</string>
     <string name="encrypt_viewer_decrypt_failed">解密失败，密码可能不正确</string>
@@ -55,8 +56,10 @@
     <string name="make_mirage_tank">制作幻影坦克</string>
     <string name="view_lsb_tank">查看无影坦克</string>
     <string name="make_lsb_tank">制作无影坦克</string>
-    <string name="make_encrypt">图片加密</string>
+    <string name="view_prism_tank">查看光棱坦克</string>
+    <string name="make_prism_tank">制作光棱坦克</string>
     <string name="view_encrypt">图片解密</string>
+    <string name="make_encrypt">图片加密</string>
     <string name="about">关于</string>
 
     <string name="about_dialog_description">一个图片处理应用</string>
